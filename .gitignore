@@ -1,41 +1,80 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
-# dependencies
+# ─────────────────────────────
+# DEPENDÊNCIAS
+# ─────────────────────────────
 node_modules/
+.pnp
+.pnp.js
 
-# Expo
+# ─────────────────────────────
+# EXPO
+# ─────────────────────────────
 .expo/
+.expo-shared/
 dist/
 web-build/
 expo-env.d.ts
 
-# Native
-.kotlin/
-*.orig.*
+# ─────────────────────────────
+# REACT NATIVE / ANDROID / IOS
+# ─────────────────────────────
+android/
+ios/
 *.jks
 *.p8
 *.p12
 *.key
 *.mobileprovision
+*.orig.*
 
-# Metro
+# ─────────────────────────────
+# BUILD
+# ─────────────────────────────
+build/
+*.apk
+*.aab
+*.ipa
+
+# ─────────────────────────────
+# CACHE
+# ─────────────────────────────
+.cache/
 .metro-health-check*
+.eslintcache
 
-# debug
+# ─────────────────────────────
+# LOGS
+# ─────────────────────────────
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+*.log
 
-# macOS
+# ─────────────────────────────
+# AMBIENTE
+# ─────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ─────────────────────────────
+# SISTEMA OPERATIVO
+# ─────────────────────────────
 .DS_Store
-*.pem
+Thumbs.db
+*.swp
+*.swo
+*~
 
-# local env files
-.env*.local
+# ─────────────────────────────
+# IDE / EDITORES
+# ─────────────────────────────
+.vscode/
+.idea/
+*.iml
 
-# typescript
-*.tsbuildinfo
+# ─────────────────────────────
+# OUTROS
+# ─────────────────────────────
+.vercel
+.turbo
 
-# generated native folders
-/ios
-/android
