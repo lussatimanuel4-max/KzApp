@@ -38,16 +38,17 @@ npm install
 npx expo start
 leia o QR Code com o Expo GO
 
-
+📱 Estado
 Funcionalidade	Estado
-Onboarding	✅
+Onboarding	        ✅
 Criação de perfil	✅
-Home + saldo	✅
-Histórico	✅
-12 categorias	✅
-Objetivos	✅
-Perfil	✅
-APK	✅
+Home + saldo	    ✅
+Histórico	        ✅
+12 categorias	    ✅
+Objetivos	        ✅
+Perfil	            ✅
+APK	                ✅
+
 
 👨‍💻 Autor
 Lussaty Dev
@@ -55,4 +56,5 @@ Lussaty Dev
 GitHub: @lussatimanuel4-max
 
 WhatsApp: +244 933 593 515
+
 
