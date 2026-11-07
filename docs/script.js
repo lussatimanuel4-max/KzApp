@@ -13,9 +13,8 @@ async function calculateApkSize() {
     if (!sizeElement) return;
 
     try {
-        // Como o APK agora está no GitHub Releases, não podemos fazer fetch HEAD diretamente
-        // por causa de CORS. Vamos colocar o tamanho manualmente (89.7 MB).
-        // Se mudares o APK, atualiza este valor.
+        
+      
         sizeElement.textContent = '89.7 MB';
     } catch (error) {
         console.error('Erro ao calcular o tamanho do APK:', error);
@@ -37,8 +36,8 @@ function downloadApp() {
 
     const link = document.createElement('a');
     link.href = apkUrl;
-    // O atributo 'download' pode ser ignorado em links cross-origin (como o GitHub)
-    // mas o browser vai tratar do redirecionamento para a página de download do GitHub.
+
+    
     link.download = 'KwanzaApp.apk'; 
     
     document.body.appendChild(link);
