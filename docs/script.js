@@ -12,7 +12,7 @@ function calculateApkSize() {
     const sizeElement = document.getElementById('apk-size');
     if (!sizeElement) return;
     
-    
+
     sizeElement.textContent = '89.7 MB';
 }
 
@@ -25,17 +25,13 @@ function downloadApp() {
     btn.textContent = 'A descarregar...';
     btn.style.opacity = '0.7';
 
-    // Link direto para o ficheiro Kwanza.App.apk no GitHub Releases
+   
     const apkUrl = 'https://github.com/lussatimanuel4-max/KzApp/releases/download/v5.1.0/Kwanza.App.apk';
 
-    const link = document.createElement('a');
-    link.href = apkUrl;
-    link.download = 'KwanzaApp.apk'; 
     
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    window.open(apkUrl, '_blank');
 
+    
     setTimeout(() => {
         btn.textContent = originalText;
         btn.style.opacity = '1';
