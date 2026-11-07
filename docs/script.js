@@ -8,18 +8,12 @@ document.addEventListener('DOMContentLoaded', () => {
 // ─────────────────────────────
 // CALCULAR TAMANHO DO APK
 // ─────────────────────────────
-async function calculateApkSize() {
+function calculateApkSize() {
     const sizeElement = document.getElementById('apk-size');
     if (!sizeElement) return;
-
-    try {
-        
-      
-        sizeElement.textContent = '89.7 MB';
-    } catch (error) {
-        console.error('Erro ao calcular o tamanho do APK:', error);
-        sizeElement.textContent = '89.7 MB';
-    }
+    
+    
+    sizeElement.textContent = '89.7 MB';
 }
 
 // ─────────────────────────────
@@ -31,13 +25,11 @@ function downloadApp() {
     btn.textContent = 'A descarregar...';
     btn.style.opacity = '0.7';
 
-    // Link direto para o ficheiro APK no GitHub Releases
-    const apkUrl = 'https://github.com/lussatimanuel4-max/KzApp/releases/download/v5.1.0/kzapp.apk';
+    // Link direto para o ficheiro Kwanza.App.apk no GitHub Releases
+    const apkUrl = 'https://github.com/lussatimanuel4-max/KzApp/releases/download/v5.1.0/Kwanza.App.apk';
 
     const link = document.createElement('a');
     link.href = apkUrl;
-
-    
     link.download = 'KwanzaApp.apk'; 
     
     document.body.appendChild(link);
