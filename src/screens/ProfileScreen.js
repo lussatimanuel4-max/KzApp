@@ -21,7 +21,6 @@ import { getProfile, updateProfileName } from '../storage/profile';
 import { getTransactions, clearTransactions } from '../storage/transactions';
 import { clearGoals } from '../storage/goals';
 import { resetAppState } from '../storage/appState';
-import { clearTheme } from '../storage/theme';
 import { calculateBalance } from '../utils/calc';
 import { formatKz } from '../utils/format';
 import CustomAlert from '../components/CustomAlert';
@@ -120,7 +119,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
             await clearTransactions();
             await clearGoals();
             await resetAppState();
-            await clearTheme();
+            // A linha await clearTheme() foi removida
             if (onLogout) onLogout();
           },
         },

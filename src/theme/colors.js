@@ -22,9 +22,9 @@ export const colors = {
   // ─────────────────────────────
   // CORES DE ESTADO E SOFT (FUNDOS)
   // ─────────────────────────────
-  success: '#00D2A0',         // verde brilhante
+  success: '#06d1a2',         // verde brilhante
   successSoft: 'rgba(0, 184, 148, 0.15)', // fundo verde translúcido
-  danger: '#ff8a8a',          // vermelho brilhante
+  danger: '#f74b4b',          // vermelho brilhante
   dangerSoft: 'rgba(255, 118, 117, 0.15)', // fundo vermelho translúcido
   warning: '#FDCB6E',
   info: '#74B9FF',
@@ -34,8 +34,8 @@ export const colors = {
   // TEXTO
   // ─────────────────────────────
   textPrimary: '#FFFFFF',     // branco (títulos)
-  textSecondary: '#A1A1A6',   // cinza claro (subtítulos)
-  textLight: '#636366',       // cinza médio (textos de apoio)
+  textSecondary: '#ffffff',   // cinza claro (subtítulos)
+  textLight: '#fdfdfd',       // cinza médio (textos de apoio)
 
   // ─────────────────────────────
   // BORDAS
