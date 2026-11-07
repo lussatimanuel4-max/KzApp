@@ -13,22 +13,13 @@ async function calculateApkSize() {
     if (!sizeElement) return;
 
     try {
-        const response = await fetch('kzapp.apk', { method: 'HEAD' });
-        
-        if (response.ok) {
-            const sizeInBytes = response.headers.get('content-length');
-            if (sizeInBytes) {
-                const sizeInMB = (sizeInBytes / (1024 * 1024)).toFixed(1);
-                sizeElement.textContent = `${sizeInMB} MB`;
-            } else {
-                sizeElement.textContent = '~20 MB';
-            }
-        } else {
-            sizeElement.textContent = 'Desconhecido';
-        }
+        // Como o APK agora está no GitHub Releases, não podemos fazer fetch HEAD diretamente
+        // por causa de CORS. Vamos colocar o tamanho manualmente (89.7 MB).
+        // Se mudares o APK, atualiza este valor.
+        sizeElement.textContent = '89.7 MB';
     } catch (error) {
         console.error('Erro ao calcular o tamanho do APK:', error);
-        sizeElement.textContent = '~20 MB';
+        sizeElement.textContent = '89.7 MB';
     }
 }
 
@@ -41,9 +32,14 @@ function downloadApp() {
     btn.textContent = 'A descarregar...';
     btn.style.opacity = '0.7';
 
+    // Link direto para o ficheiro APK no GitHub Releases
+    const apkUrl = 'https://github.com/lussatimanuel4-max/KzApp/releases/download/v5.1.0/kzapp.apk';
+
     const link = document.createElement('a');
-    link.href = 'kzapp.apk';
-    link.download = 'KwanzaApp.apk';
+    link.href = apkUrl;
+    // O atributo 'download' pode ser ignorado em links cross-origin (como o GitHub)
+    // mas o browser vai tratar do redirecionamento para a página de download do GitHub.
+    link.download = 'KwanzaApp.apk'; 
     
     document.body.appendChild(link);
     link.click();
@@ -59,15 +55,12 @@ function downloadApp() {
 // ABRIR IMAGEM EM TELA CHEIA
 // ─────────────────────────────
 function openImage(element) {
-    // Pega a imagem que está dentro do item clicado
     const imgSrc = element.querySelector('img').src;
-    
-    // Pega o visualizador e define a imagem
     const viewer = document.getElementById('image-viewer');
     const expandedImg = document.getElementById('expanded-image');
     
     expandedImg.src = imgSrc;
-    viewer.classList.add('active'); // Mostra o modal
+    viewer.classList.add('active');
 }
 
 // ─────────────────────────────
@@ -75,5 +68,5 @@ function openImage(element) {
 // ─────────────────────────────
 function closeImage() {
     const viewer = document.getElementById('image-viewer');
-    viewer.classList.remove('active'); // Esconde o modal
+    viewer.classList.remove('active');
 }
