@@ -11,6 +11,7 @@ import {
   Image,
   TextInput,
   RefreshControl,
+  Linking, // Importante para abrir o link do site
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -34,6 +35,9 @@ const AVATAR_MAP = {
   'avatar-5': require('../../assets/avatars/avatar-5.jpg'),
   'avatar-6': require('../../assets/avatars/avatar-6.jpg'),
 };
+
+// ─── LINK DO WEBSITE (A TUA PLAY STORE) ───
+const UPDATE_URL = 'https://lussatimanuel4-max.github.io/KzApp/';
 
 export default function ProfileScreen({ navigation, onLogout }) {
   const { colors, typography } = useTheme();
@@ -119,12 +123,25 @@ export default function ProfileScreen({ navigation, onLogout }) {
             await clearTransactions();
             await clearGoals();
             await resetAppState();
-            // A linha await clearTheme() foi removida
             if (onLogout) onLogout();
           },
         },
       ]
     );
+  }
+
+  // ─── ABRIR O SITE DE ATUALIZAÇÕES ───
+  async function handleCheckUpdates() {
+    try {
+      const supported = await Linking.canOpenURL(UPDATE_URL);
+      if (supported) {
+        await Linking.openURL(UPDATE_URL);
+      } else {
+        showAlert('Erro', 'Não foi possível abrir o link de atualizações.', true);
+      }
+    } catch (error) {
+      showAlert('Erro', 'Ocorreu um erro ao tentar abrir o site.', true);
+    }
   }
 
   const avatarSource =
@@ -234,6 +251,33 @@ export default function ProfileScreen({ navigation, onLogout }) {
               {totalTx}
             </Text>
           </View>
+        </View>
+
+        {/* ─── MENU: PROCURAR ATUALIZAÇÕES ─── */}
+        <View style={styles.menuSection}>
+          <TouchableOpacity
+            style={[styles.menuItem, { backgroundColor: colors.card }]}
+            onPress={handleCheckUpdates}
+            activeOpacity={0.7}
+          >
+            <View style={styles.menuLeft}>
+              <View style={[styles.menuIconBox, { backgroundColor: colors.info + '20' }]}>
+                <Ionicons
+                  name="cloud-download-outline"
+                  size={20}
+                  color={colors.info}
+                />
+              </View>
+              <Text style={[styles.menuLabel, { color: colors.textPrimary }]}>
+                Procurar Atualizações
+              </Text>
+            </View>
+            <Ionicons
+              name="chevron-forward"
+              size={18}
+              color={colors.textLight}
+            />
+          </TouchableOpacity>
         </View>
 
         {/* ─── MENU: SOBRE ─── */}
