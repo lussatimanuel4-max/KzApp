@@ -11,7 +11,7 @@ import {
   Image,
   TextInput,
   RefreshControl,
-  Linking, // Importante para abrir o link do site
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -26,7 +26,6 @@ import { calculateBalance } from '../utils/calc';
 import { formatKz } from '../utils/format';
 import CustomAlert from '../components/CustomAlert';
 
-// ─── AVATARES DISPONÍVEIS ───
 const AVATAR_MAP = {
   'avatar-1': require('../../assets/avatars/avatar-1.jpg'),
   'avatar-2': require('../../assets/avatars/avatar-2.jpg'),
@@ -36,7 +35,6 @@ const AVATAR_MAP = {
   'avatar-6': require('../../assets/avatars/avatar-6.jpg'),
 };
 
-// ─── LINK DO WEBSITE (A TUA PLAY STORE) ───
 const UPDATE_URL = 'https://lussatimanuel4-max.github.io/KzApp/';
 
 export default function ProfileScreen({ navigation, onLogout }) {
@@ -48,7 +46,6 @@ export default function ProfileScreen({ navigation, onLogout }) {
   const [nameInput, setNameInput] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
-  // ─── ESTADO DO CUSTOM ALERT ───
   const [alertConfig, setAlertConfig] = useState({
     visible: false,
     title: '',
@@ -130,7 +127,6 @@ export default function ProfileScreen({ navigation, onLogout }) {
     );
   }
 
-  // ─── ABRIR O SITE DE ATUALIZAÇÕES ───
   async function handleCheckUpdates() {
     try {
       const supported = await Linking.canOpenURL(UPDATE_URL);
@@ -160,12 +156,10 @@ export default function ProfileScreen({ navigation, onLogout }) {
           />
         }
       >
-        {/* ─── CABEÇALHO ─── */}
         <View style={styles.header}>
           <Text style={typography.h2}>Perfil</Text>
         </View>
 
-        {/* ─── CARD DO USER ─── */}
         <View style={[styles.userCard, { backgroundColor: colors.surface }]}>
           <Image
             source={avatarSource}
@@ -210,11 +204,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
               onPress={startEditing}
               activeOpacity={0.8}
             >
-              <Ionicons
-                name="pencil-outline"
-                size={14}
-                color={colors.primary}
-              />
+              <Ionicons name="pencil-outline" size={14} color={colors.primary} />
               <Text style={[styles.editButtonText, { color: colors.primary }]}>
                 Editar perfil
               </Text>
@@ -222,7 +212,6 @@ export default function ProfileScreen({ navigation, onLogout }) {
           )}
         </View>
 
-        {/* ─── ESTATÍSTICAS ─── */}
         <View style={styles.statsRow}>
           <View style={[styles.statCard, { backgroundColor: colors.card }]}>
             <View style={[styles.statIconWrapper, { backgroundColor: colors.accentSoft }]}>
@@ -238,11 +227,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
 
           <View style={[styles.statCard, { backgroundColor: colors.card }]}>
             <View style={[styles.statIconWrapper, { backgroundColor: colors.accentSoft }]}>
-              <Ionicons
-                name="stats-chart-outline"
-                size={18}
-                color={colors.primary}
-              />
+              <Ionicons name="stats-chart-outline" size={18} color={colors.primary} />
             </View>
             <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
               Movimentos
@@ -251,6 +236,25 @@ export default function ProfileScreen({ navigation, onLogout }) {
               {totalTx}
             </Text>
           </View>
+        </View>
+
+        {/* ─── MENU: METAS ─── */}
+        <View style={styles.menuSection}>
+          <TouchableOpacity
+            style={[styles.menuItem, { backgroundColor: colors.card }]}
+            onPress={() => navigation.navigate('Metas')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.menuLeft}>
+              <View style={[styles.menuIconBox, { backgroundColor: colors.accentSoft }]}>
+                <Ionicons name="flag-outline" size={20} color={colors.primary} />
+              </View>
+              <Text style={[styles.menuLabel, { color: colors.textPrimary }]}>
+                As Minhas Metas
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.textLight} />
+          </TouchableOpacity>
         </View>
 
         {/* ─── MENU: PROCURAR ATUALIZAÇÕES ─── */}
@@ -262,21 +266,13 @@ export default function ProfileScreen({ navigation, onLogout }) {
           >
             <View style={styles.menuLeft}>
               <View style={[styles.menuIconBox, { backgroundColor: colors.info + '20' }]}>
-                <Ionicons
-                  name="cloud-download-outline"
-                  size={20}
-                  color={colors.info}
-                />
+                <Ionicons name="cloud-download-outline" size={20} color={colors.info} />
               </View>
               <Text style={[styles.menuLabel, { color: colors.textPrimary }]}>
                 Procurar Atualizações
               </Text>
             </View>
-            <Ionicons
-              name="chevron-forward"
-              size={18}
-              color={colors.textLight}
-            />
+            <Ionicons name="chevron-forward" size={18} color={colors.textLight} />
           </TouchableOpacity>
         </View>
 
@@ -289,21 +285,13 @@ export default function ProfileScreen({ navigation, onLogout }) {
           >
             <View style={styles.menuLeft}>
               <View style={[styles.menuIconBox, { backgroundColor: colors.accentSoft }]}>
-                <Ionicons
-                  name="information-circle-outline"
-                  size={20}
-                  color={colors.primary}
-                />
+                <Ionicons name="information-circle-outline" size={20} color={colors.primary} />
               </View>
               <Text style={[styles.menuLabel, { color: colors.textPrimary }]}>
                 Sobre o KzApp
               </Text>
             </View>
-            <Ionicons
-              name="chevron-forward"
-              size={18}
-              color={colors.textLight}
-            />
+            <Ionicons name="chevron-forward" size={18} color={colors.textLight} />
           </TouchableOpacity>
         </View>
 
@@ -322,23 +310,16 @@ export default function ProfileScreen({ navigation, onLogout }) {
                 Apagar tudo
               </Text>
             </View>
-            <Ionicons
-              name="chevron-forward"
-              size={18}
-              color={colors.textLight}
-            />
+            <Ionicons name="chevron-forward" size={18} color={colors.textLight} />
           </TouchableOpacity>
         </View>
 
-        {/* ─── RODAPÉ ─── */}
         <Text style={[styles.footer, { color: colors.textLight }]}>
           Versão Beta
         </Text>
-
         <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* ─── CUSTOM ALERT ─── */}
       <CustomAlert
         visible={alertConfig.visible}
         title={alertConfig.title}
@@ -353,158 +334,33 @@ export default function ProfileScreen({ navigation, onLogout }) {
         }))}
         onRequestClose={closeAlert}
       />
-
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-  },
-  scroll: {
-    paddingBottom: 24,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 8,
-  },
-  userCard: {
-    alignItems: 'center',
-    paddingVertical: 28,
-    marginHorizontal: 20,
-    borderRadius: 24,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 4,
-    marginBottom: 16,
-  },
-  userName: {
-    fontFamily: 'InterExtraBold',
-    fontSize: 24,
-    letterSpacing: -0.4,
-    marginBottom: 4,
-  },
-  userRole: {
-    fontFamily: 'InterMedium',
-    fontSize: 13,
-    marginBottom: 16,
-  },
-  editButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  editButtonText: {
-    fontFamily: 'InterBold',
-    fontSize: 13,
-  },
-  editRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  nameInput: {
-    borderRadius: 26,
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    height: 52,
-    fontFamily: 'InterBold',
-    fontSize: 15,
-    minWidth: 160,
-  },
-  iconBtnPrimary: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconBtnGhost: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 12,
-    paddingHorizontal: 20,
-    marginTop: 20,
-  },
-  statCard: {
-    flex: 1,
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 1,
-  },
-  statIconWrapper: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
-  },
-  statLabel: {
-    fontFamily: 'InterMedium',
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  statValue: {
-    fontFamily: 'InterExtraBold',
-    fontSize: 16,
-    letterSpacing: -0.2,
-  },
-  menuSection: {
-    paddingHorizontal: 20,
-    marginTop: 20,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 1,
-  },
-  menuLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  menuIconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  menuLabel: {
-    fontFamily: 'InterBold',
-    fontSize: 15,
-  },
-  footer: {
-    fontFamily: 'InterRegular',
-    fontSize: 12,
-    textAlign: 'center',
-    marginTop: 24,
-  },
+  safe: { flex: 1 },
+  scroll: { paddingBottom: 24 },
+  header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 },
+  userCard: { alignItems: 'center', paddingVertical: 28, marginHorizontal: 20, borderRadius: 24 },
+  avatar: { width: 100, height: 100, borderRadius: 50, borderWidth: 4, marginBottom: 16 },
+  userName: { fontFamily: 'InterExtraBold', fontSize: 24, letterSpacing: -0.4, marginBottom: 4 },
+  userRole: { fontFamily: 'InterMedium', fontSize: 13, marginBottom: 16 },
+  editButton: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20 },
+  editButtonText: { fontFamily: 'InterBold', fontSize: 13 },
+  editRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  nameInput: { borderRadius: 26, paddingHorizontal: 18, paddingVertical: 10, height: 52, fontFamily: 'InterBold', fontSize: 15, minWidth: 160 },
+  iconBtnPrimary: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  iconBtnGhost: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  statsRow: { flexDirection: 'row', gap: 12, paddingHorizontal: 20, marginTop: 20 },
+  statCard: { flex: 1, borderRadius: 16, padding: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 6, elevation: 1 },
+  statIconWrapper: { width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
+  statLabel: { fontFamily: 'InterMedium', fontSize: 12, marginBottom: 4 },
+  statValue: { fontFamily: 'InterExtraBold', fontSize: 16, letterSpacing: -0.2 },
+  menuSection: { paddingHorizontal: 20, marginTop: 20 },
+  menuItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderRadius: 16, paddingHorizontal: 16, paddingVertical: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 6, elevation: 1 },
+  menuLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  menuIconBox: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  menuLabel: { fontFamily: 'InterBold', fontSize: 15 },
+  footer: { fontFamily: 'InterRegular', fontSize: 12, textAlign: 'center', marginTop: 24 },
 });

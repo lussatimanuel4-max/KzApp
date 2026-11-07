@@ -21,7 +21,7 @@ import * as Font from 'expo-font';
 import * as Haptics from 'expo-haptics';
 
 // ─── Tema & Contexto ───
-import { ThemeProvider, useTheme } from './src/context/ThemeContext';
+import { ThemeProvider } from './src/context/ThemeContext';
 import { colors } from './src/theme/colors';
 
 // ─── Ecrãs ───
@@ -30,7 +30,8 @@ import CreateProfileScreen from './src/screens/CreateProfileScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import AddTransactionScreen from './src/screens/AddTransactionScreen';
-import GoalsScreen from './src/screens/GoalsScreen';
+import AnalyticsScreen from './src/screens/AnalyticsScreen'; // NOVO
+import GoalsScreen from './src/screens/GoalsScreen'; // Movido para o Stack
 import ProfileScreen from './src/screens/ProfileScreen';
 import AboutScreen from './src/screens/AboutScreen';
 
@@ -121,8 +122,8 @@ function MainTabs({ onLogout, navigation }) {
               iconName = 'home';
             } else if (route.name === 'Histórico') {
               iconName = 'clock';
-            } else if (route.name === 'Metas') {
-              iconName = 'target';
+            } else if (route.name === 'Análises') {
+              iconName = 'pie-chart'; // Ícone de gráfico
             } else if (route.name === 'Perfil') {
               iconName = 'user';
             }
@@ -160,7 +161,7 @@ function MainTabs({ onLogout, navigation }) {
           }}
         />
 
-        <Tab.Screen name="Metas" component={GoalsScreen} />
+        <Tab.Screen name="Análises" component={AnalyticsScreen} />
         <Tab.Screen
           name="Perfil"
           children={(props) => (
@@ -214,6 +215,11 @@ function MainStack({ onLogout }) {
         name="AddTransaction"
         component={AddTransactionScreen}
         options={{ title: 'Nova Transação', presentation: 'modal' }}
+      />
+      <Stack.Screen
+        name="Metas"
+        component={GoalsScreen}
+        options={{ title: 'Minhas Metas' }}
       />
       <Stack.Screen
         name="Sobre"

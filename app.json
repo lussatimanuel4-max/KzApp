@@ -29,6 +29,18 @@
       "eas": {
         "projectId": "774a32f2-93bf-4289-96dd-3788f2c5fb0b"
       }
-    }
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "buildArchs": ["arm64-v8a"]
+          }
+        }
+      ]
+    ]
   }
 }
