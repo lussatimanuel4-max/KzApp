@@ -5,10 +5,10 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "splash": {
       "image": "./assets/icon.png",
-      "backgroundColor": "#e6f4fe",
+      "backgroundColor": "#000000",
       "resizeMode": "contain"
     },
     "ios": {
@@ -19,7 +19,7 @@
       "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
-        "backgroundColor": "#e6f4fe"
+        "backgroundColor": "#000000"
       }
     },
     "web": {

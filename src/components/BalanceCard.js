@@ -4,10 +4,12 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import colors from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { formatKz } from '../utils/format';
 
 export default function BalanceCard({ balance, userName = 'Estudante' }) {
+  const { colors } = useTheme();
+
   return (
     <LinearGradient
       colors={[colors.primary, colors.primaryDark]}
@@ -49,16 +51,18 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 12,
     overflow: 'hidden',
-    shadowColor: colors.primary,
+    // A sombra em dark mode não precisa de ser roxa brilhante, 
+    // mas o gradiente já se destaca sobre o preto.
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.28,
+    shadowOpacity: 0.3,
     shadowRadius: 14,
     elevation: 7,
   },
   userName: {
     fontFamily: 'InterBold',
     fontSize: 14,
-    color: colors.white,
+    color: '#FFFFFF', // Branco fixo (sobre gradiente)
     letterSpacing: 0.3,
     marginBottom: 16,
   },
@@ -94,7 +98,7 @@ const styles = StyleSheet.create({
   },
   wifiArc: {
     position: 'absolute',
-    borderColor: 'rgba(255, 255, 255, 0.9)',
+    borderColor: 'rgba(255, 255, 255, 0.9)', // Branco fixo
     borderStyle: 'solid',
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
@@ -122,14 +126,14 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: 'InterBold',
     fontSize: 11,
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: 'rgba(255, 255, 255, 0.6)', // Branco translúcido fixo
     letterSpacing: 1.5,
     marginBottom: 4,
   },
   balance: {
     fontFamily: 'InterExtraBold',
     fontSize: 32,
-    color: colors.white,
+    color: '#FFFFFF', // Branco fixo
     letterSpacing: -1,
   },
 });

@@ -1,5 +1,5 @@
 // App.js
-// Entrada do KzApp — navegação completa com vibração
+// Entrada do KzApp — navegação completa com vibração (Dark Mode Fixo)
 
 import React, { useEffect, useState } from 'react';
 import {
@@ -20,7 +20,9 @@ import { Feather, Ionicons } from '@expo/vector-icons';
 import * as Font from 'expo-font';
 import * as Haptics from 'expo-haptics';
 
-import colors from './src/theme/colors';
+// ─── Tema & Contexto ───
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
+import { colors } from './src/theme/colors';
 
 // ─── Ecrãs ───
 import OnboardingScreen from './src/screens/OnboardingScreen';
@@ -46,7 +48,7 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 // ─────────────────────────────
-// FUNÇÃO DE VIBRAÇÃO
+// FUNÇÕES DE VIBRAÇÃO
 // ─────────────────────────────
 function vibrateLight() {
   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -73,8 +75,26 @@ function MainTabs({ onLogout, navigation }) {
     setSheetVisible(true);
   }
 
+  const tabBarStyle = {
+    position: 'absolute',
+    bottom: bottomPosition,
+    left: 16,
+    right: 16,
+    height: 76,
+    borderRadius: 28,
+    backgroundColor: colors.sheetBg,
+    borderTopWidth: 0,
+    paddingBottom: 8,
+    paddingTop: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 10,
+  };
+
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <Tab.Navigator
         screenListeners={{
           tabPress: () => {
@@ -85,23 +105,7 @@ function MainTabs({ onLogout, navigation }) {
           headerShown: false,
           tabBarActiveTintColor: colors.primary,
           tabBarInactiveTintColor: colors.textPrimary,
-          tabBarStyle: {
-            position: 'absolute',
-            bottom: bottomPosition,
-            left: 16,
-            right: 16,
-            height: 76,
-            borderRadius: 28,
-            backgroundColor: colors.white,
-            borderTopWidth: 0,
-            paddingBottom: 8,
-            paddingTop: 8,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 6 },
-            shadowOpacity: 0.1,
-            shadowRadius: 16,
-            elevation: 10,
-          },
+          tabBarStyle: tabBarStyle,
           tabBarItemStyle: {
             paddingVertical: 6,
           },
@@ -129,7 +133,12 @@ function MainTabs({ onLogout, navigation }) {
 
             if (focused) {
               return (
-                <View style={styles.activeIconBox}>
+                <View
+                  style={[
+                    styles.activeIconBox,
+                    { backgroundColor: colors.accentSoft },
+                  ]}
+                >
                   <Feather name={iconName} size={18} color={colors.primary} />
                 </View>
               );
@@ -161,7 +170,14 @@ function MainTabs({ onLogout, navigation }) {
       </Tab.Navigator>
 
       <TouchableOpacity
-        style={[styles.addButton, { bottom: bottomPosition + 12 }]}
+        style={[
+          styles.addButton,
+          {
+            bottom: bottomPosition + 12,
+            backgroundColor: colors.primary,
+            shadowColor: colors.primary,
+          },
+        ]}
         onPress={handleAddPress}
         activeOpacity={0.85}
       >
@@ -209,9 +225,9 @@ function MainStack({ onLogout }) {
 }
 
 // ─────────────────────────────
-// APP
+// CONTEÚDO INTERNO
 // ─────────────────────────────
-export default function App() {
+function AppContent() {
   const [loading, setLoading] = useState(true);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [onboardingSeen, setOnboardingSeen] = useState(false);
@@ -257,15 +273,15 @@ export default function App() {
 
   if (loading || !fontsLoaded) {
     return (
-      <View style={styles.loading}>
+      <View style={[styles.loading, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   return (
-    <SafeAreaProvider>
-      <StatusBar style="dark" />
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <StatusBar style="light" />
       <NavigationContainer>
         {!onboardingSeen ? (
           <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -293,14 +309,26 @@ export default function App() {
           <MainStack onLogout={handleLogout} />
         )}
       </NavigationContainer>
-    </SafeAreaProvider>
+    </View>
+  );
+}
+
+// ─────────────────────────────
+// APP ROOT
+// ─────────────────────────────
+export default function App() {
+  return (
+    <ThemeProvider>
+      <SafeAreaProvider>
+        <AppContent />
+      </SafeAreaProvider>
+    </ThemeProvider>
   );
 }
 
 const styles = StyleSheet.create({
   loading: {
     flex: 1,
-    backgroundColor: colors.background,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -308,7 +336,6 @@ const styles = StyleSheet.create({
     width: 54,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#F0EDFF',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 2,
@@ -328,10 +355,8 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.35,
     shadowRadius: 12,

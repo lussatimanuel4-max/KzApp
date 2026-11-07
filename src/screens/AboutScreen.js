@@ -14,11 +14,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-import colors from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 
 const WHATSAPP_NUMBER = '244933593515';
 
 export default function AboutScreen() {
+  const { colors } = useTheme();
+
   async function openWhatsApp() {
     const appUrl = `whatsapp://send?phone=${WHATSAPP_NUMBER}`;
     const webUrl = `https://wa.me/${WHATSAPP_NUMBER}`;
@@ -36,21 +38,25 @@ export default function AboutScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['bottom']}>
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
         {/* ─── DEV CARD (1º) ─── */}
-        <View style={styles.devCard}>
+        <View style={[styles.devCard, { backgroundColor: colors.card }]}>
           <Image
             source={require('../../assets/dev.jpg')}
             style={styles.devAvatar}
           />
 
           <View style={styles.devInfo}>
-            <Text style={styles.devLabel}>Desenvolvedor Do App</Text>
-            <Text style={styles.devName}>Manuel Lussaty</Text>
+            <Text style={[styles.devLabel, { color: colors.textSecondary }]}>
+              Desenvolvedor Do App
+            </Text>
+            <Text style={[styles.devName, { color: colors.textPrimary }]}>
+              Manuel Lussaty
+            </Text>
           </View>
         </View>
 
@@ -60,52 +66,62 @@ export default function AboutScreen() {
           activeOpacity={0.85}
         >
           <Ionicons name="logo-whatsapp" size={20} color={colors.white} />
-          <Text style={styles.contactButtonText}>Falar comigo</Text>
+          <Text style={[styles.contactButtonText, { color: colors.white }]}>
+            Falar comigo
+          </Text>
         </TouchableOpacity>
 
         {/* ─── 3 MINI-CARDS (2º) ─── */}
         <View style={styles.miniCardsRow}>
-          <View style={styles.miniCard}>
-            <View style={styles.miniIconBox}>
+          <View style={[styles.miniCard, { backgroundColor: colors.card }]}>
+            <View style={[styles.miniIconBox, { backgroundColor: colors.accentSoft }]}>
               <Ionicons
                 name="cloud-offline-outline"
                 size={22}
                 color={colors.primary}
               />
             </View>
-            <Text style={styles.miniLabel}>Offline</Text>
+            <Text style={[styles.miniLabel, { color: colors.textPrimary }]}>
+              Offline
+            </Text>
           </View>
 
-          <View style={styles.miniCard}>
-            <View style={styles.miniIconBox}>
+          <View style={[styles.miniCard, { backgroundColor: colors.card }]}>
+            <View style={[styles.miniIconBox, { backgroundColor: colors.accentSoft }]}>
               <Ionicons
                 name="shield-checkmark-outline"
                 size={22}
                 color={colors.primary}
               />
             </View>
-            <Text style={styles.miniLabel}>Privado</Text>
+            <Text style={[styles.miniLabel, { color: colors.textPrimary }]}>
+              Privado
+            </Text>
           </View>
 
-          <View style={styles.miniCard}>
-            <View style={styles.miniIconBox}>
+          <View style={[styles.miniCard, { backgroundColor: colors.card }]}>
+            <View style={[styles.miniIconBox, { backgroundColor: colors.accentSoft }]}>
               <Text style={styles.flagEmoji}>🇦🇴</Text>
             </View>
-            <Text style={styles.miniLabel}>Angola</Text>
+            <Text style={[styles.miniLabel, { color: colors.textPrimary }]}>
+              Angola
+            </Text>
           </View>
         </View>
 
         {/* ─── SOBRE O KWANZA (3º) ─── */}
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: colors.card }]}>
           <View style={styles.cardHeader}>
             <Image
               source={require('../../assets/moeda.png')}
               style={styles.cardImageIcon}
               resizeMode="contain"
             />
-            <Text style={styles.cardTitle}>Sobre o Kwanza App</Text>
+            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
+              Sobre o Kwanza App
+            </Text>
           </View>
-          <Text style={styles.cardTextDark}>
+          <Text style={[styles.cardTextDark, { color: colors.textPrimary }]}>
             O Kwanza App, é um aplicativo Android que funciona de maneira 
             Offline, O foco do App é registar e controlar os teus ganhos
             e gastos, para teres domínio de onde vão as tuas Finanças. O APP
@@ -114,38 +130,56 @@ export default function AboutScreen() {
         </View>
 
         {/* ─── SOBRE O KZAPP (4º) ─── */}
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: colors.card }]}>
           <View style={styles.cardHeader}>
-            <View style={styles.cardIcon}>
+            <View style={[styles.cardIcon, { backgroundColor: colors.accentSoft }]}>
               <Ionicons
                 name="information-circle-outline"
                 size={18}
                 color={colors.primary}
               />
             </View>
-            <Text style={styles.cardTitle}>Sobre o KzApp</Text>
+            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
+              Sobre o KzApp
+            </Text>
           </View>
 
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabelDark}>Versão</Text>
-            <Text style={styles.infoValueDark}>5.1.0</Text>
+          <View style={[styles.infoRow, { borderBottomColor: colors.divider }]}>
+            <Text style={[styles.infoLabelDark, { color: colors.textPrimary }]}>
+              Versão
+            </Text>
+            <Text style={[styles.infoValueDark, { color: colors.textPrimary }]}>
+              5.1.0
+            </Text>
           </View>
 
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabelDark}>Plataforma</Text>
-            <Text style={styles.infoValueDark}>Android</Text>
+          <View style={[styles.infoRow, { borderBottomColor: colors.divider }]}>
+            <Text style={[styles.infoLabelDark, { color: colors.textPrimary }]}>
+              Plataforma
+            </Text>
+            <Text style={[styles.infoValueDark, { color: colors.textPrimary }]}>
+              Android
+            </Text>
           </View>
 
           <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
-            <Text style={styles.infoLabelDark}>Preço</Text>
-            <Text style={styles.infoValueDark}>Grátis</Text>
+            <Text style={[styles.infoLabelDark, { color: colors.textPrimary }]}>
+              Preço
+            </Text>
+            <Text style={[styles.infoValueDark, { color: colors.textPrimary }]}>
+              Grátis
+            </Text>
           </View>
         </View>
 
         {/* ─── RODAPÉ ─── */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>© 2026 KzApp</Text>
-          <Text style={styles.footerSub}>App De Finanças</Text>
+          <Text style={[styles.footerText, { color: colors.textSecondary }]}>
+            © 2026 KzApp
+          </Text>
+          <Text style={[styles.footerSub, { color: colors.textLight }]}>
+            App De Finanças
+          </Text>
         </View>
 
         <View style={{ height: 24 }} />
@@ -157,7 +191,6 @@ export default function AboutScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   scroll: {
     paddingHorizontal: 20,
@@ -169,7 +202,6 @@ const styles = StyleSheet.create({
   devCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
     borderRadius: 18,
     padding: 16,
     marginBottom: 12,
@@ -186,13 +218,11 @@ const styles = StyleSheet.create({
   devLabel: {
     fontFamily: 'InterMedium',
     fontSize: 12,
-    color: colors.textSecondary,
     marginBottom: 2,
   },
   devName: {
     fontFamily: 'InterExtraBold',
     fontSize: 20,
-    color: colors.textPrimary,
     letterSpacing: -0.3,
   },
 
@@ -204,7 +234,7 @@ const styles = StyleSheet.create({
     gap: 8,
     height: 54,
     borderRadius: 16,
-    backgroundColor: '#25D366',
+    backgroundColor: '#25D366', // Cor fixa do WhatsApp
     marginBottom: 24,
     shadowColor: '#25D366',
     shadowOffset: { width: 0, height: 6 },
@@ -215,7 +245,6 @@ const styles = StyleSheet.create({
   contactButtonText: {
     fontFamily: 'InterBold',
     fontSize: 15,
-    color: colors.white,
     letterSpacing: 0.2,
   },
 
@@ -227,7 +256,6 @@ const styles = StyleSheet.create({
   },
   miniCard: {
     flex: 1,
-    backgroundColor: colors.card,
     borderRadius: 16,
     paddingVertical: 18,
     alignItems: 'center',
@@ -241,7 +269,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: '#F0EDFF',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,
@@ -252,13 +279,11 @@ const styles = StyleSheet.create({
   miniLabel: {
     fontFamily: 'InterBold',
     fontSize: 13,
-    color: colors.textPrimary,
     letterSpacing: -0.1,
   },
 
   // ─── CARDS ───
   card: {
-    backgroundColor: colors.card,
     borderRadius: 18,
     padding: 18,
     marginBottom: 14,
@@ -279,7 +304,6 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 10,
-    backgroundColor: '#F0EDFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -290,13 +314,11 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontFamily: 'InterBold',
     fontSize: 15,
-    color: colors.textPrimary,
     letterSpacing: -0.1,
   },
   cardTextDark: {
     fontFamily: 'InterRegular',
     fontSize: 14,
-    color: colors.textPrimary,
     lineHeight: 21,
   },
 
@@ -307,17 +329,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
   },
   infoLabelDark: {
     fontFamily: 'InterMedium',
     fontSize: 14,
-    color: colors.textPrimary,
   },
   infoValueDark: {
     fontFamily: 'InterBold',
     fontSize: 14,
-    color: colors.textPrimary,
   },
 
   // ─── RODAPÉ ───
@@ -328,12 +347,10 @@ const styles = StyleSheet.create({
   footerText: {
     fontFamily: 'InterBold',
     fontSize: 12,
-    color: colors.textSecondary,
     marginBottom: 4,
   },
   footerSub: {
     fontFamily: 'InterRegular',
     fontSize: 12,
-    color: colors.textLight,
   },
 });

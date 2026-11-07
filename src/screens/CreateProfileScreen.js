@@ -11,16 +11,16 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import colors from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { saveProfile } from '../storage/profile';
 import { markProfileCreated } from '../storage/appState';
 import { PROVINCES, SCHOOL_LEVELS, GENDERS } from '../storage/constants';
+import CustomAlert from '../components/CustomAlert';
 
 const TOTAL_STEPS = 4;
 
@@ -35,6 +35,7 @@ const AVATARS = [
 ];
 
 export default function CreateProfileScreen({ onComplete }) {
+  const { colors } = useTheme();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
@@ -51,6 +52,30 @@ export default function CreateProfileScreen({ onComplete }) {
   const [showSchoolLevels, setShowSchoolLevels] = useState(false);
   const [showProvinces, setShowProvinces] = useState(false);
 
+  // ─── ESTADO DO CUSTOM ALERT ───
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    isDestructive: false,
+    buttons: [],
+  });
+
+  // Função auxiliar para mostrar alertas de validação
+  function showAlert(title, message, isDestructive = false) {
+    setAlertConfig({
+      visible: true,
+      title,
+      message,
+      isDestructive,
+      buttons: [{ text: 'Entendido', style: 'default' }],
+    });
+  }
+
+  function closeAlert() {
+    setAlertConfig((prev) => ({ ...prev, visible: false }));
+  }
+
   function vibrate() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
@@ -60,31 +85,31 @@ export default function CreateProfileScreen({ onComplete }) {
 
     if (step === 1) {
       if (name.trim().length < 2) {
-        Alert.alert('Nome inválido', 'Escreve o teu nome.');
+        showAlert('Nome inválido', 'Escreve o teu nome.');
         return;
       }
       if (!age || Number(age) < 10 || Number(age) > 80) {
-        Alert.alert('Idade inválida', 'Escreve uma idade entre 10 e 80.');
+        showAlert('Idade inválida', 'Escreve uma idade entre 10 e 80.');
         return;
       }
       setStep(2);
     } else if (step === 2) {
       if (school.trim().length < 2) {
-        Alert.alert('Escola inválida', 'Escreve o nome da tua escola.');
+        showAlert('Escola inválida', 'Escreve o nome da tua escola.');
         return;
       }
       if (!schoolLevel) {
-        Alert.alert('Classe em falta', 'Escolhe a tua classe ou ano.');
+        showAlert('Classe em falta', 'Escolhe a tua classe ou ano.');
         return;
       }
       setStep(3);
     } else if (step === 3) {
       if (!province) {
-        Alert.alert('Província em falta', 'Escolhe a tua província.');
+        showAlert('Província em falta', 'Escolhe a tua província.');
         return;
       }
       if (!gender) {
-        Alert.alert('Género em falta', 'Escolhe uma opção.');
+        showAlert('Género em falta', 'Escolhe uma opção.');
         return;
       }
       setStep(4);
@@ -100,7 +125,7 @@ export default function CreateProfileScreen({ onComplete }) {
 
   async function handleFinish() {
     if (!selectedAvatar) {
-      Alert.alert('Avatar em falta', 'Escolhe um avatar para continuar.');
+      showAlert('Avatar em falta', 'Escolhe um avatar para continuar.');
       return;
     }
 
@@ -119,7 +144,7 @@ export default function CreateProfileScreen({ onComplete }) {
 
     if (!saved) {
       setLoading(false);
-      Alert.alert('Erro', 'Não foi possível guardar. Tenta novamente.');
+      showAlert('Erro', 'Não foi possível guardar. Tenta novamente.', true);
       return;
     }
 
@@ -139,12 +164,12 @@ export default function CreateProfileScreen({ onComplete }) {
           resizeMode="contain"
         />
 
-        <Text style={styles.title}>Quem és?</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>Quem és?</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
           Diz-nos quem és para personalizar a tua experiência.
         </Text>
 
-        <View style={styles.inputWrapper}>
+        <View style={[styles.inputWrapper, { backgroundColor: colors.surface }]}>
           <Ionicons
             name="person-outline"
             size={20}
@@ -152,7 +177,7 @@ export default function CreateProfileScreen({ onComplete }) {
             style={styles.inputIcon}
           />
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.textPrimary }]}
             placeholder="Escreve o teu nome"
             placeholderTextColor={colors.textLight}
             value={name}
@@ -162,7 +187,7 @@ export default function CreateProfileScreen({ onComplete }) {
           />
         </View>
 
-        <View style={styles.inputWrapper}>
+        <View style={[styles.inputWrapper, { backgroundColor: colors.surface }]}>
           <Ionicons
             name="calendar-outline"
             size={20}
@@ -170,7 +195,7 @@ export default function CreateProfileScreen({ onComplete }) {
             style={styles.inputIcon}
           />
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.textPrimary }]}
             placeholder="Quantos anos tens?"
             placeholderTextColor={colors.textLight}
             keyboardType="number-pad"
@@ -193,12 +218,12 @@ export default function CreateProfileScreen({ onComplete }) {
           resizeMode="contain"
         />
 
-        <Text style={styles.title}>Onde estudas?</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>Onde estudas?</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
           Isto ajuda-nos a adaptar o app para ti.
         </Text>
 
-        <View style={styles.inputWrapper}>
+        <View style={[styles.inputWrapper, { backgroundColor: colors.surface }]}>
           <Ionicons
             name="school-outline"
             size={20}
@@ -206,7 +231,7 @@ export default function CreateProfileScreen({ onComplete }) {
             style={styles.inputIcon}
           />
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.textPrimary }]}
             placeholder="Escola ou universidade"
             placeholderTextColor={colors.textLight}
             value={school}
@@ -216,7 +241,7 @@ export default function CreateProfileScreen({ onComplete }) {
         </View>
 
         <TouchableOpacity
-          style={styles.inputWrapper}
+          style={[styles.inputWrapper, { backgroundColor: colors.surface }]}
           onPress={() => {
             vibrate();
             setShowSchoolLevels(true);
@@ -232,7 +257,7 @@ export default function CreateProfileScreen({ onComplete }) {
           <Text
             style={[
               styles.input,
-              !schoolLevel && { color: colors.textLight },
+              { color: schoolLevel ? colors.textPrimary : colors.textLight },
             ]}
           >
             {schoolLevel || 'Classe / Ano'}
@@ -257,13 +282,13 @@ export default function CreateProfileScreen({ onComplete }) {
           resizeMode="contain"
         />
 
-        <Text style={styles.title}>Onde vives?</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>Onde vives?</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
           Estamos em Angola, mas queremos saber a tua província.
         </Text>
 
         <TouchableOpacity
-          style={styles.inputWrapper}
+          style={[styles.inputWrapper, { backgroundColor: colors.surface }]}
           onPress={() => {
             vibrate();
             setShowProvinces(true);
@@ -279,7 +304,7 @@ export default function CreateProfileScreen({ onComplete }) {
           <Text
             style={[
               styles.input,
-              !province && { color: colors.textLight },
+              { color: province ? colors.textPrimary : colors.textLight },
             ]}
           >
             {province || 'Província'}
@@ -299,7 +324,8 @@ export default function CreateProfileScreen({ onComplete }) {
                 key={g.id}
                 style={[
                   styles.genderButton,
-                  active && styles.genderButtonActive,
+                  { backgroundColor: colors.surface },
+                  active && { backgroundColor: colors.primary },
                 ]}
                 onPress={() => {
                   vibrate();
@@ -310,7 +336,7 @@ export default function CreateProfileScreen({ onComplete }) {
                 <Text
                   style={[
                     styles.genderText,
-                    active && styles.genderTextActive,
+                    { color: active ? colors.white : colors.textSecondary },
                   ]}
                   numberOfLines={1}
                 >
@@ -328,8 +354,10 @@ export default function CreateProfileScreen({ onComplete }) {
   function renderStep4() {
     return (
       <>
-        <Text style={styles.title}>Escolhe o teu avatar</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>
+          Escolhe o teu avatar
+        </Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
           Este avatar vai aparecer no teu perfil.
         </Text>
 
@@ -341,7 +369,10 @@ export default function CreateProfileScreen({ onComplete }) {
                 key={avatar.id}
                 style={[
                   styles.avatarWrapper,
-                  active && styles.avatarWrapperActive,
+                  active && {
+                    borderColor: colors.primary,
+                    backgroundColor: colors.accentSoft,
+                  },
                 ]}
                 onPress={() => {
                   vibrate();
@@ -356,7 +387,15 @@ export default function CreateProfileScreen({ onComplete }) {
                 />
 
                 {active && (
-                  <View style={styles.avatarCheck}>
+                  <View
+                    style={[
+                      styles.avatarCheck,
+                      {
+                        backgroundColor: colors.primary,
+                        borderColor: colors.white,
+                      },
+                    ]}
+                  >
                     <Ionicons
                       name="checkmark"
                       size={16}
@@ -373,7 +412,7 @@ export default function CreateProfileScreen({ onComplete }) {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -392,17 +431,17 @@ export default function CreateProfileScreen({ onComplete }) {
             <View style={styles.backButton} />
           )}
 
-          <Text style={styles.stepText}>
+          <Text style={[styles.stepText, { color: colors.textSecondary }]}>
             {step} / {TOTAL_STEPS}
           </Text>
         </View>
 
         {/* ─── BARRA DE PROGRESSO ─── */}
-        <View style={styles.progressTrack}>
+        <View style={[styles.progressTrack, { backgroundColor: colors.divider }]}>
           <View
             style={[
               styles.progressFill,
-              { width: `${(step / TOTAL_STEPS) * 100}%` },
+              { width: `${(step / TOTAL_STEPS) * 100}%`, backgroundColor: colors.primary },
             ]}
           />
         </View>
@@ -422,12 +461,16 @@ export default function CreateProfileScreen({ onComplete }) {
         {/* ─── BOTÃO ─── */}
         <View style={styles.footer}>
           <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
+            style={[
+              styles.button,
+              loading && styles.buttonDisabled,
+              { backgroundColor: colors.primary, shadowColor: colors.primary },
+            ]}
             onPress={step === 4 ? handleFinish : goNext}
             activeOpacity={0.85}
             disabled={loading}
           >
-            <Text style={styles.buttonText}>
+            <Text style={[styles.buttonText, { color: colors.white }]}>
               {loading
                 ? 'A guardar...'
                 : step === 4
@@ -440,15 +483,17 @@ export default function CreateProfileScreen({ onComplete }) {
 
         {/* ─── MODAL: CLASSES ─── */}
         {showSchoolLevels && (
-          <View style={styles.modalOverlay}>
+          <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}>
             <TouchableOpacity
               style={styles.modalBackdrop}
               onPress={() => setShowSchoolLevels(false)}
               activeOpacity={1}
             />
-            <View style={styles.modalSheet}>
-              <View style={styles.modalHandle} />
-              <Text style={styles.modalTitle}>Classe / Ano</Text>
+            <View style={[styles.modalSheet, { backgroundColor: colors.sheetBg }]}>
+              <View style={[styles.modalHandle, { backgroundColor: colors.divider }]} />
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
+                Classe / Ano
+              </Text>
 
               <ScrollView style={{ maxHeight: 320 }}>
                 {SCHOOL_LEVELS.map((level) => (
@@ -461,7 +506,9 @@ export default function CreateProfileScreen({ onComplete }) {
                       setShowSchoolLevels(false);
                     }}
                   >
-                    <Text style={styles.modalOptionText}>{level}</Text>
+                    <Text style={[styles.modalOptionText, { color: colors.textPrimary }]}>
+                      {level}
+                    </Text>
                     {schoolLevel === level && (
                       <Ionicons
                         name="checkmark"
@@ -478,15 +525,17 @@ export default function CreateProfileScreen({ onComplete }) {
 
         {/* ─── MODAL: PROVÍNCIAS ─── */}
         {showProvinces && (
-          <View style={styles.modalOverlay}>
+          <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}>
             <TouchableOpacity
               style={styles.modalBackdrop}
               onPress={() => setShowProvinces(false)}
               activeOpacity={1}
             />
-            <View style={styles.modalSheet}>
-              <View style={styles.modalHandle} />
-              <Text style={styles.modalTitle}>Província</Text>
+            <View style={[styles.modalSheet, { backgroundColor: colors.sheetBg }]}>
+              <View style={[styles.modalHandle, { backgroundColor: colors.divider }]} />
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
+                Província
+              </Text>
 
               <ScrollView style={{ maxHeight: 320 }}>
                 {PROVINCES.map((p) => (
@@ -499,7 +548,9 @@ export default function CreateProfileScreen({ onComplete }) {
                       setShowProvinces(false);
                     }}
                   >
-                    <Text style={styles.modalOptionText}>{p}</Text>
+                    <Text style={[styles.modalOptionText, { color: colors.textPrimary }]}>
+                      {p}
+                    </Text>
                     {province === p && (
                       <Ionicons
                         name="checkmark"
@@ -513,6 +564,23 @@ export default function CreateProfileScreen({ onComplete }) {
             </View>
           </View>
         )}
+
+        {/* ─── CUSTOM ALERT ─── */}
+        <CustomAlert
+          visible={alertConfig.visible}
+          title={alertConfig.title}
+          message={alertConfig.message}
+          isDestructive={alertConfig.isDestructive}
+          buttons={alertConfig.buttons.map((btn) => ({
+            ...btn,
+            onPress: () => {
+              closeAlert();
+              if (btn.onPress) btn.onPress();
+            },
+          }))}
+          onRequestClose={closeAlert}
+        />
+
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -521,7 +589,6 @@ export default function CreateProfileScreen({ onComplete }) {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   flex: {
     flex: 1,
@@ -544,11 +611,9 @@ const styles = StyleSheet.create({
   stepText: {
     fontFamily: 'InterBold',
     fontSize: 14,
-    color: colors.textSecondary,
   },
   progressTrack: {
     height: 4,
-    backgroundColor: colors.divider,
     marginHorizontal: 20,
     borderRadius: 2,
     overflow: 'hidden',
@@ -556,7 +621,6 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: colors.primary,
     borderRadius: 2,
   },
   scroll: {
@@ -572,21 +636,18 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: 'InterExtraBold',
     fontSize: 26,
-    color: colors.textPrimary,
     letterSpacing: -0.5,
     marginBottom: 8,
   },
   subtitle: {
     fontFamily: 'InterRegular',
     fontSize: 15,
-    color: colors.textSecondary,
     lineHeight: 22,
     marginBottom: 24,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
     borderRadius: 26,
     paddingHorizontal: 20,
     height: 52,
@@ -599,7 +660,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: 'InterRegular',
     fontSize: 16,
-    color: colors.textPrimary,
   },
   genderRow: {
     flexDirection: 'row',
@@ -610,22 +670,14 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 52,
     borderRadius: 26,
-    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 8,
   },
-  genderButtonActive: {
-    backgroundColor: colors.primary,
-  },
   genderText: {
     fontFamily: 'InterBold',
     fontSize: 13,
-    color: colors.textSecondary,
     textAlign: 'center',
-  },
-  genderTextActive: {
-    color: colors.white,
   },
   avatarsGrid: {
     flexDirection: 'row',
@@ -643,10 +695,6 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
   },
-  avatarWrapperActive: {
-    borderColor: colors.primary,
-    backgroundColor: '#F0EDFF',
-  },
   avatarImage: {
     width: '100%',
     height: '100%',
@@ -659,11 +707,9 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: colors.white,
   },
   footer: {
     paddingHorizontal: 28,
@@ -674,11 +720,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primary,
     height: 56,
     borderRadius: 28,
     gap: 8,
-    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.25,
     shadowRadius: 10,
@@ -690,7 +734,6 @@ const styles = StyleSheet.create({
   buttonText: {
     fontFamily: 'InterBold',
     fontSize: 16,
-    color: colors.white,
     letterSpacing: 0.2,
   },
   modalOverlay: {
@@ -699,10 +742,8 @@ const styles = StyleSheet.create({
   },
   modalBackdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
   modalSheet: {
-    backgroundColor: colors.white,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingHorizontal: 24,
@@ -713,14 +754,12 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: colors.divider,
     alignSelf: 'center',
     marginBottom: 20,
   },
   modalTitle: {
     fontFamily: 'InterExtraBold',
     fontSize: 20,
-    color: colors.textPrimary,
     letterSpacing: -0.3,
     marginBottom: 12,
   },
@@ -735,6 +774,5 @@ const styles = StyleSheet.create({
   modalOptionText: {
     fontFamily: 'InterMedium',
     fontSize: 15,
-    color: colors.textPrimary,
   },
 });

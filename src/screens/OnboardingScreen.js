@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import colors from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
@@ -42,6 +42,7 @@ const SLIDES = [
 ];
 
 export default function OnboardingScreen({ onComplete }) {
+  const { colors } = useTheme();
   const scrollRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -71,15 +72,17 @@ export default function OnboardingScreen({ onComplete }) {
   const isLast = currentIndex === SLIDES.length - 1;
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
       {/* ─── PULAR ─── */}
       <View style={styles.topBar}>
         <TouchableOpacity
-          style={styles.skipButton}
+          style={[styles.skipButton, { backgroundColor: colors.surface }]}
           onPress={handleSkip}
           activeOpacity={0.7}
         >
-          <Text style={styles.skipText}>Pular</Text>
+          <Text style={[styles.skipText, { color: colors.textPrimary }]}>
+            Pular
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -103,8 +106,12 @@ export default function OnboardingScreen({ onComplete }) {
               />
             </View>
 
-            <Text style={styles.title}>{slide.title}</Text>
-            <Text style={styles.subtitle}>{slide.subtitle}</Text>
+            <Text style={[styles.title, { color: colors.textPrimary }]}>
+              {slide.title}
+            </Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+              {slide.subtitle}
+            </Text>
           </View>
         ))}
       </ScrollView>
@@ -116,7 +123,11 @@ export default function OnboardingScreen({ onComplete }) {
             key={slide.id}
             style={[
               styles.dot,
-              index === currentIndex && styles.dotActive,
+              { backgroundColor: colors.divider },
+              index === currentIndex && {
+                width: 24,
+                backgroundColor: colors.primary,
+              },
             ]}
           />
         ))}
@@ -125,11 +136,17 @@ export default function OnboardingScreen({ onComplete }) {
       {/* ─── BOTÃO ─── */}
       <View style={styles.footer}>
         <TouchableOpacity
-          style={styles.button}
+          style={[
+            styles.button,
+            {
+              backgroundColor: colors.primary,
+              shadowColor: colors.primary,
+            },
+          ]}
           onPress={handleNext}
           activeOpacity={0.85}
         >
-          <Text style={styles.buttonText}>
+          <Text style={[styles.buttonText, { color: colors.white }]}>
             {isLast ? 'Começar' : 'Próximo'}
           </Text>
           <Ionicons name="arrow-forward" size={20} color={colors.white} />
@@ -142,7 +159,6 @@ export default function OnboardingScreen({ onComplete }) {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   topBar: {
     alignItems: 'flex-end',
@@ -154,12 +170,10 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
-    backgroundColor: colors.surface,
   },
   skipText: {
     fontFamily: 'InterBold',
     fontSize: 13,
-    color: colors.textPrimary,
   },
   scroll: {
     flex: 1,
@@ -184,7 +198,6 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: 'InterExtraBold',
     fontSize: 26,
-    color: colors.textPrimary,
     textAlign: 'center',
     letterSpacing: -0.5,
     marginBottom: 12,
@@ -192,7 +205,6 @@ const styles = StyleSheet.create({
   subtitle: {
     fontFamily: 'InterRegular',
     fontSize: 15,
-    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
     paddingHorizontal: 8,
@@ -208,11 +220,6 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.divider,
-  },
-  dotActive: {
-    width: 24,
-    backgroundColor: colors.primary,
   },
   footer: {
     paddingHorizontal: 32,
@@ -222,11 +229,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primary,
     height: 56,
     borderRadius: 28,
     gap: 8,
-    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.25,
     shadowRadius: 10,
@@ -235,7 +240,6 @@ const styles = StyleSheet.create({
   buttonText: {
     fontFamily: 'InterBold',
     fontSize: 16,
-    color: colors.white,
     letterSpacing: 0.2,
   },
 });

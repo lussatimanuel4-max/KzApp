@@ -3,19 +3,24 @@
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import colors from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 
-export default function ProgressBar({ percent = 0, color = colors.primary }) {
+export default function ProgressBar({ percent = 0, color }) {
+  const { colors } = useTheme();
+  
   // Garantir que percent está entre 0 e 1
   const safePercent = Math.max(0, Math.min(Number(percent) || 0, 1));
   const widthPercent = `${safePercent * 100}%`;
   
+  // Fallback para o primário se não for passada cor
+  const fillColor = color || colors.primary;
+
   return (
-    <View style={styles.track}>
+    <View style={[styles.track, { backgroundColor: colors.surface }]}>
       <View
         style={[
           styles.fill,
-          { width: widthPercent, backgroundColor: color },
+          { width: widthPercent, backgroundColor: fillColor },
         ]}
       />
     </View>
@@ -27,7 +32,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.divider,
     overflow: 'hidden',
   },
   fill: {

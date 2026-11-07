@@ -10,7 +10,6 @@ import {
   TouchableOpacity,
   TextInput,
   Modal,
-  Alert,
   RefreshControl,
   Image,
 } from 'react-native';
@@ -18,9 +17,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 
-import colors from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import ProgressBar from '../components/ProgressBar';
 import EmptyState from '../components/EmptyState';
+import CustomAlert from '../components/CustomAlert';
 
 import {
   CATEGORIES,
@@ -32,11 +32,35 @@ import { calculateCategorySummary } from '../utils/calc';
 import { formatKz, calculatePercent } from '../utils/format';
 
 export default function BudgetScreen({ navigation }) {
+  const { colors, typography } = useTheme();
   const [summary, setSummary] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCat, setSelectedCat] = useState(null);
   const [inputValue, setInputValue] = useState('');
+
+  // ─── ESTADO DO CUSTOM ALERT ───
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    isDestructive: false,
+    buttons: [],
+  });
+
+  function showAlert(title, message, isDestructive = false, buttons = null) {
+    setAlertConfig({
+      visible: true,
+      title,
+      message,
+      isDestructive,
+      buttons: buttons || [{ text: 'Entendido', style: 'default' }],
+    });
+  }
+
+  function closeAlert() {
+    setAlertConfig((prev) => ({ ...prev, visible: false }));
+  }
 
   async function loadData() {
     const transactions = await getTransactions();
@@ -73,7 +97,7 @@ export default function BudgetScreen({ navigation }) {
     const numeric = Number(inputValue);
 
     if (!numeric || numeric <= 0) {
-      Alert.alert('Valor inválido', 'Escreve um valor maior que zero.');
+      showAlert('Valor inválido', 'Escreve um valor maior que zero.');
       return;
     }
 
@@ -99,7 +123,7 @@ export default function BudgetScreen({ navigation }) {
   const totalPercent = calculatePercent(totalSpent, totalBudget);
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
@@ -113,21 +137,29 @@ export default function BudgetScreen({ navigation }) {
       >
         {/* ─── CABEÇALHO ─── */}
         <View style={styles.header}>
-          <Text style={styles.title}>Orçamento</Text>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>
+            Orçamento
+          </Text>
         </View>
 
         {/* ─── CARD TOTAL ─── */}
-        <View style={styles.totalCard}>
-          <Text style={styles.totalLabel}>Este mês</Text>
+        <View style={[styles.totalCard, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.totalLabel, { color: colors.textSecondary }]}>
+            Este mês
+          </Text>
           <View style={styles.totalRow}>
-            <Text style={styles.totalSpent}>{formatKz(totalSpent)}</Text>
-            <Text style={styles.totalBudget}>/ {formatKz(totalBudget)}</Text>
+            <Text style={[styles.totalSpent, { color: colors.textPrimary }]}>
+              {formatKz(totalSpent)}
+            </Text>
+            <Text style={[styles.totalBudget, { color: colors.textLight }]}>
+              / {formatKz(totalBudget)}
+            </Text>
           </View>
           <ProgressBar
             percent={totalPercent}
             color={totalPercent > 0.8 ? colors.danger : colors.primary}
           />
-          <Text style={styles.totalHint}>
+          <Text style={[styles.totalHint, { color: colors.textSecondary }]}>
             {totalBudget === 0
               ? 'Define um orçamento por categoria'
               : `${Math.round(totalPercent * 100)}% usado`}
@@ -136,7 +168,9 @@ export default function BudgetScreen({ navigation }) {
 
         {/* ─── CATEGORIAS ─── */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Categorias</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+            Categorias
+          </Text>
         </View>
 
         {summary.length === 0 ? (
@@ -160,20 +194,22 @@ export default function BudgetScreen({ navigation }) {
               return (
                 <TouchableOpacity
                   key={cat.id}
-                  style={styles.catCard}
+                  style={[styles.catCard, { backgroundColor: colors.card }]}
                   onPress={() => openModal(cat)}
                   activeOpacity={0.75}
                 >
                   <View style={styles.catTop}>
                     <View style={styles.catLeft}>
-                      <View style={styles.catIcon}>
+                      <View style={[styles.catIcon, { backgroundColor: colors.accentSoft }]}>
                         <Image
                           source={categoryData?.image}
                           style={styles.catImage}
                           resizeMode="contain"
                         />
                       </View>
-                      <Text style={styles.catLabel}>{cat.label}</Text>
+                      <Text style={[styles.catLabel, { color: colors.textPrimary }]}>
+                        {cat.label}
+                      </Text>
                     </View>
 
                     <Ionicons
@@ -186,10 +222,10 @@ export default function BudgetScreen({ navigation }) {
                   {hasBudget ? (
                     <>
                       <View style={styles.catValues}>
-                        <Text style={styles.catSpent}>
+                        <Text style={[styles.catSpent, { color: colors.textPrimary }]}>
                           {formatKz(cat.spent)}
                         </Text>
-                        <Text style={styles.catBudget}>
+                        <Text style={[styles.catBudget, { color: colors.textLight }]}>
                           / {formatKz(cat.budget)}
                         </Text>
                       </View>
@@ -199,7 +235,7 @@ export default function BudgetScreen({ navigation }) {
                       />
                     </>
                   ) : (
-                    <Text style={styles.catNoBudget}>
+                    <Text style={[styles.catNoBudget, { color: colors.textLight }]}>
                       Sem orçamento definido
                     </Text>
                   )}
@@ -219,21 +255,23 @@ export default function BudgetScreen({ navigation }) {
         animationType="slide"
         onRequestClose={closeModal}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHandle} />
+        <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}>
+          <View style={[styles.modalContent, { backgroundColor: colors.sheetBg }]}>
+            <View style={[styles.modalHandle, { backgroundColor: colors.divider }]} />
 
-            <Text style={styles.modalTitle}>
+            <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
               {selectedCat?.label || 'Categoria'}
             </Text>
-            <Text style={styles.modalSubtitle}>
+            <Text style={[styles.modalSubtitle, { color: colors.textSecondary }]}>
               Define o orçamento mensal
             </Text>
 
-            <View style={styles.modalInputWrapper}>
-              <Text style={styles.modalCurrency}>Kz</Text>
+            <View style={[styles.modalInputWrapper, { backgroundColor: colors.surface }]}>
+              <Text style={[styles.modalCurrency, { color: colors.textLight }]}>
+                Kz
+              </Text>
               <TextInput
-                style={styles.modalInput}
+                style={[styles.modalInput, { color: colors.textPrimary }]}
                 placeholder="0"
                 placeholderTextColor={colors.textLight}
                 keyboardType="number-pad"
@@ -246,24 +284,45 @@ export default function BudgetScreen({ navigation }) {
 
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                style={styles.modalCancel}
+                style={[styles.modalCancel, { backgroundColor: colors.surface }]}
                 onPress={closeModal}
                 activeOpacity={0.8}
               >
-                <Text style={styles.modalCancelText}>Cancelar</Text>
+                <Text style={[styles.modalCancelText, { color: colors.textSecondary }]}>
+                  Cancelar
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.modalSave}
+                style={[styles.modalSave, { backgroundColor: colors.primary }]}
                 onPress={handleSave}
                 activeOpacity={0.85}
               >
-                <Text style={styles.modalSaveText}>Guardar</Text>
+                <Text style={[styles.modalSaveText, { color: colors.white }]}>
+                  Guardar
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
+
+      {/* ─── CUSTOM ALERT ─── */}
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        isDestructive={alertConfig.isDestructive}
+        buttons={alertConfig.buttons.map((btn) => ({
+          ...btn,
+          onPress: () => {
+            closeAlert();
+            if (btn.onPress) btn.onPress();
+          },
+        }))}
+        onRequestClose={closeAlert}
+      />
+
     </SafeAreaView>
   );
 }
@@ -271,7 +330,6 @@ export default function BudgetScreen({ navigation }) {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   scroll: {
     paddingBottom: 32,
@@ -284,18 +342,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: '800',
-    color: colors.textPrimary,
     letterSpacing: -0.5,
   },
   totalCard: {
-    backgroundColor: colors.surface,
     marginHorizontal: 20,
     padding: 20,
     borderRadius: 18,
   },
   totalLabel: {
     fontSize: 13,
-    color: colors.textSecondary,
     marginBottom: 6,
   },
   totalRow: {
@@ -306,18 +361,15 @@ const styles = StyleSheet.create({
   totalSpent: {
     fontSize: 24,
     fontWeight: '800',
-    color: colors.textPrimary,
   },
   totalBudget: {
     fontSize: 15,
     fontWeight: '600',
-    color: colors.textLight,
     marginLeft: 6,
     marginBottom: 3,
   },
   totalHint: {
     fontSize: 12,
-    color: colors.textSecondary,
     marginTop: 10,
   },
   sectionHeader: {
@@ -328,13 +380,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: colors.textPrimary,
   },
   list: {
     paddingHorizontal: 20,
   },
   catCard: {
-    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -359,7 +409,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: '#F0EDFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -370,7 +419,6 @@ const styles = StyleSheet.create({
   catLabel: {
     fontSize: 15,
     fontWeight: '700',
-    color: colors.textPrimary,
   },
   catValues: {
     flexDirection: 'row',
@@ -380,26 +428,21 @@ const styles = StyleSheet.create({
   catSpent: {
     fontSize: 15,
     fontWeight: '700',
-    color: colors.textPrimary,
   },
   catBudget: {
     fontSize: 13,
     fontWeight: '600',
-    color: colors.textLight,
     marginLeft: 6,
   },
   catNoBudget: {
     fontSize: 12,
-    color: colors.textLight,
     fontStyle: 'italic',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: colors.white,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     padding: 24,
@@ -409,25 +452,21 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: colors.divider,
     alignSelf: 'center',
     marginBottom: 20,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: '800',
-    color: colors.textPrimary,
     marginBottom: 4,
   },
   modalSubtitle: {
     fontSize: 14,
-    color: colors.textSecondary,
     marginBottom: 24,
   },
   modalInputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
     borderRadius: 14,
     paddingHorizontal: 16,
     height: 64,
@@ -436,14 +475,12 @@ const styles = StyleSheet.create({
   modalCurrency: {
     fontSize: 22,
     fontWeight: '700',
-    color: colors.textLight,
     marginRight: 10,
   },
   modalInput: {
     flex: 1,
     fontSize: 28,
     fontWeight: '800',
-    color: colors.textPrimary,
   },
   modalButtons: {
     flexDirection: 'row',
@@ -453,12 +490,10 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 52,
     borderRadius: 14,
-    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalCancelText: {
-    color: colors.textSecondary,
     fontSize: 15,
     fontWeight: '700',
   },
@@ -466,12 +501,10 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 52,
     borderRadius: 14,
-    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalSaveText: {
-    color: colors.white,
     fontSize: 15,
     fontWeight: '700',
   },

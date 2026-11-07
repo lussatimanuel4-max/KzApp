@@ -3,10 +3,12 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import colors from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { CATEGORIES } from '../utils/categories';
 
 export default function CategoryPicker({ selected, onSelect }) {
+  const { colors } = useTheme();
+
   return (
     <View style={styles.grid}>
       {CATEGORIES.map((cat) => {
@@ -17,7 +19,11 @@ export default function CategoryPicker({ selected, onSelect }) {
             key={cat.id}
             style={[
               styles.item,
-              isSelected && styles.itemSelected,
+              { backgroundColor: colors.surface },
+              isSelected && {
+                backgroundColor: colors.accentSoft,
+                borderColor: colors.primary,
+              },
             ]}
             onPress={() => onSelect(cat.id)}
             activeOpacity={0.7}
@@ -25,7 +31,7 @@ export default function CategoryPicker({ selected, onSelect }) {
             <View
               style={[
                 styles.iconBox,
-                isSelected && styles.iconBoxSelected,
+                { backgroundColor: colors.white }, // As imagens têm fundo branco, mantemos para contraste
               ]}
             >
               <Image
@@ -38,7 +44,8 @@ export default function CategoryPicker({ selected, onSelect }) {
             <Text
               style={[
                 styles.label,
-                isSelected && styles.labelSelected,
+                { color: colors.textSecondary },
+                isSelected && { color: colors.primary, fontWeight: '700' },
               ]}
               numberOfLines={2}
             >
@@ -63,14 +70,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 6,
     borderRadius: 14,
-    backgroundColor: colors.surface,
     marginBottom: 12,
     borderWidth: 2,
     borderColor: 'transparent',
-  },
-  itemSelected: {
-    backgroundColor: '#F0EDFF',
-    borderColor: colors.primary,
   },
   iconBox: {
     width: 64,
@@ -78,11 +80,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.white,
     marginBottom: 8,
-  },
-  iconBoxSelected: {
-    backgroundColor: colors.white,
   },
   image: {
     width: 48,
@@ -91,12 +89,7 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: 'InterBold',
     fontSize: 11,
-    color: colors.textSecondary,
     textAlign: 'center',
     letterSpacing: 0.1,
-  },
-  labelSelected: {
-    color: colors.primary,
-    fontWeight: '700',
   },
 });

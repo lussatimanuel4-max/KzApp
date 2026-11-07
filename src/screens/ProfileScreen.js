@@ -10,21 +10,21 @@ import {
   TouchableOpacity,
   Image,
   TextInput,
-  Alert,
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 
-import colors from '../theme/colors';
-import typography from '../theme/typography';
+import { useTheme } from '../context/ThemeContext';
 import { getProfile, updateProfileName } from '../storage/profile';
 import { getTransactions, clearTransactions } from '../storage/transactions';
 import { clearGoals } from '../storage/goals';
 import { resetAppState } from '../storage/appState';
+import { clearTheme } from '../storage/theme';
 import { calculateBalance } from '../utils/calc';
 import { formatKz } from '../utils/format';
+import CustomAlert from '../components/CustomAlert';
 
 // ─── AVATARES DISPONÍVEIS ───
 const AVATAR_MAP = {
@@ -37,12 +37,36 @@ const AVATAR_MAP = {
 };
 
 export default function ProfileScreen({ navigation, onLogout }) {
+  const { colors, typography } = useTheme();
   const [profile, setProfile] = useState(null);
   const [balance, setBalance] = useState(0);
   const [totalTx, setTotalTx] = useState(0);
   const [editing, setEditing] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+
+  // ─── ESTADO DO CUSTOM ALERT ───
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    isDestructive: false,
+    buttons: [],
+  });
+
+  function showAlert(title, message, isDestructive = false, buttons = null) {
+    setAlertConfig({
+      visible: true,
+      title,
+      message,
+      isDestructive,
+      buttons: buttons || [{ text: 'Entendido', style: 'default' }],
+    });
+  }
+
+  function closeAlert() {
+    setAlertConfig((prev) => ({ ...prev, visible: false }));
+  }
 
   async function loadData() {
     const p = await getProfile();
@@ -73,7 +97,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
     const trimmed = nameInput.trim();
 
     if (trimmed.length < 2) {
-      Alert.alert('Nome inválido', 'Escreve pelo menos 2 letras.');
+      showAlert('Nome inválido', 'Escreve pelo menos 2 letras.');
       return;
     }
 
@@ -83,9 +107,10 @@ export default function ProfileScreen({ navigation, onLogout }) {
   }
 
   function confirmReset() {
-    Alert.alert(
+    showAlert(
       'Apagar tudo',
       'Isto vai apagar o teu perfil, movimentos e objetivos. Não há como recuperar.',
+      true,
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -95,6 +120,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
             await clearTransactions();
             await clearGoals();
             await resetAppState();
+            await clearTheme();
             if (onLogout) onLogout();
           },
         },
@@ -106,7 +132,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
     AVATAR_MAP[profile?.avatar] || AVATAR_MAP['avatar-1'];
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
@@ -124,42 +150,47 @@ export default function ProfileScreen({ navigation, onLogout }) {
         </View>
 
         {/* ─── CARD DO USER ─── */}
-        <View style={styles.userCard}>
-          <Image source={avatarSource} style={styles.avatar} />
+        <View style={[styles.userCard, { backgroundColor: colors.surface }]}>
+          <Image
+            source={avatarSource}
+            style={[styles.avatar, { borderColor: colors.card }]}
+          />
 
           {editing ? (
             <View style={styles.editRow}>
               <TextInput
-                style={styles.nameInput}
+                style={[styles.nameInput, { backgroundColor: colors.card, color: colors.textPrimary }]}
                 value={nameInput}
                 onChangeText={setNameInput}
                 autoFocus
                 maxLength={30}
               />
               <TouchableOpacity
-                style={styles.iconBtnPrimary}
+                style={[styles.iconBtnPrimary, { backgroundColor: colors.primary }]}
                 onPress={saveName}
               >
                 <Ionicons name="checkmark" size={20} color={colors.white} />
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.iconBtnGhost}
+                style={[styles.iconBtnGhost, { backgroundColor: colors.card }]}
                 onPress={() => setEditing(false)}
               >
                 <Ionicons name="close" size={20} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
           ) : (
-            <Text style={styles.userName}>
+            <Text style={[styles.userName, { color: colors.textPrimary }]}>
               {profile?.name || 'Estudante'}
             </Text>
           )}
 
-          <Text style={styles.userRole}>Estudante</Text>
+          <Text style={[styles.userRole, { color: colors.textSecondary }]}>
+            Estudante
+          </Text>
 
           {!editing && (
             <TouchableOpacity
-              style={styles.editButton}
+              style={[styles.editButton, { backgroundColor: colors.card }]}
               onPress={startEditing}
               activeOpacity={0.8}
             >
@@ -168,50 +199,62 @@ export default function ProfileScreen({ navigation, onLogout }) {
                 size={14}
                 color={colors.primary}
               />
-              <Text style={styles.editButtonText}>Editar perfil</Text>
+              <Text style={[styles.editButtonText, { color: colors.primary }]}>
+                Editar perfil
+              </Text>
             </TouchableOpacity>
           )}
         </View>
 
         {/* ─── ESTATÍSTICAS ─── */}
         <View style={styles.statsRow}>
-          <View style={styles.statCard}>
-            <View style={styles.statIconWrapper}>
+          <View style={[styles.statCard, { backgroundColor: colors.card }]}>
+            <View style={[styles.statIconWrapper, { backgroundColor: colors.accentSoft }]}>
               <Ionicons name="wallet-outline" size={18} color={colors.primary} />
             </View>
-            <Text style={styles.statLabel}>Tenho agora</Text>
-            <Text style={styles.statValue}>{formatKz(balance)}</Text>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
+              Tenho agora
+            </Text>
+            <Text style={[styles.statValue, { color: colors.textPrimary }]}>
+              {formatKz(balance)}
+            </Text>
           </View>
 
-          <View style={styles.statCard}>
-            <View style={styles.statIconWrapper}>
+          <View style={[styles.statCard, { backgroundColor: colors.card }]}>
+            <View style={[styles.statIconWrapper, { backgroundColor: colors.accentSoft }]}>
               <Ionicons
                 name="stats-chart-outline"
                 size={18}
                 color={colors.primary}
               />
             </View>
-            <Text style={styles.statLabel}>Movimentos</Text>
-            <Text style={styles.statValue}>{totalTx}</Text>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
+              Movimentos
+            </Text>
+            <Text style={[styles.statValue, { color: colors.textPrimary }]}>
+              {totalTx}
+            </Text>
           </View>
         </View>
 
         {/* ─── MENU: SOBRE ─── */}
         <View style={styles.menuSection}>
           <TouchableOpacity
-            style={styles.menuItem}
+            style={[styles.menuItem, { backgroundColor: colors.card }]}
             onPress={() => navigation.navigate('Sobre')}
             activeOpacity={0.7}
           >
             <View style={styles.menuLeft}>
-              <View style={styles.menuIconBox}>
+              <View style={[styles.menuIconBox, { backgroundColor: colors.accentSoft }]}>
                 <Ionicons
                   name="information-circle-outline"
                   size={20}
                   color={colors.primary}
                 />
               </View>
-              <Text style={styles.menuLabel}>Sobre o KzApp</Text>
+              <Text style={[styles.menuLabel, { color: colors.textPrimary }]}>
+                Sobre o KzApp
+              </Text>
             </View>
             <Ionicons
               name="chevron-forward"
@@ -224,12 +267,12 @@ export default function ProfileScreen({ navigation, onLogout }) {
         {/* ─── MENU: APAGAR ─── */}
         <View style={styles.menuSection}>
           <TouchableOpacity
-            style={styles.menuItem}
+            style={[styles.menuItem, { backgroundColor: colors.card }]}
             onPress={confirmReset}
             activeOpacity={0.7}
           >
             <View style={styles.menuLeft}>
-              <View style={[styles.menuIconBox, { backgroundColor: '#FFF0F0' }]}>
+              <View style={[styles.menuIconBox, { backgroundColor: colors.dangerSoft }]}>
                 <Ionicons name="trash-outline" size={20} color={colors.danger} />
               </View>
               <Text style={[styles.menuLabel, { color: colors.danger }]}>
@@ -245,10 +288,29 @@ export default function ProfileScreen({ navigation, onLogout }) {
         </View>
 
         {/* ─── RODAPÉ ─── */}
-        <Text style={styles.footer}>Versão Beta</Text>
+        <Text style={[styles.footer, { color: colors.textLight }]}>
+          Versão Beta
+        </Text>
 
         <View style={{ height: 120 }} />
       </ScrollView>
+
+      {/* ─── CUSTOM ALERT ─── */}
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        isDestructive={alertConfig.isDestructive}
+        buttons={alertConfig.buttons.map((btn) => ({
+          ...btn,
+          onPress: () => {
+            closeAlert();
+            if (btn.onPress) btn.onPress();
+          },
+        }))}
+        onRequestClose={closeAlert}
+      />
+
     </SafeAreaView>
   );
 }
@@ -256,7 +318,6 @@ export default function ProfileScreen({ navigation, onLogout }) {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   scroll: {
     paddingBottom: 24,
@@ -270,7 +331,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 28,
     marginHorizontal: 20,
-    backgroundColor: colors.surface,
     borderRadius: 24,
   },
   avatar: {
@@ -278,20 +338,17 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     borderWidth: 4,
-    borderColor: colors.white,
     marginBottom: 16,
   },
   userName: {
     fontFamily: 'InterExtraBold',
     fontSize: 24,
-    color: colors.textPrimary,
     letterSpacing: -0.4,
     marginBottom: 4,
   },
   userRole: {
     fontFamily: 'InterMedium',
     fontSize: 13,
-    color: colors.textSecondary,
     marginBottom: 16,
   },
   editButton: {
@@ -301,12 +358,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: colors.white,
   },
   editButtonText: {
     fontFamily: 'InterBold',
     fontSize: 13,
-    color: colors.primary,
   },
   editRow: {
     flexDirection: 'row',
@@ -314,21 +369,18 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   nameInput: {
-    backgroundColor: colors.white,
     borderRadius: 26,
     paddingHorizontal: 18,
     paddingVertical: 10,
     height: 52,
     fontFamily: 'InterBold',
     fontSize: 15,
-    color: colors.textPrimary,
     minWidth: 160,
   },
   iconBtnPrimary: {
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -336,7 +388,6 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -348,7 +399,6 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 16,
     shadowColor: '#000',
@@ -361,7 +411,6 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 10,
-    backgroundColor: '#F0EDFF',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,
@@ -369,13 +418,11 @@ const styles = StyleSheet.create({
   statLabel: {
     fontFamily: 'InterMedium',
     fontSize: 12,
-    color: colors.textSecondary,
     marginBottom: 4,
   },
   statValue: {
     fontFamily: 'InterExtraBold',
     fontSize: 16,
-    color: colors.textPrimary,
     letterSpacing: -0.2,
   },
   menuSection: {
@@ -386,7 +433,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.card,
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 16,
@@ -405,19 +451,16 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: '#F0EDFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
   menuLabel: {
     fontFamily: 'InterBold',
     fontSize: 15,
-    color: colors.textPrimary,
   },
   footer: {
     fontFamily: 'InterRegular',
     fontSize: 12,
-    color: colors.textLight,
     textAlign: 'center',
     marginTop: 24,
   },

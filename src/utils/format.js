@@ -36,6 +36,11 @@ const MONTHS_SHORT = [
   'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
 ];
 
+const MONTHS_LONG = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+];
+
 export function formatDate(dateInput) {
   if (!dateInput) return '';
   const date = new Date(dateInput);
@@ -116,4 +121,54 @@ export function getGreeting() {
   if (hour < 12) return 'Bom dia';
   if (hour < 18) return 'Boa tarde';
   return 'Boa noite';
+}
+
+// ═══════════════════════════════════════════════════════════
+// NOVAS FUNÇÕES PARA O FILTRO POR MÊS
+// ═══════════════════════════════════════════════════════════
+
+// ─────────────────────────────
+// FORMATAR MÊS POR EXTENSO
+// Ex: (2026, 10) → "Novembro 2026"
+// ─────────────────────────────
+export function formatMonthYear(year, monthIndex) {
+  return `${MONTHS_LONG[monthIndex]} ${year}`;
+}
+
+// ─────────────────────────────
+// FORMATAR MÊS CURTO (para o botão no topo)
+// Ex: (2026, 10) → "Nov 2026"
+// ─────────────────────────────
+export function getMonthLabelShort(year, monthIndex) {
+  return `${MONTHS_SHORT[monthIndex]} ${year}`;
+}
+
+// ─────────────────────────────
+// OBTER LISTA DE MESES DISPONÍVEIS
+// A partir da lista de transações, devolve um array de objetos:
+// [{ label, year, monthIndex }, ...] ordenado do mais recente para o mais antigo.
+// ─────────────────────────────
+export function getAvailableMonths(transactions) {
+  if (!Array.isArray(transactions) || transactions.length === 0) return [];
+
+  const monthsMap = {};
+
+  transactions.forEach((tx) => {
+    const date = new Date(tx.date || tx.createdAt);
+    const key = `${date.getFullYear()}-${date.getMonth()}`;
+    
+    if (!monthsMap[key]) {
+      monthsMap[key] = {
+        year: date.getFullYear(),
+        monthIndex: date.getMonth(),
+        label: formatMonthYear(date.getFullYear(), date.getMonth()),
+      };
+    }
+  });
+
+  // Converter para array e ordenar decrescente (mais recente primeiro)
+  return Object.values(monthsMap).sort((a, b) => {
+    if (a.year !== b.year) return b.year - a.year;
+    return b.monthIndex - a.monthIndex;
+  });
 }

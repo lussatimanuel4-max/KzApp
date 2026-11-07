@@ -10,7 +10,6 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
-  Alert,
   RefreshControl,
   KeyboardAvoidingView,
   Platform,
@@ -19,10 +18,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 
-import colors from '../theme/colors';
-import typography from '../theme/typography';
+import { useTheme } from '../context/ThemeContext';
 import ProgressBar from '../components/ProgressBar';
 import EmptyState from '../components/EmptyState';
+import CustomAlert from '../components/CustomAlert';
 
 import {
   getGoals,
@@ -37,6 +36,7 @@ import {
 import { formatKz } from '../utils/format';
 
 export default function GoalsScreen({ navigation }) {
+  const { colors, typography } = useTheme();
   const [goals, setGoals] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -47,6 +47,29 @@ export default function GoalsScreen({ navigation }) {
   const [newTitle, setNewTitle] = useState('');
   const [newTarget, setNewTarget] = useState('');
   const [moneyInput, setMoneyInput] = useState('');
+
+  // ─── ESTADO DO CUSTOM ALERT ───
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    isDestructive: false,
+    buttons: [],
+  });
+
+  function showAlert(title, message, isDestructive = false, buttons = null) {
+    setAlertConfig({
+      visible: true,
+      title,
+      message,
+      isDestructive,
+      buttons: buttons || [{ text: 'Entendido', style: 'default' }],
+    });
+  }
+
+  function closeAlert() {
+    setAlertConfig((prev) => ({ ...prev, visible: false }));
+  }
 
   async function loadData() {
     const list = await getGoals();
@@ -69,12 +92,12 @@ export default function GoalsScreen({ navigation }) {
     const target = Number(newTarget);
 
     if (newTitle.trim().length < 2) {
-      Alert.alert('Nome inválido', 'Escreve um nome para o objetivo.');
+      showAlert('Nome inválido', 'Escreve um nome para o objetivo.');
       return;
     }
 
     if (!target || target <= 0) {
-      Alert.alert('Valor inválido', 'Define um valor maior que zero.');
+      showAlert('Valor inválido', 'Define um valor maior que zero.');
       return;
     }
 
@@ -95,7 +118,7 @@ export default function GoalsScreen({ navigation }) {
     const amount = Number(moneyInput);
 
     if (!amount || amount <= 0) {
-      Alert.alert('Valor inválido', 'Escreve um valor maior que zero.');
+      showAlert('Valor inválido', 'Escreve um valor maior que zero.');
       return;
     }
 
@@ -107,9 +130,10 @@ export default function GoalsScreen({ navigation }) {
   }
 
   function confirmDelete(goal) {
-    Alert.alert(
+    showAlert(
       'Apagar objetivo',
       `Queres apagar "${goal.title}"?`,
+      true,
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -141,7 +165,7 @@ export default function GoalsScreen({ navigation }) {
   const totalSaved = calculateTotalSaved(goals);
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
@@ -157,7 +181,7 @@ export default function GoalsScreen({ navigation }) {
         <View style={styles.header}>
           <Text style={typography.h2}>O que quero</Text>
           <TouchableOpacity
-            style={styles.addButton}
+            style={[styles.addButton, { backgroundColor: colors.primary }]}
             onPress={() => setAddModal(true)}
             activeOpacity={0.85}
           >
@@ -166,7 +190,7 @@ export default function GoalsScreen({ navigation }) {
         </View>
 
         {/* ─── CARD TOTAL ─── */}
-        <View style={styles.totalCard}>
+        <View style={[styles.totalCard, { backgroundColor: colors.surface }]}>
           <Text style={typography.label}>Já juntei</Text>
           <Text
             style={[
@@ -196,7 +220,7 @@ export default function GoalsScreen({ navigation }) {
               return (
                 <TouchableOpacity
                   key={goal.id}
-                  style={styles.goalCard}
+                  style={[styles.goalCard, { backgroundColor: colors.card }]}
                   activeOpacity={0.85}
                   onPress={() => {
                     setActiveGoal(goal);
@@ -210,7 +234,11 @@ export default function GoalsScreen({ navigation }) {
                       <View
                         style={[
                           styles.goalIcon,
-                          done && { backgroundColor: '#E8F8F4' },
+                          {
+                            backgroundColor: done
+                              ? colors.successSoft
+                              : colors.accentSoft,
+                          },
                         ]}
                       >
                         <Ionicons
@@ -220,7 +248,7 @@ export default function GoalsScreen({ navigation }) {
                         />
                       </View>
                       <Text
-                        style={[typography.subtitle, { flex: 1 }]}
+                        style={[typography.subtitle, { flex: 1, color: colors.textPrimary }]}
                         numberOfLines={1}
                       >
                         {goal.title}
@@ -228,14 +256,16 @@ export default function GoalsScreen({ navigation }) {
                     </View>
 
                     {done && (
-                      <View style={styles.doneBadge}>
-                        <Text style={styles.doneText}>Consegui!</Text>
+                      <View style={[styles.doneBadge, { backgroundColor: colors.successSoft }]}>
+                        <Text style={[styles.doneText, { color: colors.success }]}>
+                          Consegui!
+                        </Text>
                       </View>
                     )}
                   </View>
 
                   <View style={styles.goalValues}>
-                    <Text style={[typography.subtitle, { fontSize: 16 }]}>
+                    <Text style={[typography.subtitle, { fontSize: 16, color: colors.textPrimary }]}>
                       {formatKz(goal.saved)}
                     </Text>
                     <Text style={[typography.label, { marginLeft: 6 }]}>
@@ -273,20 +303,20 @@ export default function GoalsScreen({ navigation }) {
         onRequestClose={() => setAddModal(false)}
       >
         <KeyboardAvoidingView
-          style={styles.modalOverlay}
+          style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <View style={styles.modalContent}>
-            <View style={styles.modalHandle} />
+          <View style={[styles.modalContent, { backgroundColor: colors.sheetBg }]}>
+            <View style={[styles.modalHandle, { backgroundColor: colors.divider }]} />
 
-            <Text style={[typography.h3, { marginBottom: 4 }]}>
+            <Text style={[typography.h3, { marginBottom: 4, color: colors.textPrimary }]}>
               Novo objetivo
             </Text>
-            <Text style={[typography.body, { marginBottom: 20 }]}>
+            <Text style={[typography.body, { marginBottom: 20, color: colors.textSecondary }]}>
               O que queres conquistar?
             </Text>
 
-            <View style={styles.inputWrapper}>
+            <View style={[styles.inputWrapper, { backgroundColor: colors.surface }]}>
               <Ionicons
                 name="flag-outline"
                 size={20}
@@ -294,7 +324,7 @@ export default function GoalsScreen({ navigation }) {
                 style={styles.inputIcon}
               />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: colors.textPrimary }]}
                 placeholder="Ex: Comprar PC"
                 placeholderTextColor={colors.textLight}
                 value={newTitle}
@@ -303,10 +333,10 @@ export default function GoalsScreen({ navigation }) {
               />
             </View>
 
-            <View style={styles.inputWrapper}>
-              <Text style={styles.currency}>Kz</Text>
+            <View style={[styles.inputWrapper, { backgroundColor: colors.surface }]}>
+              <Text style={[styles.currency, { color: colors.textLight }]}>Kz</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: colors.textPrimary }]}
                 placeholder="Quanto precisas?"
                 placeholderTextColor={colors.textLight}
                 keyboardType="number-pad"
@@ -320,19 +350,23 @@ export default function GoalsScreen({ navigation }) {
 
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                style={styles.modalCancel}
+                style={[styles.modalCancel, { backgroundColor: colors.surface }]}
                 onPress={() => setAddModal(false)}
                 activeOpacity={0.8}
               >
-                <Text style={styles.modalCancelText}>Cancelar</Text>
+                <Text style={[styles.modalCancelText, { color: colors.textSecondary }]}>
+                  Cancelar
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.modalSave}
+                style={[styles.modalSave, { backgroundColor: colors.primary }]}
                 onPress={handleAddGoal}
                 activeOpacity={0.85}
               >
-                <Text style={styles.modalSaveText}>Criar</Text>
+                <Text style={[styles.modalSaveText, { color: colors.white }]}>
+                  Criar
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -347,23 +381,23 @@ export default function GoalsScreen({ navigation }) {
         onRequestClose={() => setMoneyModal(false)}
       >
         <KeyboardAvoidingView
-          style={styles.modalOverlay}
+          style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <View style={styles.modalContent}>
-            <View style={styles.modalHandle} />
+          <View style={[styles.modalContent, { backgroundColor: colors.sheetBg }]}>
+            <View style={[styles.modalHandle, { backgroundColor: colors.divider }]} />
 
-            <Text style={[typography.h3, { marginBottom: 4 }]}>
+            <Text style={[typography.h3, { marginBottom: 4, color: colors.textPrimary }]}>
               {activeGoal?.title || 'Objetivo'}
             </Text>
-            <Text style={[typography.body, { marginBottom: 20 }]}>
+            <Text style={[typography.body, { marginBottom: 20, color: colors.textSecondary }]}>
               Quanto queres juntar agora?
             </Text>
 
-            <View style={styles.inputWrapper}>
-              <Text style={styles.currency}>Kz</Text>
+            <View style={[styles.inputWrapper, { backgroundColor: colors.surface }]}>
+              <Text style={[styles.currency, { color: colors.textLight }]}>Kz</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: colors.textPrimary }]}
                 placeholder="0"
                 placeholderTextColor={colors.textLight}
                 keyboardType="number-pad"
@@ -378,27 +412,48 @@ export default function GoalsScreen({ navigation }) {
 
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                style={styles.modalCancel}
+                style={[styles.modalCancel, { backgroundColor: colors.surface }]}
                 onPress={() => {
                   setMoneyModal(false);
                   setActiveGoal(null);
                 }}
                 activeOpacity={0.8}
               >
-                <Text style={styles.modalCancelText}>Cancelar</Text>
+                <Text style={[styles.modalCancelText, { color: colors.textSecondary }]}>
+                  Cancelar
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.modalSave}
+                style={[styles.modalSave, { backgroundColor: colors.primary }]}
                 onPress={handleAddMoney}
                 activeOpacity={0.85}
               >
-                <Text style={styles.modalSaveText}>Juntar</Text>
+                <Text style={[styles.modalSaveText, { color: colors.white }]}>
+                  Juntar
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* ─── CUSTOM ALERT ─── */}
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        isDestructive={alertConfig.isDestructive}
+        buttons={alertConfig.buttons.map((btn) => ({
+          ...btn,
+          onPress: () => {
+            closeAlert();
+            if (btn.onPress) btn.onPress();
+          },
+        }))}
+        onRequestClose={closeAlert}
+      />
+
     </SafeAreaView>
   );
 }
@@ -406,7 +461,6 @@ export default function GoalsScreen({ navigation }) {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   scroll: {
     paddingBottom: 32,
@@ -423,12 +477,10 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   totalCard: {
-    backgroundColor: colors.surface,
     marginHorizontal: 20,
     padding: 20,
     borderRadius: 18,
@@ -438,7 +490,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   goalCard: {
-    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -464,12 +515,10 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: '#F0EDFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
   doneBadge: {
-    backgroundColor: '#E8F8F4',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
@@ -477,7 +526,6 @@ const styles = StyleSheet.create({
   doneText: {
     fontFamily: 'InterBold',
     fontSize: 11,
-    color: colors.success,
   },
   goalValues: {
     flexDirection: 'row',
@@ -486,11 +534,9 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: colors.white,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     padding: 24,
@@ -500,14 +546,12 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: colors.divider,
     alignSelf: 'center',
     marginBottom: 20,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
     borderRadius: 26,
     paddingHorizontal: 20,
     height: 52,
@@ -519,14 +563,12 @@ const styles = StyleSheet.create({
   currency: {
     fontFamily: 'InterBold',
     fontSize: 18,
-    color: colors.textLight,
     marginRight: 10,
   },
   input: {
     flex: 1,
     fontFamily: 'InterRegular',
     fontSize: 16,
-    color: colors.textPrimary,
   },
   modalButtons: {
     flexDirection: 'row',
@@ -537,26 +579,22 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 52,
     borderRadius: 26,
-    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalCancelText: {
     fontFamily: 'InterBold',
     fontSize: 15,
-    color: colors.textSecondary,
   },
   modalSave: {
     flex: 1,
     height: 52,
     borderRadius: 26,
-    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalSaveText: {
     fontFamily: 'InterBold',
     fontSize: 15,
-    color: colors.white,
   },
 });

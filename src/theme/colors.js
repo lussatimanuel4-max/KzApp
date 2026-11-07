@@ -1,41 +1,47 @@
 // src/theme/colors.js
-// Paleta de cores oficial do KzApp
+// Paleta de cores oficial do KzApp — Dark Mode Fixo
 
 export const colors = {
   // ─────────────────────────────
   // FUNDOS
   // ─────────────────────────────
-  background: '#F8F9FA',      // fundo do ecrã
-  surface: '#E8E8ED',         // cinza mais escuro
-  card: '#FFFFFF',            // cards
+  background: '#000000',      // preto puro (fundo do ecrã)
+  surface: '#1C1C1E',         // cinza escuro (inputs)
+  card: '#1C1C1E',            // cards
+  surfaceRaised: '#2C2C2E',   // botões claros em dark (ex: Editar Perfil)
+  sheetBg: '#1C1C1E',         // fundo de modais e tabBar
+  overlay: 'rgba(0, 0, 0, 0.7)', // overlay mais forte
 
   // ─────────────────────────────
   // COR PRIMÁRIA
   // ─────────────────────────────
-  primary: '#7E57C2',         // roxo principal (novo)
-  primaryLight: '#B39DDB',    // roxo claro
-  primaryDark: '#5E35B1',     // roxo escuro
+  primary: '#7E57C2',         // roxo principal
+  primaryLight: '#B39DDB',
+  primaryDark: '#5E35B1',
 
   // ─────────────────────────────
-  // CORES DE ESTADO
+  // CORES DE ESTADO E SOFT (FUNDOS)
   // ─────────────────────────────
-  success: '#00B894',         // verde (entradas)
-  danger: '#FF7675',          // vermelho (saídas)
-  warning: '#FDCB6E',         // amarelo (alertas)
-  info: '#74B9FF',            // azul (informação)
+  success: '#00D2A0',         // verde brilhante
+  successSoft: 'rgba(0, 184, 148, 0.15)', // fundo verde translúcido
+  danger: '#ff8a8a',          // vermelho brilhante
+  dangerSoft: 'rgba(255, 118, 117, 0.15)', // fundo vermelho translúcido
+  warning: '#FDCB6E',
+  info: '#74B9FF',
+  accentSoft: 'rgba(126, 87, 194, 0.2)', // lilás translúcido
 
   // ─────────────────────────────
   // TEXTO
   // ─────────────────────────────
-  textPrimary: '#1F2224',     // quase preto
-  textSecondary: '#4A5157',   // cinza escuro
-  textLight: '#8A9199',       // cinza médio
+  textPrimary: '#FFFFFF',     // branco (títulos)
+  textSecondary: '#A1A1A6',   // cinza claro (subtítulos)
+  textLight: '#636366',       // cinza médio (textos de apoio)
 
   // ─────────────────────────────
   // BORDAS
   // ─────────────────────────────
-  border: '#D2D6DB',          // cinza mais firme
-  divider: '#DCDFE4',         // divisórias
+  border: '#2C2C2E',
+  divider: '#2C2C2E',
 
   // ─────────────────────────────
   // EXTRA

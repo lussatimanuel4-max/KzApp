@@ -12,10 +12,11 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import colors from '../theme/colors';
-import typography from '../theme/typography';
+import { useTheme } from '../context/ThemeContext';
 
 export default function AddActionSheet({ visible, onClose, onSelect }) {
+  const { colors, typography } = useTheme();
+
   function handleSelect(type) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onClose();
@@ -33,11 +34,11 @@ export default function AddActionSheet({ visible, onClose, onSelect }) {
       onRequestClose={onClose}
     >
       <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.overlay}>
+        <View style={[styles.overlay, { backgroundColor: colors.overlay }]}>
           <TouchableWithoutFeedback>
-            <View style={styles.sheet}>
+            <View style={[styles.sheet, { backgroundColor: colors.sheetBg }]}>
               {/* ─── HANDLE ─── */}
-              <View style={styles.handle} />
+              <View style={[styles.handle, { backgroundColor: colors.divider }]} />
 
               {/* ─── TÍTULO ─── */}
               <Text style={[typography.h3, { marginBottom: 20 }]}>
@@ -48,46 +49,56 @@ export default function AddActionSheet({ visible, onClose, onSelect }) {
               <View style={styles.optionsRow}>
                 {/* Recebi */}
                 <TouchableOpacity
-                  style={[styles.optionCard, styles.optionIn]}
+                  style={[styles.optionCard, { backgroundColor: colors.successSoft }]}
                   onPress={() => handleSelect('in')}
                   activeOpacity={0.85}
                 >
-                  <View style={[styles.optionIcon, styles.optionIconIn]}>
+                  <View style={[styles.optionIcon, { backgroundColor: colors.success }]}>
                     <Ionicons
                       name="arrow-down"
                       size={28}
                       color={colors.white}
                     />
                   </View>
-                  <Text style={styles.optionLabel}>Recebi</Text>
-                  <Text style={styles.optionHint}>Dinheiro que entrou</Text>
+                  <Text style={[styles.optionLabel, { color: colors.textPrimary }]}>
+                    Recebi
+                  </Text>
+                  <Text style={[styles.optionHint, { color: colors.textSecondary }]}>
+                    Dinheiro que entrou
+                  </Text>
                 </TouchableOpacity>
 
                 {/* Gastei */}
                 <TouchableOpacity
-                  style={[styles.optionCard, styles.optionOut]}
+                  style={[styles.optionCard, { backgroundColor: colors.dangerSoft }]}
                   onPress={() => handleSelect('out')}
                   activeOpacity={0.85}
                 >
-                  <View style={[styles.optionIcon, styles.optionIconOut]}>
+                  <View style={[styles.optionIcon, { backgroundColor: colors.danger }]}>
                     <Ionicons
                       name="arrow-up"
                       size={28}
                       color={colors.white}
                     />
                   </View>
-                  <Text style={styles.optionLabel}>Gastei</Text>
-                  <Text style={styles.optionHint}>Dinheiro que saiu</Text>
+                  <Text style={[styles.optionLabel, { color: colors.textPrimary }]}>
+                    Gastei
+                  </Text>
+                  <Text style={[styles.optionHint, { color: colors.textSecondary }]}>
+                    Dinheiro que saiu
+                  </Text>
                 </TouchableOpacity>
               </View>
 
               {/* ─── CANCELAR ─── */}
               <TouchableOpacity
-                style={styles.cancelButton}
+                style={[styles.cancelButton, { backgroundColor: colors.primary }]}
                 onPress={onClose}
                 activeOpacity={0.7}
               >
-                <Text style={styles.cancelText}>Cancelar</Text>
+                <Text style={[styles.cancelText, { color: colors.white }]}>
+                  Cancelar
+                </Text>
               </TouchableOpacity>
             </View>
           </TouchableWithoutFeedback>
@@ -100,11 +111,9 @@ export default function AddActionSheet({ visible, onClose, onSelect }) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: colors.white,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingHorizontal: 24,
@@ -115,7 +124,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: colors.divider,
     alignSelf: 'center',
     marginBottom: 20,
   },
@@ -130,12 +138,6 @@ const styles = StyleSheet.create({
     padding: 18,
     alignItems: 'flex-start',
   },
-  optionIn: {
-    backgroundColor: '#E8F8F4',
-  },
-  optionOut: {
-    backgroundColor: '#FFF0F0',
-  },
   optionIcon: {
     width: 48,
     height: 48,
@@ -144,34 +146,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 14,
   },
-  optionIconIn: {
-    backgroundColor: colors.success,
-  },
-  optionIconOut: {
-    backgroundColor: colors.danger,
-  },
   optionLabel: {
     fontFamily: 'InterExtraBold',
     fontSize: 17,
-    color: colors.textPrimary,
     marginBottom: 4,
     letterSpacing: -0.2,
   },
   optionHint: {
     fontFamily: 'InterMedium',
     fontSize: 12,
-    color: colors.textSecondary,
   },
   cancelButton: {
     height: 52,
     borderRadius: 26,
-    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cancelText: {
     fontFamily: 'InterBold',
     fontSize: 15,
-    color: colors.white,
   },
 });

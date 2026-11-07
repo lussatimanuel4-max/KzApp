@@ -4,7 +4,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import colors from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 
 export default function EmptyState({
   icon = 'folder-open-outline',
@@ -15,6 +15,8 @@ export default function EmptyState({
   actionLabel = null,
   onAction = null,
 }) {
+  const { colors } = useTheme();
+
   return (
     <View style={styles.container}>
       {image ? (
@@ -24,23 +26,31 @@ export default function EmptyState({
           resizeMode="contain"
         />
       ) : (
-        <View style={styles.iconBox}>
+        <View style={[styles.iconBox, { backgroundColor: colors.accentSoft }]}>
           <Ionicons name={icon} size={40} color={colors.primary} />
         </View>
       )}
 
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, { color: colors.textPrimary }]}>
+        {title}
+      </Text>
 
-      {message ? <Text style={styles.message}>{message}</Text> : null}
+      {message ? (
+        <Text style={[styles.message, { color: colors.textSecondary }]}>
+          {message}
+        </Text>
+      ) : null}
 
       {actionLabel && onAction ? (
         <TouchableOpacity
-          style={styles.button}
+          style={[styles.button, { backgroundColor: colors.primary }]}
           onPress={onAction}
           activeOpacity={0.8}
         >
           <Ionicons name="add" size={18} color={colors.white} />
-          <Text style={styles.buttonText}>{actionLabel}</Text>
+          <Text style={[styles.buttonText, { color: colors.white }]}>
+            {actionLabel}
+          </Text>
         </TouchableOpacity>
       ) : null}
     </View>
@@ -61,7 +71,6 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#F0EDFF',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
@@ -69,7 +78,6 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: 'InterExtraBold',
     fontSize: 18,
-    color: colors.textPrimary,
     textAlign: 'center',
     marginBottom: 8,
     letterSpacing: -0.3,
@@ -77,7 +85,6 @@ const styles = StyleSheet.create({
   message: {
     fontFamily: 'InterRegular',
     fontSize: 14,
-    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: 24,
@@ -85,7 +92,6 @@ const styles = StyleSheet.create({
   button: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.primary,
     paddingVertical: 14,
     paddingHorizontal: 26,
     borderRadius: 28,
@@ -94,7 +100,6 @@ const styles = StyleSheet.create({
   buttonText: {
     fontFamily: 'InterBold',
     fontSize: 14,
-    color: colors.white,
     letterSpacing: 0.2,
   },
 });

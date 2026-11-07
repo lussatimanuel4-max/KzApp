@@ -15,8 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 
-import colors from '../theme/colors';
-import typography from '../theme/typography';
+import { useTheme } from '../context/ThemeContext';
 import BalanceCard from '../components/BalanceCard';
 import TransactionItem from '../components/TransactionItem';
 import EmptyState from '../components/EmptyState';
@@ -53,18 +52,8 @@ const WEEKDAYS = [
 
 // ─── MESES ───
 const MONTHS = [
-  'Jan',
-  'Fev',
-  'Mar',
-  'Abr',
-  'Mai',
-  'Jun',
-  'Jul',
-  'Ago',
-  'Set',
-  'Out',
-  'Nov',
-  'Dez',
+  'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+  'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
 ];
 
 function getTodayLabel() {
@@ -76,6 +65,7 @@ function getTodayLabel() {
 }
 
 export default function HomeScreen({ navigation }) {
+  const { colors, typography } = useTheme();
   const [profile, setProfile] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -109,7 +99,7 @@ export default function HomeScreen({ navigation }) {
     AVATAR_MAP[profile?.avatar] || AVATAR_MAP['avatar-1'];
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
@@ -127,14 +117,19 @@ export default function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('Perfil')}
             activeOpacity={0.85}
           >
-            <Image source={avatarSource} style={styles.headerAvatar} />
+            <Image
+              source={avatarSource}
+              style={[styles.headerAvatar, { borderColor: colors.card }]}
+            />
           </TouchableOpacity>
 
           <View style={styles.headerText}>
-            <Text style={styles.greeting}>
+            <Text style={[styles.greeting, { color: colors.textPrimary }]}>
               {greeting}, {firstName || 'Estudante'}
             </Text>
-            <Text style={styles.date}>{getTodayLabel()}</Text>
+            <Text style={[styles.date, { color: colors.textSecondary }]}>
+              {getTodayLabel()}
+            </Text>
           </View>
         </View>
 
@@ -167,8 +162,8 @@ export default function HomeScreen({ navigation }) {
 
         {/* ─── RESUMO ─── */}
         <View style={styles.summaryRow}>
-          <View style={styles.summaryCard}>
-            <View style={[styles.summaryIcon, { backgroundColor: '#E8F8F4' }]}>
+          <View style={[styles.summaryCard, { backgroundColor: colors.card }]}>
+            <View style={[styles.summaryIcon, { backgroundColor: colors.successSoft }]}>
               <Ionicons name="trending-up" size={18} color={colors.success} />
             </View>
             <Text style={typography.label}>Recebi</Text>
@@ -182,8 +177,8 @@ export default function HomeScreen({ navigation }) {
             </Text>
           </View>
 
-          <View style={styles.summaryCard}>
-            <View style={[styles.summaryIcon, { backgroundColor: '#FFF0F0' }]}>
+          <View style={[styles.summaryCard, { backgroundColor: colors.card }]}>
+            <View style={[styles.summaryIcon, { backgroundColor: colors.dangerSoft }]}>
               <Ionicons name="trending-down" size={18} color={colors.danger} />
             </View>
             <Text style={typography.label}>Gastei</Text>
@@ -246,7 +241,6 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   scroll: {
     paddingBottom: 32,
@@ -264,7 +258,6 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 24,
     borderWidth: 2,
-    borderColor: colors.white,
   },
   headerText: {
     flex: 1,
@@ -272,14 +265,12 @@ const styles = StyleSheet.create({
   greeting: {
     fontFamily: 'InterExtraBold',
     fontSize: 17,
-    color: colors.textPrimary,
     letterSpacing: -0.3,
     marginBottom: 2,
   },
   date: {
     fontFamily: 'InterMedium',
     fontSize: 12,
-    color: colors.textSecondary,
     letterSpacing: 0.1,
   },
   actions: {
@@ -305,7 +296,6 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     flex: 1,
-    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 16,
     shadowColor: '#000',

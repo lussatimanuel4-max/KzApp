@@ -3,7 +3,7 @@
 // Fonte: Inter (carregada no App.js)
 
 import { StyleSheet } from 'react-native';
-import colors from './colors';
+import { colors } from './colors';
 
 export const typography = StyleSheet.create({
   // ─────────────────────────────
