@@ -1,0 +1,349 @@
+/* ─────────────────────────────
+   VARIÁVEIS
+   ───────────────────────────── */
+:root {
+    --bg-color: #000000;
+    --card-bg: #1C1C1E;
+    --text-primary: #FFFFFF;
+    --text-secondary: #d3d3d6;
+    --primary-color: #A8C7FA;
+    --primary-text: #0B1B33;
+    --divider: #2C2C2E;
+    --font-family: 'Inter', sans-serif;
+}
+
+/* ─────────────────────────────
+   RESET
+   ───────────────────────────── */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    font-size: 14px;
+    line-height: 1.5;
+    padding-bottom: 40px; /* Já não há footer, por isso menos margem */
+}
+
+/* ─────────────────────────────
+   TOP BAR (Simplificada)
+   ───────────────────────────── */
+.top-bar {
+    position: sticky;
+    top: 0;
+    background-color: var(--bg-color);
+    z-index: 100;
+    padding: 16px;
+}
+
+.top-bar-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.top-bar-content .material-symbols-rounded {
+    color: var(--text-primary);
+    font-size: 24px;
+}
+
+.header-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ─────────────────────────────
+   CONTAINER
+   ───────────────────────────── */
+.container {
+    padding: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ─────────────────────────────
+   APP HEADER
+   ───────────────────────────── */
+.app-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.app-icon-container {
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+}
+
+.app-icon {
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+    object-fit: cover;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.app-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.app-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+}
+
+.app-developer {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.installed-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.installed-badge .material-symbols-rounded {
+    font-size: 16px;
+    color: var(--text-secondary);
+}
+
+/* Botão Atualizar */
+.install-btn {
+    background-color: var(--primary-color);
+    color: var(--primary-text);
+    border: none;
+    padding: 10px 24px;
+    border-radius: 24px;
+    font-family: var(--font-family);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* ─────────────────────────────
+   STATS BAR
+   ───────────────────────────── */
+.stats-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 0 16px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.stat-item:first-child {
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+}
+
+.stat-item .material-symbols-rounded {
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+.stat-value {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.stat-divider {
+    width: 1px;
+    height: 30px;
+    background-color: var(--divider);
+}
+
+.age-box {
+    border: 1.5px solid var(--text-secondary);
+    border-radius: 4px;
+    padding: 0 4px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+/* ─────────────────────────────
+   CARROSSEL DE SCREENSHOTS
+   ───────────────────────────── */
+.screenshots {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    margin: 0 -16px 24px -16px;
+    padding: 0 16px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+}
+
+.screenshots::-webkit-scrollbar {
+    display: none;
+}
+
+.screenshot-item {
+    flex-shrink: 0;
+    width: 160px;
+    height: 300px;
+    border-radius: 16px;
+    overflow: hidden;
+    scroll-snap-align: start;
+    border: 1px solid var(--divider);
+    cursor: pointer;
+}
+
+.screenshot-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ─────────────────────────────
+   VISUALIZADOR DE IMAGEM (MODAL)
+   ───────────────────────────── */
+.image-viewer {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.image-viewer.active {
+    display: flex;
+}
+
+.image-viewer img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.close-icon {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: white;
+    font-size: 32px;
+    cursor: pointer;
+}
+
+/* ─────────────────────────────
+   DESCRIÇÃO E NOVIDADES
+   ───────────────────────────── */
+.description {
+    margin-bottom: 32px;
+    color: var(--text-secondary);
+    font-size: 15px;
+}
+
+.whats-new {
+    margin-bottom: 32px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.section-header h2 {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.update-date {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.changelog {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: var(--text-secondary);
+}
+
+.changelog li {
+    position: relative;
+    padding-left: 20px;
+}
+
+.changelog li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--primary-color);
+    font-size: 20px;
+    top: -2px;
+}
+
+/* ─────────────────────────────
+   INFORMAÇÕES ADICIONAIS
+   ───────────────────────────── */
+.app-info {
+    margin-bottom: 32px;
+}
+
+.info-grid {
+    display: flex;
+    gap: 24px;
+    border-top: 1px solid var(--divider);
+    border-bottom: 1px solid var(--divider);
+    padding: 16px 0;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.info-label {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.info-value {
+    font-weight: 600;
+    font-size: 14px;
+}

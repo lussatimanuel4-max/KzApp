@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kwanza App - Play Store</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Fontes Inter (Google Fonts) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Ícones do Google (Material Symbols) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
+</head>
+<body>
+
+    <!-- ─── HEADER (Barra Superior Simplificada) ─── -->
+    <header class="top-bar">
+        <div class="top-bar-content">
+            <span class="material-symbols-rounded">arrow_back</span>
+            <span class="header-title">Detalhes do App</span>
+        </div>
+    </header>
+
+    <!-- ─── CONTEÚDO PRINCIPAL ─── -->
+    <main class="container">
+        
+        <!-- Info do App (Topo) -->
+        <section class="app-header">
+            <div class="app-icon-container">
+                <img src="icon.png" alt="Kwanza App" class="app-icon">
+            </div>
+            
+            <div class="app-details">
+                <h1 class="app-title">Kwanza App</h1>
+                <p class="app-developer">Gestão de Finanças</p>
+                <div class="installed-badge">
+                    <span class="material-symbols-rounded">verified</span>
+                    <span>Lussaty Dev</span>
+                </div>
+            </div>
+
+            <!-- Botão de Instalar/Atualizar -->
+            <button class="install-btn" id="downloadBtn" onclick="downloadApp()">
+                Atualizar
+            </button>
+        </section>
+
+        <!-- Barra de Estatísticas -->
+        <section class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-value">4,8</span>
+                <span class="material-symbols-rounded">star</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-value">300+</span>
+                <span class="stat-label">Downloads</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item age-rating">
+                <span class="age-box">3+</span>
+                <span class="stat-label">Classificação</span>
+            </div>
+        </section>
+
+        <!-- Carrossel de Imagens (5 Screenshots) -->
+        <section class="screenshots" id="screenshots-container">
+            <div class="screenshot-item" onclick="openImage(this)">
+                <img src="screenshot-1.png" alt="Home Screen">
+            </div>
+            <div class="screenshot-item" onclick="openImage(this)">
+                <img src="screenshot-2.png" alt="Histórico">
+            </div>
+            <div class="screenshot-item" onclick="openImage(this)">
+                <img src="screenshot-3.png" alt="Metas">
+            </div>
+            <div class="screenshot-item" onclick="openImage(this)">
+                <img src="screenshot-4.png" alt="Nova Transação">
+            </div>
+            <div class="screenshot-item" onclick="openImage(this)">
+                <img src="screenshot-5.png" alt="Perfil">
+            </div>
+        </section>
+
+        <!-- Descrição Curta -->
+        <section class="description">
+            <p>O teu gestor de finanças pessoais, 100% offline e focado em estudantes angolanos.</p>
+        </section>
+
+        <!-- Novidades -->
+        <section class="whats-new">
+            <div class="section-header">
+                <h2>Novidades</h2>
+                <span class="update-date">Última atualização: 07/11/2026</span>
+            </div>
+            <ul class="changelog">
+                <li>Modo Escuro (Dark Mode) nativo e fixo.</li>
+                <li>Novo filtro por mês no Histórico.</li>
+                <li>Popups de confirmação personalizados.</li>
+                <li>Melhorias de performance e correções de bugs.</li>
+            </ul>
+        </section>
+
+        <!-- Informações Adicionais -->
+        <section class="app-info">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Tamanho</span>
+                    <span class="info-value" id="apk-size">A calcular...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Versão</span>
+                    <span class="info-value">5.1.0</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Sistema</span>
+                    <span class="info-value">Android</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ─── VISUALIZADOR DE IMAGEM (TELA CHEIA) ─── -->
+    <div id="image-viewer" class="image-viewer" onclick="closeImage()">
+        <span class="material-symbols-rounded close-icon">close</span>
+        <img id="expanded-image" src="" alt="Screenshot">
+    </div>
+
+    <!-- Script -->
+    <script src="script.js"></script>
+</body>
+</html>
