@@ -26,7 +26,7 @@ function downloadApp() {
     btn.style.opacity = '0.7';
 
    
-    const apkUrl = 'https://github.com/lussatimanuel4-max/KzApp/releases/download/v5.1.0/Kwanza.App.apk';
+    const apkUrl = 'https://github.com/lussatimanuel4-max/KzApp/releases/download/v5.1.1/Kwanza.App.apk';
 
     
     window.open(apkUrl, '_blank');
