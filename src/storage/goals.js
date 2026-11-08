@@ -62,10 +62,17 @@ export async function addGoal(goal) {
 // ─────────────────────────────
 export async function addToGoal(goalId, amount) {
   try {
+    const numericAmount = Number(amount);
+
+    // Bloqueia valores negativos ou zero
+    if (!numericAmount || numericAmount <= 0) {
+      return null;
+    }
+
     const list = await getGoals();
     const updated = list.map((goal) => {
       if (goal.id === goalId) {
-        return { ...goal, saved: (goal.saved || 0) + Number(amount || 0) };
+        return { ...goal, saved: (goal.saved || 0) + numericAmount };
       }
       return goal;
     });

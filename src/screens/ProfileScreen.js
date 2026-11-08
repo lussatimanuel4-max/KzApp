@@ -18,9 +18,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { useTheme } from '../context/ThemeContext';
-import { getProfile, updateProfileName } from '../storage/profile';
+import { getProfile, updateProfileName, deleteProfile } from '../storage/profile'; // deleteProfile adicionado
 import { getTransactions, clearTransactions } from '../storage/transactions';
 import { clearGoals } from '../storage/goals';
+import { clearBudgets } from '../storage/budgets'; // clearBudgets adicionado
 import { resetAppState } from '../storage/appState';
 import { calculateBalance } from '../utils/calc';
 import { formatKz } from '../utils/format';
@@ -109,7 +110,7 @@ export default function ProfileScreen({ navigation, onLogout }) {
   function confirmReset() {
     showAlert(
       'Apagar tudo',
-      'Isto vai apagar o teu perfil, movimentos e objetivos. Não há como recuperar.',
+      'Isto vai apagar o teu perfil, movimentos, metas e orçamentos. Não há como recuperar.',
       true,
       [
         { text: 'Cancelar', style: 'cancel' },
@@ -119,6 +120,8 @@ export default function ProfileScreen({ navigation, onLogout }) {
           onPress: async () => {
             await clearTransactions();
             await clearGoals();
+            await clearBudgets();   // NOVO
+            await deleteProfile();  // NOVO
             await resetAppState();
             if (onLogout) onLogout();
           },

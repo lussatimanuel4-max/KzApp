@@ -1,7 +1,7 @@
 // src/screens/AddTransactionScreen.js
 // Ecrã para adicionar ou editar um movimento
 
-import React, { useState, useLayoutEffect } from 'react';
+import React, { useState, useLayoutEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -38,7 +38,9 @@ export default function AddTransactionScreen({ navigation, route }) {
   const [note, setNote] = useState(editTransaction?.note || '');
   const [loading, setLoading] = useState(false);
 
-  // ─── ESTADO DO CUSTOM ALERT ───
+  // Ref para bloquear gravação dupla
+  const savingRef = useRef(false);
+
   const [alertConfig, setAlertConfig] = useState({
     visible: false,
     title: '',
@@ -90,6 +92,9 @@ export default function AddTransactionScreen({ navigation, route }) {
   }
 
   async function handleSave() {
+    // Bloqueia o duplo toque imediatamente
+    if (savingRef.current) return;
+
     const numeric = Number(amount);
 
     if (!numeric || numeric <= 0) {
@@ -102,6 +107,8 @@ export default function AddTransactionScreen({ navigation, route }) {
       return;
     }
 
+    // Ativa o bloqueio e o loading
+    savingRef.current = true;
     setLoading(true);
 
     if (isEditing) {
@@ -112,9 +119,9 @@ export default function AddTransactionScreen({ navigation, route }) {
         note: note.trim(),
       });
 
-      setLoading(false);
-
       if (!result) {
+        setLoading(false);
+        savingRef.current = false; // Liberta em caso de erro
         showAlert('Erro', 'Não foi possível atualizar. Tenta novamente.', true);
         return;
       }
@@ -127,14 +134,15 @@ export default function AddTransactionScreen({ navigation, route }) {
         date: new Date().toISOString(),
       });
 
-      setLoading(false);
-
       if (!result) {
+        setLoading(false);
+        savingRef.current = false; // Liberta em caso de erro
         showAlert('Erro', 'Não foi possível guardar. Tenta novamente.', true);
         return;
       }
     }
 
+    // Sucesso: volta atrás (o componente vai desmontar)
     navigation.goBack();
   }
 
@@ -330,21 +338,10 @@ export default function AddTransactionScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-  },
-  flex: {
-    flex: 1,
-  },
-  scroll: {
-    padding: 20,
-    paddingBottom: 32,
-  },
-  typeRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 28,
-  },
+  safe: { flex: 1 },
+  flex: { flex: 1 },
+  scroll: { padding: 20, paddingBottom: 32 },
+  typeRow: { flexDirection: 'row', gap: 12, marginBottom: 28 },
   typeButton: {
     flex: 1,
     flexDirection: 'row',
@@ -359,15 +356,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     letterSpacing: 0.1,
   },
-  amountWrapper: {
-    alignItems: 'center',
-    marginBottom: 28,
-  },
-  amountRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-  },
+  amountWrapper: { alignItems: 'center', marginBottom: 28 },
+  amountRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
   amountCurrency: {
     fontFamily: 'InterBold',
     fontSize: 28,
@@ -380,9 +370,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: -1,
   },
-  block: {
-    marginBottom: 24,
-  },
+  block: { marginBottom: 24 },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -390,9 +378,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     height: 52,
   },
-  inputIcon: {
-    marginRight: 10,
-  },
+  inputIcon: { marginRight: 10 },
   input: {
     flex: 1,
     fontFamily: 'InterRegular',
@@ -425,9 +411,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 4,
   },
-  saveButtonDisabled: {
-    opacity: 0.6,
-  },
+  saveButtonDisabled: { opacity: 0.6 },
   saveText: {
     fontFamily: 'InterBold',
     fontSize: 16,

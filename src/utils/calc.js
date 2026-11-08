@@ -135,3 +135,30 @@ export function daysUntil(dateInput) {
 
   return diff;
 }
+
+// ─────────────────────────────
+// RESUMO DO ORÇAMENTO POR CATEGORIA (NOVO)
+// Usado no BudgetScreen para cruzar gastos e orçamentos
+// ─────────────────────────────
+export function calculateCategorySummary(transactions, budgets, categories) {
+  if (!Array.isArray(transactions)) return [];
+
+  return categories.map((cat) => {
+    const spent = transactions
+      .filter((tx) => tx.type === 'out' && tx.category === cat.id)
+      .reduce((sum, tx) => sum + (Number(tx.amount) || 0), 0);
+
+    const budgetData = budgets[cat.id];
+    const budgetAmount = budgetData ? Number(budgetData.amount) || 0 : 0;
+    
+    const percent = budgetAmount > 0 ? spent / budgetAmount : 0;
+
+    return {
+      id: cat.id,
+      label: cat.label,
+      spent,
+      budget: budgetAmount,
+      percent: percent > 1 ? 1 : percent, // Limita a 100%
+    };
+  });
+}

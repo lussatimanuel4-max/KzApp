@@ -2,18 +2,10 @@
 // Guarda e lê os orçamentos por categoria
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// Importamos a lista oficial de categorias (fonte única de verdade)
+import { CATEGORIES, getCategoryById } from '../utils/categories';
 
 const KEY_BUDGETS = '@kzapp:budgets';
-
-// Categorias oficiais do KzApp (com imagens)
-export const CATEGORIES = [
-  { id: 'lanche',     label: 'Lanche',            image: require('../../assets/categories/lanche.png') },
-  { id: 'transporte', label: 'Transporte',        image: require('../../assets/categories/transporte.png') },
-  { id: 'material',   label: 'Material escolar',  image: require('../../assets/categories/material.png') },
-  { id: 'fasciculos', label: 'Fascículos',        image: require('../../assets/categories/fasciculos.png') },
-  { id: 'propinas',   label: 'Propinas',          image: require('../../assets/categories/propinas.png') },
-  { id: 'internet',   label: 'Internet',          image: require('../../assets/categories/internet.png') },
-];
 
 // ─────────────────────────────
 // LER TODOS OS ORÇAMENTOS
@@ -91,7 +83,7 @@ export async function deleteBudget(categoryId) {
 }
 
 // ─────────────────────────────
-// APAGAR TODOS OS ORÇAMENTOS
+// APAGAR TODOS OS ORÇAMENTOS (NOVO - usado no "Apagar tudo")
 // ─────────────────────────────
 export async function clearBudgets() {
   try {
@@ -104,8 +96,6 @@ export async function clearBudgets() {
 }
 
 // ─────────────────────────────
-// OBTER CATEGORIA PELO ID
+// RE-EXPORTAR CATEGORIAS (para não quebrar o BudgetScreen antigo)
 // ─────────────────────────────
-export function getCategoryById(categoryId) {
-  return CATEGORIES.find((cat) => cat.id === categoryId) || null;
-}
+export { CATEGORIES, getCategoryById };
