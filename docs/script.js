@@ -13,7 +13,7 @@ function calculateApkSize() {
     if (!sizeElement) return;
     
 
-    sizeElement.textContent = '89.7 MB';
+    sizeElement.textContent = '89.3 MB';
 }
 
 // ─────────────────────────────
@@ -26,7 +26,7 @@ function downloadApp() {
     btn.style.opacity = '0.7';
 
    
-    const apkUrl = 'https://github.com/lussatimanuel4-max/KzApp/releases/download/v5.1.2/Kwanza.App.apk';
+    const apkUrl = 'https://github.com/lussatimanuel4-max/KzApp/releases/download/v5.1.3/Kwanza.App.apk';
 
     
     window.open(apkUrl, '_blank');

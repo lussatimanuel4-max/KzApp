@@ -1,6 +1,4 @@
 // src/screens/AnalyticsScreen.js
-// Ecrã de Análises (Gráficos)
-
 import React, { useState, useCallback } from 'react';
 import {
   View,
@@ -8,21 +6,26 @@ import {
   StyleSheet,
   ScrollView,
   Dimensions,
+  TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import { PieChart } from 'react-native-gifted-charts'; // Mantemos apenas o PieChart
+import { PieChart } from 'react-native-gifted-charts';
 
 import { useTheme } from '../context/ThemeContext';
 import { getTransactions } from '../storage/transactions';
 import { CATEGORIES } from '../utils/categories';
 import { formatKz, getMonthLabelShort } from '../utils/format';
+import { generateMonthlyReport } from '../utils/pdfGenerator';
 
 const { width } = Dimensions.get('window');
 
 export default function AnalyticsScreen() {
   const { colors, typography } = useTheme();
   const [transactions, setTransactions] = useState([]);
+  const [generating, setGenerating] = useState(false);
 
   async function loadData() {
     const list = await getTransactions();
@@ -39,14 +42,21 @@ export default function AnalyticsScreen() {
   const targetYear = now.getFullYear();
   const targetMonthIndex = now.getMonth();
 
-  // Filtrar transações do mês atual
   const monthTransactions = transactions.filter((tx) => {
     const date = new Date(tx.date || tx.createdAt);
     return date.getFullYear() === targetYear && date.getMonth() === targetMonthIndex;
   });
 
-  // ─── 1. RANKING DE GASTOS POR DIA ───
-  // Agrupar por dia
+  // Cálculos para o Relatório
+  const totalIn = monthTransactions
+    .filter((tx) => tx.type === 'in')
+    .reduce((sum, tx) => sum + tx.amount, 0);
+  const totalOut = monthTransactions
+    .filter((tx) => tx.type === 'out')
+    .reduce((sum, tx) => sum + tx.amount, 0);
+  const balance = totalIn - totalOut;
+
+  // Ranking diário (para o gráfico de cima)
   const dailyTotals = {};
   monthTransactions
     .filter((tx) => tx.type === 'out')
@@ -55,15 +65,14 @@ export default function AnalyticsScreen() {
       dailyTotals[day] = (dailyTotals[day] || 0) + tx.amount;
     });
 
-  // Transformar num array, ordenar do maior para o menor e pegar nos top 5
   const dailyRanking = Object.keys(dailyTotals)
     .map(day => ({ day: Number(day), amount: dailyTotals[day] }))
     .sort((a, b) => b.amount - a.amount)
-    .slice(0, 5); // Mostra apenas os 5 dias com mais gastos
+    .slice(0, 5);
 
   const maxDailyAmount = dailyRanking.length > 0 ? dailyRanking[0].amount : 1;
 
-  // ─── 2. GASTOS POR CATEGORIA ───
+  // Pizza (Top Categorias)
   const categoryTotals = monthTransactions
     .filter((tx) => tx.type === 'out')
     .reduce((acc, tx) => {
@@ -72,29 +81,57 @@ export default function AnalyticsScreen() {
       return acc;
     }, {});
 
-  const pieData = Object.keys(categoryTotals).map((catId) => {
+  const colorMap = {
+    lanche: '#FFB74D', transporte: '#64B5F6', material: '#BA68C8',
+    fasciculos: '#4DB6AC', propinas: '#9575CD', 'internet unitel': '#FF8A65',
+    almoco: '#E57373', roupa: '#4FC3F7', higiene: '#81C784',
+    saude: '#FFD54F', diversao: '#F06292', emprestimos: '#A1887F',
+  };
+
+  const topCategoriesData = Object.keys(categoryTotals).map((catId) => {
     const catData = CATEGORIES.find((c) => c.id === catId);
     return {
+      id: catId,
       value: categoryTotals[catId],
-      color: catId === 'lanche' ? '#FFB74D' : 
-             catId === 'transporte' ? '#64B5F6' : 
-             catId === 'material' ? '#BA68C8' : 
-             catId === 'fasciculos' ? '#4DB6AC' :
-             catId === 'propinas' ? '#9575CD' :
-             catId === 'internet unitel' ? '#FF8A65' : 
-             catId === 'almoco' ? '#E57373' : 
-             catId === 'roupa' ? '#4FC3F7' : 
-             catId === 'higiene' ? '#81C784' : 
-             catId === 'saude' ? '#FFD54F' : 
-             catId === 'diversao' ? '#F06292' : 
-             catId === 'emprestimos' ? '#A1887F' : 
-             '#A1A1A6',
-      text: catData ? catData.label : 'Outros',
-      fullLabel: catData ? catData.label : 'Outros',
+      color: colorMap[catId] || '#A1A1A6',
+      label: catData ? catData.label : 'Outros',
     };
   }).sort((a, b) => b.value - a.value);
 
+  const pieData = topCategoriesData.map((item) => ({
+    value: item.value,
+    color: item.color,
+    text: item.label,
+    fullLabel: item.label,
+  }));
+
   const totalGasto = pieData.reduce((sum, item) => sum + item.value, 0);
+
+  // ─── GERAR PDF ───
+  async function handleShareReport() {
+    if (monthTransactions.length === 0) {
+      Alert.alert('Sem dados', 'Ainda não tens transações este mês.');
+      return;
+    }
+
+    try {
+      setGenerating(true);
+      await generateMonthlyReport({
+        transactions,
+        year: targetYear,
+        monthIndex: targetMonthIndex,
+        totalIn,
+        totalOut,
+        balance,
+        topCategories: topCategoriesData,
+      });
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Erro', 'Não foi possível gerar o relatório.');
+    } finally {
+      setGenerating(false);
+    }
+  }
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
@@ -102,13 +139,28 @@ export default function AnalyticsScreen() {
         
         {/* ─── CABEÇALHO ─── */}
         <View style={styles.header}>
-          <Text style={typography.h2}>Análises</Text>
-          <Text style={[typography.label, { color: colors.textSecondary }]}>
-            {getMonthLabelShort(targetYear, targetMonthIndex)}
-          </Text>
+          <View>
+            <Text style={typography.h2}>Análises</Text>
+            <Text style={[typography.label, { color: colors.textSecondary, marginTop: 4 }]}>
+              {getMonthLabelShort(targetYear, targetMonthIndex)}
+            </Text>
+          </View>
+
+          {/* Botão de Partilhar */}
+          <TouchableOpacity
+            style={[styles.shareBtn, { backgroundColor: colors.card }]}
+            onPress={handleShareReport}
+            activeOpacity={0.7}
+            disabled={generating}
+          >
+            <Ionicons name="share-outline" size={20} color={colors.primary} />
+            <Text style={[styles.shareBtnText, { color: colors.primary }]}>
+              {generating ? 'A gerar...' : 'Relatório'}
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        {/* ─── CARD: RANKING DIÁRIO (NOVO FORMATO) ─── */}
+        {/* ─── CARD: RANKING DIÁRIO ─── */}
         <View style={[styles.chartCard, { backgroundColor: colors.card }]}>
           <Text style={[typography.subtitle, { color: colors.textPrimary, marginBottom: 24 }]}>
             Dias com mais gastos
@@ -124,25 +176,17 @@ export default function AnalyticsScreen() {
                 const percent = (item.amount / maxDailyAmount);
                 return (
                   <View key={index} style={styles.rankingRow}>
-                    {/* Dia */}
                     <Text style={[styles.rankingDay, { color: colors.textSecondary }]}>
                       Dia {item.day}
                     </Text>
-                    
-                    {/* Barra de Progresso */}
                     <View style={[styles.rankingBarTrack, { backgroundColor: colors.surface }]}>
                       <View 
                         style={[
                           styles.rankingBarFill, 
-                          { 
-                            width: `${percent * 100}%`,
-                            backgroundColor: colors.danger 
-                          }
+                          { width: `${percent * 100}%`, backgroundColor: colors.danger }
                         ]} 
                       />
                     </View>
-
-                    {/* Valor */}
                     <Text style={[styles.rankingAmount, { color: colors.textPrimary }]}>
                       {formatKz(item.amount)}
                     </Text>
@@ -168,19 +212,16 @@ export default function AnalyticsScreen() {
                   radius={80}
                   innerRadius={60}
                   innerCircleColor={colors.card}
-                  centerLabelComponent={() => {
-                    return (
-                      <View style={{justifyContent: 'center', alignItems: 'center'}}>
-                        <Text style={[typography.label, {color: colors.textSecondary}]}>Total</Text>
-                        <Text style={[typography.subtitle, {color: colors.textPrimary}]}>
-                          {formatKz(totalGasto)}
-                        </Text>
-                      </View>
-                    );
-                  }}
+                  centerLabelComponent={() => (
+                    <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                      <Text style={[typography.label, {color: colors.textSecondary}]}>Total</Text>
+                      <Text style={[typography.subtitle, {color: colors.textPrimary}]}>
+                        {formatKz(totalGasto)}
+                      </Text>
+                    </View>
+                  )}
                 />
               </View>
-
               <View style={styles.pieLegend}>
                 {pieData.map((item, index) => (
                   <View key={index} style={styles.pieLegendItem}>
@@ -209,19 +250,27 @@ export default function AnalyticsScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-  },
-  scroll: {
-    paddingBottom: 32,
-  },
+  safe: { flex: 1 },
+  scroll: { paddingBottom: 32 },
   header: {
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
+    alignItems: 'center',
+  },
+  shareBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  shareBtnText: {
+    fontFamily: 'InterBold',
+    fontSize: 13,
   },
   chartCard: {
     marginHorizontal: 20,
@@ -229,66 +278,17 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: 16,
   },
-  
-  // ─── ESTILOS DO RANKING ───
-  rankingContainer: {
-    gap: 16,
-  },
-  rankingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  rankingDay: {
-    fontFamily: 'InterMedium',
-    fontSize: 13,
-    width: 50, // Largura fixa para alinhar todas as barras
-  },
-  rankingBarTrack: {
-    flex: 1,
-    height: 8,
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  rankingBarFill: {
-    height: '100%',
-    borderRadius: 4,
-  },
-  rankingAmount: {
-    fontFamily: 'InterBold',
-    fontSize: 13,
-    width: 80, // Largura fixa para alinhar os valores
-    textAlign: 'right',
-  },
-
-  // ─── ESTILOS DO PIE CHART ───
-  pieContainer: {
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  pieChartWrapper: {
-    marginBottom: 24,
-  },
-  pieLegend: {
-    width: '100%',
-    gap: 12,
-  },
-  pieLegendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  legendDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  legendText: {
-    fontFamily: 'InterMedium',
-    fontSize: 13,
-  },
-  legendValue: {
-    fontFamily: 'InterBold',
-    fontSize: 13,
-  }
+  rankingContainer: { gap: 16 },
+  rankingRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  rankingDay: { fontFamily: 'InterMedium', fontSize: 13, width: 50 },
+  rankingBarTrack: { flex: 1, height: 8, borderRadius: 4, overflow: 'hidden' },
+  rankingBarFill: { height: '100%', borderRadius: 4 },
+  rankingAmount: { fontFamily: 'InterBold', fontSize: 13, width: 80, textAlign: 'right' },
+  pieContainer: { flexDirection: 'column', alignItems: 'center' },
+  pieChartWrapper: { marginBottom: 24 },
+  pieLegend: { width: '100%', gap: 12 },
+  pieLegendItem: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  legendDot: { width: 8, height: 8, borderRadius: 4 },
+  legendText: { fontFamily: 'InterMedium', fontSize: 13 },
+  legendValue: { fontFamily: 'InterBold', fontSize: 13 },
 });

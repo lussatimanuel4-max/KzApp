@@ -149,7 +149,7 @@ export default function AboutScreen() {
               Versão
             </Text>
             <Text style={[styles.infoValueDark, { color: colors.textPrimary }]}>
-              5.1.0
+              5.1.3
             </Text>
           </View>
 
