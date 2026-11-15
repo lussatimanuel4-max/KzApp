@@ -77,4 +77,10 @@ Thumbs.db
 # ─────────────────────────────
 .vercel
 .turbo
-
+# ─────────────────────────────
+# OUTRS
+# ─────────────────────────────
+credentials.json
+credentials/
+*.jks
+*.keystore
