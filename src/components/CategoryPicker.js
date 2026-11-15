@@ -10,19 +10,19 @@ export default function CategoryPicker({ selected, onSelect }) {
   const { colors } = useTheme();
 
   return (
-    <View style={styles.grid}>
+    <View style={styles.grelha}>
       {CATEGORIES.map((cat) => {
-        const isSelected = selected === cat.id;
+        const estaSelecionada = selected === cat.id;
 
         return (
           <TouchableOpacity
             key={cat.id}
             style={[
               styles.item,
-              { backgroundColor: colors.surface },
-              isSelected && {
-                backgroundColor: colors.accentSoft,
-                borderColor: colors.primary,
+              { backgroundColor: colors.superficie },
+              estaSelecionada && {
+                backgroundColor: colors.destaqueSuave,
+                borderColor: colors.primaria,
               },
             ]}
             onPress={() => onSelect(cat.id)}
@@ -30,22 +30,22 @@ export default function CategoryPicker({ selected, onSelect }) {
           >
             <View
               style={[
-                styles.iconBox,
-                { backgroundColor: colors.white }, // As imagens têm fundo branco, mantemos para contraste
+                styles.caixaIcone,
+                { backgroundColor: colors.branco },
               ]}
             >
               <Image
                 source={cat.image}
-                style={styles.image}
+                style={styles.imagem}
                 resizeMode="contain"
               />
             </View>
 
             <Text
               style={[
-                styles.label,
-                { color: colors.textSecondary },
-                isSelected && { color: colors.primary, fontWeight: '700' },
+                styles.rotulo,
+                { color: colors.textoSecundario },
+                estaSelecionada && { color: colors.primaria, fontWeight: '700' },
               ]}
               numberOfLines={2}
             >
@@ -59,7 +59,7 @@ export default function CategoryPicker({ selected, onSelect }) {
 }
 
 const styles = StyleSheet.create({
-  grid: {
+  grelha: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'transparent',
   },
-  iconBox: {
+  caixaIcone: {
     width: 64,
     height: 64,
     borderRadius: 14,
@@ -82,11 +82,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 8,
   },
-  image: {
+  imagem: {
     width: 48,
     height: 48,
   },
-  label: {
+  rotulo: {
     fontFamily: 'InterBold',
     fontSize: 11,
     textAlign: 'center',

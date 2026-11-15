@@ -17,15 +17,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../context/ThemeContext';
-import { saveProfile } from '../storage/profile';
-import { markProfileCreated } from '../storage/appState';
+import { guardarPerfil } from '../storage/profile';
+import { marcarPerfilCriado } from '../storage/appState';
 import { PROVINCES, SCHOOL_LEVELS, GENDERS } from '../storage/constants';
 import CustomAlert from '../components/CustomAlert';
 
-const TOTAL_STEPS = 4;
+const TOTAL_PASSOS = 4;
 
 // ─── AVATARES DISPONÍVEIS ───
-const AVATARS = [
+const AVATARES = [
   { id: 'avatar-1', image: require('../../assets/avatars/avatar-1.jpg') },
   { id: 'avatar-2', image: require('../../assets/avatars/avatar-2.jpg') },
   { id: 'avatar-3', image: require('../../assets/avatars/avatar-3.jpg') },
@@ -36,24 +36,24 @@ const AVATARS = [
 
 export default function CreateProfileScreen({ onComplete }) {
   const { colors } = useTheme();
-  const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [passo, setPasso] = useState(1);
+  const [carregando, setCarregando] = useState(false);
 
   // ─── DADOS DO PERFIL ───
-  const [name, setName] = useState('');
-  const [age, setAge] = useState('');
-  const [school, setSchool] = useState('');
-  const [schoolLevel, setSchoolLevel] = useState('');
-  const [province, setProvince] = useState('');
-  const [gender, setGender] = useState('');
-  const [selectedAvatar, setSelectedAvatar] = useState('');
+  const [nome, setNome] = useState('');
+  const [idade, setIdade] = useState('');
+  const [escola, setEscola] = useState('');
+  const [nivelEscolar, setNivelEscolar] = useState('');
+  const [provincia, setProvincia] = useState('');
+  const [genero, setGenero] = useState('');
+  const [avatarSelecionado, setAvatarSelecionado] = useState('');
 
   // ─── MODAIS ───
-  const [showSchoolLevels, setShowSchoolLevels] = useState(false);
-  const [showProvinces, setShowProvinces] = useState(false);
+  const [mostrarNiveis, setMostrarNiveis] = useState(false);
+  const [mostrarProvincias, setMostrarProvincias] = useState(false);
 
   // ─── ESTADO DO CUSTOM ALERT ───
-  const [alertConfig, setAlertConfig] = useState({
+  const [configAlerta, setConfigAlerta] = useState({
     visible: false,
     title: '',
     message: '',
@@ -61,9 +61,8 @@ export default function CreateProfileScreen({ onComplete }) {
     buttons: [],
   });
 
-  // Função auxiliar para mostrar alertas de validação
-  function showAlert(title, message, isDestructive = false) {
-    setAlertConfig({
+  function mostrarAlerta(title, message, isDestructive = false) {
+    setConfigAlerta({
       visible: true,
       title,
       message,
@@ -72,135 +71,135 @@ export default function CreateProfileScreen({ onComplete }) {
     });
   }
 
-  function closeAlert() {
-    setAlertConfig((prev) => ({ ...prev, visible: false }));
+  function fecharAlerta() {
+    setConfigAlerta((prev) => ({ ...prev, visible: false }));
   }
 
-  function vibrate() {
+  function vibrar() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   }
 
-  function goNext() {
-    vibrate();
+  function avancar() {
+    vibrar();
 
-    if (step === 1) {
-      if (name.trim().length < 2) {
-        showAlert('Nome inválido', 'Escreve o teu nome.');
+    if (passo === 1) {
+      if (nome.trim().length < 2) {
+        mostrarAlerta('Nome inválido', 'Escreve o teu nome.');
         return;
       }
-      if (!age || Number(age) < 10 || Number(age) > 80) {
-        showAlert('Idade inválida', 'Escreve uma idade entre 10 e 80.');
+      if (!idade || Number(idade) < 10 || Number(idade) > 80) {
+        mostrarAlerta('Idade inválida', 'Escreve uma idade entre 10 e 80.');
         return;
       }
-      setStep(2);
-    } else if (step === 2) {
-      if (school.trim().length < 2) {
-        showAlert('Escola inválida', 'Escreve o nome da tua escola.');
+      setPasso(2);
+    } else if (passo === 2) {
+      if (escola.trim().length < 2) {
+        mostrarAlerta('Escola inválida', 'Escreve o nome da tua escola.');
         return;
       }
-      if (!schoolLevel) {
-        showAlert('Classe em falta', 'Escolhe a tua classe ou ano.');
+      if (!nivelEscolar) {
+        mostrarAlerta('Classe em falta', 'Escolhe a tua classe ou ano.');
         return;
       }
-      setStep(3);
-    } else if (step === 3) {
-      if (!province) {
-        showAlert('Província em falta', 'Escolhe a tua província.');
+      setPasso(3);
+    } else if (passo === 3) {
+      if (!provincia) {
+        mostrarAlerta('Província em falta', 'Escolhe a tua província.');
         return;
       }
-      if (!gender) {
-        showAlert('Género em falta', 'Escolhe uma opção.');
+      if (!genero) {
+        mostrarAlerta('Género em falta', 'Escolhe uma opção.');
         return;
       }
-      setStep(4);
+      setPasso(4);
     }
   }
 
-  function goBack() {
-    if (step > 1) {
-      vibrate();
-      setStep(step - 1);
+  function retroceder() {
+    if (passo > 1) {
+      vibrar();
+      setPasso(passo - 1);
     }
   }
 
-  async function handleFinish() {
-    if (!selectedAvatar) {
-      showAlert('Avatar em falta', 'Escolhe um avatar para continuar.');
+  async function finalizar() {
+    if (!avatarSelecionado) {
+      mostrarAlerta('Avatar em falta', 'Escolhe um avatar para continuar.');
       return;
     }
 
-    vibrate();
-    setLoading(true);
+    vibrar();
+    setCarregando(true);
 
-    const saved = await saveProfile({
-      name: name.trim(),
-      age: age.trim(),
-      school: school.trim(),
-      schoolLevel,
-      province,
-      gender,
-      avatar: selectedAvatar,
+    const guardado = await guardarPerfil({
+      name: nome.trim(),
+      age: idade.trim(),
+      school: escola.trim(),
+      schoolLevel: nivelEscolar,
+      province: provincia,
+      gender: genero,
+      avatar: avatarSelecionado,
     });
 
-    if (!saved) {
-      setLoading(false);
-      showAlert('Erro', 'Não foi possível guardar. Tenta novamente.', true);
+    if (!guardado) {
+      setCarregando(false);
+      mostrarAlerta('Erro', 'Não foi possível guardar. Tenta novamente.', true);
       return;
     }
 
-    await markProfileCreated();
-    setLoading(false);
+    await marcarPerfilCriado();
+    setCarregando(false);
 
     if (onComplete) onComplete();
   }
 
   // ─── TELA 1 ───
-  function renderStep1() {
+  function renderizarPasso1() {
     return (
       <>
         <Image
           source={require('../../assets/signup/signup-1.png')}
-          style={styles.illustration}
+          style={styles.ilustracao}
           resizeMode="contain"
         />
 
-        <Text style={[styles.title, { color: colors.textPrimary }]}>Quem és?</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+        <Text style={[styles.titulo, { color: colors.textoPrimario }]}>Quem és?</Text>
+        <Text style={[styles.subtitulo, { color: colors.textoSecundario }]}>
           Diz-nos quem és para personalizar a tua experiência.
         </Text>
 
-        <View style={[styles.inputWrapper, { backgroundColor: colors.surface }]}>
+        <View style={[styles.containerInput, { backgroundColor: colors.superficie }]}>
           <Ionicons
             name="person-outline"
             size={20}
-            color={colors.textLight}
-            style={styles.inputIcon}
+            color={colors.textoClaro}
+            style={styles.iconeInput}
           />
           <TextInput
-            style={[styles.input, { color: colors.textPrimary }]}
+            style={[styles.input, { color: colors.textoPrimario }]}
             placeholder="Escreve o teu nome"
-            placeholderTextColor={colors.textLight}
-            value={name}
-            onChangeText={setName}
+            placeholderTextColor={colors.textoClaro}
+            value={nome}
+            onChangeText={setNome}
             autoCapitalize="words"
             maxLength={30}
           />
         </View>
 
-        <View style={[styles.inputWrapper, { backgroundColor: colors.surface }]}>
+        <View style={[styles.containerInput, { backgroundColor: colors.superficie }]}>
           <Ionicons
             name="calendar-outline"
             size={20}
-            color={colors.textLight}
-            style={styles.inputIcon}
+            color={colors.textoClaro}
+            style={styles.iconeInput}
           />
           <TextInput
-            style={[styles.input, { color: colors.textPrimary }]}
+            style={[styles.input, { color: colors.textoPrimario }]}
             placeholder="Quantos anos tens?"
-            placeholderTextColor={colors.textLight}
+            placeholderTextColor={colors.textoClaro}
             keyboardType="number-pad"
-            value={age}
-            onChangeText={(t) => setAge(t.replace(/[^0-9]/g, ''))}
+            value={idade}
+            onChangeText={(t) => setIdade(t.replace(/[^0-9]/g, ''))}
             maxLength={2}
           />
         </View>
@@ -209,134 +208,126 @@ export default function CreateProfileScreen({ onComplete }) {
   }
 
   // ─── TELA 2 ───
-  function renderStep2() {
+  function renderizarPasso2() {
     return (
       <>
         <Image
           source={require('../../assets/signup/signup-2.png')}
-          style={styles.illustration}
+          style={styles.ilustracao}
           resizeMode="contain"
         />
 
-        <Text style={[styles.title, { color: colors.textPrimary }]}>Onde estudas?</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+        <Text style={[styles.titulo, { color: colors.textoPrimario }]}>Onde estudas?</Text>
+        <Text style={[styles.subtitulo, { color: colors.textoSecundario }]}>
           Isto ajuda-nos a adaptar o app para ti.
         </Text>
 
-        <View style={[styles.inputWrapper, { backgroundColor: colors.surface }]}>
+        <View style={[styles.containerInput, { backgroundColor: colors.superficie }]}>
           <Ionicons
             name="school-outline"
             size={20}
-            color={colors.textLight}
-            style={styles.inputIcon}
+            color={colors.textoClaro}
+            style={styles.iconeInput}
           />
           <TextInput
-            style={[styles.input, { color: colors.textPrimary }]}
+            style={[styles.input, { color: colors.textoPrimario }]}
             placeholder="Escola ou universidade"
-            placeholderTextColor={colors.textLight}
-            value={school}
-            onChangeText={setSchool}
+            placeholderTextColor={colors.textoClaro}
+            value={escola}
+            onChangeText={setEscola}
             maxLength={50}
           />
         </View>
 
         <TouchableOpacity
-          style={[styles.inputWrapper, { backgroundColor: colors.surface }]}
+          style={[styles.containerInput, { backgroundColor: colors.superficie }]}
           onPress={() => {
-            vibrate();
-            setShowSchoolLevels(true);
+            vibrar();
+            setMostrarNiveis(true);
           }}
           activeOpacity={0.7}
         >
           <Ionicons
             name="book-outline"
             size={20}
-            color={colors.textLight}
-            style={styles.inputIcon}
+            color={colors.textoClaro}
+            style={styles.iconeInput}
           />
           <Text
             style={[
               styles.input,
-              { color: schoolLevel ? colors.textPrimary : colors.textLight },
+              { color: nivelEscolar ? colors.textoPrimario : colors.textoClaro },
             ]}
           >
-            {schoolLevel || 'Classe / Ano'}
+            {nivelEscolar || 'Classe / Ano'}
           </Text>
-          <Ionicons
-            name="chevron-down"
-            size={20}
-            color={colors.textLight}
-          />
+          <Ionicons name="chevron-down" size={20} color={colors.textoClaro} />
         </TouchableOpacity>
       </>
     );
   }
 
   // ─── TELA 3 ───
-  function renderStep3() {
+  function renderizarPasso3() {
     return (
       <>
         <Image
           source={require('../../assets/signup/signup-3.png')}
-          style={styles.illustration}
+          style={styles.ilustracao}
           resizeMode="contain"
         />
 
-        <Text style={[styles.title, { color: colors.textPrimary }]}>Onde vives?</Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+        <Text style={[styles.titulo, { color: colors.textoPrimario }]}>Onde vives?</Text>
+        <Text style={[styles.subtitulo, { color: colors.textoSecundario }]}>
           Estamos em Angola, mas queremos saber a tua província.
         </Text>
 
         <TouchableOpacity
-          style={[styles.inputWrapper, { backgroundColor: colors.surface }]}
+          style={[styles.containerInput, { backgroundColor: colors.superficie }]}
           onPress={() => {
-            vibrate();
-            setShowProvinces(true);
+            vibrar();
+            setMostrarProvincias(true);
           }}
           activeOpacity={0.7}
         >
           <Ionicons
             name="location-outline"
             size={20}
-            color={colors.textLight}
-            style={styles.inputIcon}
+            color={colors.textoClaro}
+            style={styles.iconeInput}
           />
           <Text
             style={[
               styles.input,
-              { color: province ? colors.textPrimary : colors.textLight },
+              { color: provincia ? colors.textoPrimario : colors.textoClaro },
             ]}
           >
-            {province || 'Província'}
+            {provincia || 'Província'}
           </Text>
-          <Ionicons
-            name="chevron-down"
-            size={20}
-            color={colors.textLight}
-          />
+          <Ionicons name="chevron-down" size={20} color={colors.textoClaro} />
         </TouchableOpacity>
 
-        <View style={styles.genderRow}>
+        <View style={styles.linhaGenero}>
           {GENDERS.map((g) => {
-            const active = gender === g.id;
+            const ativo = genero === g.id;
             return (
               <TouchableOpacity
                 key={g.id}
                 style={[
-                  styles.genderButton,
-                  { backgroundColor: colors.surface },
-                  active && { backgroundColor: colors.primary },
+                  styles.botaoGenero,
+                  { backgroundColor: colors.superficie },
+                  ativo && { backgroundColor: colors.primaria },
                 ]}
                 onPress={() => {
-                  vibrate();
-                  setGender(g.id);
+                  vibrar();
+                  setGenero(g.id);
                 }}
                 activeOpacity={0.85}
               >
                 <Text
                   style={[
-                    styles.genderText,
-                    { color: active ? colors.white : colors.textSecondary },
+                    styles.textoGenero,
+                    { color: ativo ? colors.branco : colors.textoSecundario },
                   ]}
                   numberOfLines={1}
                 >
@@ -351,56 +342,52 @@ export default function CreateProfileScreen({ onComplete }) {
   }
 
   // ─── TELA 4 ───
-  function renderStep4() {
+  function renderizarPasso4() {
     return (
       <>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>
+        <Text style={[styles.titulo, { color: colors.textoPrimario }]}>
           Escolhe o teu avatar
         </Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+        <Text style={[styles.subtitulo, { color: colors.textoSecundario }]}>
           Este avatar vai aparecer no teu perfil.
         </Text>
 
-        <View style={styles.avatarsGrid}>
-          {AVATARS.map((avatar) => {
-            const active = selectedAvatar === avatar.id;
+        <View style={styles.grelhaAvatares}>
+          {AVATARES.map((avatar) => {
+            const ativo = avatarSelecionado === avatar.id;
             return (
               <TouchableOpacity
                 key={avatar.id}
                 style={[
-                  styles.avatarWrapper,
-                  active && {
-                    borderColor: colors.primary,
-                    backgroundColor: colors.accentSoft,
+                  styles.containerAvatar,
+                  ativo && {
+                    borderColor: colors.primaria,
+                    backgroundColor: colors.destaqueSuave,
                   },
                 ]}
                 onPress={() => {
-                  vibrate();
-                  setSelectedAvatar(avatar.id);
+                  vibrar();
+                  setAvatarSelecionado(avatar.id);
                 }}
                 activeOpacity={0.85}
               >
                 <Image
                   source={avatar.image}
-                  style={styles.avatarImage}
+                  style={styles.imagemAvatar}
                   resizeMode="cover"
                 />
 
-                {active && (
+                {ativo && (
                   <View
                     style={[
-                      styles.avatarCheck,
+                      styles.checkAvatar,
                       {
-                        backgroundColor: colors.primary,
-                        borderColor: colors.white,
+                        backgroundColor: colors.primaria,
+                        borderColor: colors.branco,
                       },
                     ]}
                   >
-                    <Ionicons
-                      name="checkmark"
-                      size={16}
-                      color={colors.white}
-                    />
+                    <Ionicons name="checkmark" size={16} color={colors.branco} />
                   </View>
                 )}
               </TouchableOpacity>
@@ -412,36 +399,32 @@ export default function CreateProfileScreen({ onComplete }) {
   }
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
+    <SafeAreaView style={[styles.seguro, { backgroundColor: colors.fundo }]}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         {/* ─── HEADER ─── */}
-        <View style={styles.header}>
-          {step > 1 ? (
-            <TouchableOpacity onPress={goBack} style={styles.backButton}>
-              <Ionicons
-                name="arrow-back"
-                size={22}
-                color={colors.textPrimary}
-              />
+        <View style={styles.cabecalho}>
+          {passo > 1 ? (
+            <TouchableOpacity onPress={retroceder} style={styles.botaoVoltar}>
+              <Ionicons name="arrow-back" size={22} color={colors.textoPrimario} />
             </TouchableOpacity>
           ) : (
-            <View style={styles.backButton} />
+            <View style={styles.botaoVoltar} />
           )}
 
-          <Text style={[styles.stepText, { color: colors.textSecondary }]}>
-            {step} / {TOTAL_STEPS}
+          <Text style={[styles.textoPasso, { color: colors.textoSecundario }]}>
+            {passo} / {TOTAL_PASSOS}
           </Text>
         </View>
 
         {/* ─── BARRA DE PROGRESSO ─── */}
-        <View style={[styles.progressTrack, { backgroundColor: colors.divider }]}>
+        <View style={[styles.trilhoProgresso, { backgroundColor: colors.divisoria }]}>
           <View
             style={[
-              styles.progressFill,
-              { width: `${(step / TOTAL_STEPS) * 100}%`, backgroundColor: colors.primary },
+              styles.preenchimentoProgresso,
+              { width: `${(passo / TOTAL_PASSOS) * 100}%`, backgroundColor: colors.primaria },
             ]}
           />
         </View>
@@ -452,69 +435,61 @@ export default function CreateProfileScreen({ onComplete }) {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {step === 1 && renderStep1()}
-          {step === 2 && renderStep2()}
-          {step === 3 && renderStep3()}
-          {step === 4 && renderStep4()}
+          {passo === 1 && renderizarPasso1()}
+          {passo === 2 && renderizarPasso2()}
+          {passo === 3 && renderizarPasso3()}
+          {passo === 4 && renderizarPasso4()}
         </ScrollView>
 
         {/* ─── BOTÃO ─── */}
-        <View style={styles.footer}>
+        <View style={styles.rodape}>
           <TouchableOpacity
             style={[
-              styles.button,
-              loading && styles.buttonDisabled,
-              { backgroundColor: colors.primary, shadowColor: colors.primary },
+              styles.botao,
+              carregando && styles.botaoDesativado,
+              { backgroundColor: colors.primaria, shadowColor: colors.primaria },
             ]}
-            onPress={step === 4 ? handleFinish : goNext}
+            onPress={passo === 4 ? finalizar : avancar}
             activeOpacity={0.85}
-            disabled={loading}
+            disabled={carregando}
           >
-            <Text style={[styles.buttonText, { color: colors.white }]}>
-              {loading
-                ? 'A guardar...'
-                : step === 4
-                ? 'Começar'
-                : 'Próximo'}
+            <Text style={[styles.textoBotao, { color: colors.branco }]}>
+              {carregando ? 'A guardar...' : passo === 4 ? 'Começar' : 'Próximo'}
             </Text>
-            <Ionicons name="arrow-forward" size={20} color={colors.white} />
+            <Ionicons name="arrow-forward" size={20} color={colors.branco} />
           </TouchableOpacity>
         </View>
 
         {/* ─── MODAL: CLASSES ─── */}
-        {showSchoolLevels && (
-          <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}>
+        {mostrarNiveis && (
+          <View style={[styles.sobreposicaoModal, { backgroundColor: colors.sobreposicao }]}>
             <TouchableOpacity
-              style={styles.modalBackdrop}
-              onPress={() => setShowSchoolLevels(false)}
+              style={styles.fundoModal}
+              onPress={() => setMostrarNiveis(false)}
               activeOpacity={1}
             />
-            <View style={[styles.modalSheet, { backgroundColor: colors.sheetBg }]}>
-              <View style={[styles.modalHandle, { backgroundColor: colors.divider }]} />
-              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
+            <View style={[styles.folhaModal, { backgroundColor: colors.fundoModal }]}>
+              <View style={[styles.pegaModal, { backgroundColor: colors.divisoria }]} />
+              <Text style={[styles.tituloModal, { color: colors.textoPrimario }]}>
                 Classe / Ano
               </Text>
 
               <ScrollView style={{ maxHeight: 320 }}>
-                {SCHOOL_LEVELS.map((level) => (
+                {SCHOOL_LEVELS.map((nivel) => (
                   <TouchableOpacity
-                    key={level}
-                    style={styles.modalOption}
+                    key={nivel}
+                    style={styles.opcaoModal}
                     onPress={() => {
-                      vibrate();
-                      setSchoolLevel(level);
-                      setShowSchoolLevels(false);
+                      vibrar();
+                      setNivelEscolar(nivel);
+                      setMostrarNiveis(false);
                     }}
                   >
-                    <Text style={[styles.modalOptionText, { color: colors.textPrimary }]}>
-                      {level}
+                    <Text style={[styles.textoOpcaoModal, { color: colors.textoPrimario }]}>
+                      {nivel}
                     </Text>
-                    {schoolLevel === level && (
-                      <Ionicons
-                        name="checkmark"
-                        size={20}
-                        color={colors.primary}
-                      />
+                    {nivelEscolar === nivel && (
+                      <Ionicons name="checkmark" size={20} color={colors.primaria} />
                     )}
                   </TouchableOpacity>
                 ))}
@@ -524,16 +499,16 @@ export default function CreateProfileScreen({ onComplete }) {
         )}
 
         {/* ─── MODAL: PROVÍNCIAS ─── */}
-        {showProvinces && (
-          <View style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}>
+        {mostrarProvincias && (
+          <View style={[styles.sobreposicaoModal, { backgroundColor: colors.sobreposicao }]}>
             <TouchableOpacity
-              style={styles.modalBackdrop}
-              onPress={() => setShowProvinces(false)}
+              style={styles.fundoModal}
+              onPress={() => setMostrarProvincias(false)}
               activeOpacity={1}
             />
-            <View style={[styles.modalSheet, { backgroundColor: colors.sheetBg }]}>
-              <View style={[styles.modalHandle, { backgroundColor: colors.divider }]} />
-              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
+            <View style={[styles.folhaModal, { backgroundColor: colors.fundoModal }]}>
+              <View style={[styles.pegaModal, { backgroundColor: colors.divisoria }]} />
+              <Text style={[styles.tituloModal, { color: colors.textoPrimario }]}>
                 Província
               </Text>
 
@@ -541,22 +516,18 @@ export default function CreateProfileScreen({ onComplete }) {
                 {PROVINCES.map((p) => (
                   <TouchableOpacity
                     key={p}
-                    style={styles.modalOption}
+                    style={styles.opcaoModal}
                     onPress={() => {
-                      vibrate();
-                      setProvince(p);
-                      setShowProvinces(false);
+                      vibrar();
+                      setProvincia(p);
+                      setMostrarProvincias(false);
                     }}
                   >
-                    <Text style={[styles.modalOptionText, { color: colors.textPrimary }]}>
+                    <Text style={[styles.textoOpcaoModal, { color: colors.textoPrimario }]}>
                       {p}
                     </Text>
-                    {province === p && (
-                      <Ionicons
-                        name="checkmark"
-                        size={20}
-                        color={colors.primary}
-                      />
+                    {provincia === p && (
+                      <Ionicons name="checkmark" size={20} color={colors.primaria} />
                     )}
                   </TouchableOpacity>
                 ))}
@@ -567,18 +538,18 @@ export default function CreateProfileScreen({ onComplete }) {
 
         {/* ─── CUSTOM ALERT ─── */}
         <CustomAlert
-          visible={alertConfig.visible}
-          title={alertConfig.title}
-          message={alertConfig.message}
-          isDestructive={alertConfig.isDestructive}
-          buttons={alertConfig.buttons.map((btn) => ({
+          visible={configAlerta.visible}
+          title={configAlerta.title}
+          message={configAlerta.message}
+          isDestructive={configAlerta.isDestructive}
+          buttons={configAlerta.buttons.map((btn) => ({
             ...btn,
             onPress: () => {
-              closeAlert();
+              fecharAlerta();
               if (btn.onPress) btn.onPress();
             },
           }))}
-          onRequestClose={closeAlert}
+          onRequestClose={fecharAlerta}
         />
 
       </KeyboardAvoidingView>
@@ -587,13 +558,13 @@ export default function CreateProfileScreen({ onComplete }) {
 }
 
 const styles = StyleSheet.create({
-  safe: {
+  seguro: {
     flex: 1,
   },
   flex: {
     flex: 1,
   },
-  header: {
+  cabecalho: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -601,25 +572,25 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 12,
   },
-  backButton: {
+  botaoVoltar: {
     width: 42,
     height: 42,
     borderRadius: 21,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stepText: {
+  textoPasso: {
     fontFamily: 'InterBold',
     fontSize: 14,
   },
-  progressTrack: {
+  trilhoProgresso: {
     height: 4,
     marginHorizontal: 20,
     borderRadius: 2,
     overflow: 'hidden',
     marginBottom: 20,
   },
-  progressFill: {
+  preenchimentoProgresso: {
     height: '100%',
     borderRadius: 2,
   },
@@ -627,25 +598,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     paddingBottom: 20,
   },
-  illustration: {
+  ilustracao: {
     width: 220,
     height: 220,
     alignSelf: 'center',
     marginBottom: 20,
   },
-  title: {
+  titulo: {
     fontFamily: 'InterExtraBold',
     fontSize: 26,
     letterSpacing: -0.5,
     marginBottom: 8,
   },
-  subtitle: {
+  subtitulo: {
     fontFamily: 'InterRegular',
     fontSize: 15,
     lineHeight: 22,
     marginBottom: 24,
   },
-  inputWrapper: {
+  containerInput: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 26,
@@ -653,7 +624,7 @@ const styles = StyleSheet.create({
     height: 52,
     marginBottom: 14,
   },
-  inputIcon: {
+  iconeInput: {
     marginRight: 10,
   },
   input: {
@@ -661,12 +632,12 @@ const styles = StyleSheet.create({
     fontFamily: 'InterRegular',
     fontSize: 16,
   },
-  genderRow: {
+  linhaGenero: {
     flexDirection: 'row',
     gap: 8,
     marginBottom: 14,
   },
-  genderButton: {
+  botaoGenero: {
     flex: 1,
     height: 52,
     borderRadius: 26,
@@ -674,18 +645,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 8,
   },
-  genderText: {
+  textoGenero: {
     fontFamily: 'InterBold',
     fontSize: 13,
     textAlign: 'center',
   },
-  avatarsGrid: {
+  grelhaAvatares: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginTop: 8,
   },
-  avatarWrapper: {
+  containerAvatar: {
     width: '31%',
     aspectRatio: 1,
     borderRadius: 100,
@@ -695,12 +666,12 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
   },
-  avatarImage: {
+  imagemAvatar: {
     width: '100%',
     height: '100%',
     borderRadius: 100,
   },
-  avatarCheck: {
+  checkAvatar: {
     position: 'absolute',
     bottom: 4,
     right: 4,
@@ -711,12 +682,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 2,
   },
-  footer: {
+  rodape: {
     paddingHorizontal: 28,
     paddingBottom: 24,
     paddingTop: 12,
   },
-  button: {
+  botao: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -728,42 +699,42 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 4,
   },
-  buttonDisabled: {
+  botaoDesativado: {
     opacity: 0.6,
   },
-  buttonText: {
+  textoBotao: {
     fontFamily: 'InterBold',
     fontSize: 16,
     letterSpacing: 0.2,
   },
-  modalOverlay: {
+  sobreposicaoModal: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'flex-end',
   },
-  modalBackdrop: {
+  fundoModal: {
     ...StyleSheet.absoluteFillObject,
   },
-  modalSheet: {
+  folhaModal: {
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingHorizontal: 24,
     paddingTop: 12,
     paddingBottom: 24,
   },
-  modalHandle: {
+  pegaModal: {
     width: 40,
     height: 4,
     borderRadius: 2,
     alignSelf: 'center',
     marginBottom: 20,
   },
-  modalTitle: {
+  tituloModal: {
     fontFamily: 'InterExtraBold',
     fontSize: 20,
     letterSpacing: -0.3,
     marginBottom: 12,
   },
-  modalOption: {
+  opcaoModal: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -771,7 +742,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 14,
   },
-  modalOptionText: {
+  textoOpcaoModal: {
     fontFamily: 'InterMedium',
     fontSize: 15,
   },

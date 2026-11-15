@@ -23,19 +23,19 @@ import EmptyState from '../components/EmptyState';
 import CustomAlert from '../components/CustomAlert';
 
 import {
-  getTransactions,
-  deleteTransaction,
+  obterTransacoes,
+  apagarTransacao,
 } from '../storage/transactions';
-import { groupTransactionsByDay } from '../utils/calc';
+import { agruparTransacoesPorDia } from '../utils/calc';
 import { 
-  getDayLabel, 
-  formatKz, 
-  getAvailableMonths, 
-  getMonthLabelShort,
-  formatMonthYear,
+  obterEtiquetaDia, 
+  formatarKz, 
+  obterMesesDisponiveis, 
+  obterEtiquetaMesCurta,
+  formatarMesAno,
 } from '../utils/format';
 
-const FILTERS = [
+const FILTROS = [
   { id: 'all', label: 'Tudo' },
   { id: 'in', label: 'Recebi' },
   { id: 'out', label: 'Gastei' },
@@ -43,16 +43,16 @@ const FILTERS = [
 
 export default function HistoryScreen({ navigation }) {
   const { colors, typography } = useTheme();
-  const [transactions, setTransactions] = useState([]);
-  const [filter, setFilter] = useState('all');
-  const [refreshing, setRefreshing] = useState(false);
+  const [transacoes, setTransacoes] = useState([]);
+  const [filtro, setFiltro] = useState('all');
+  const [atualizando, setAtualizando] = useState(false);
 
   // Estado do filtro por mês
-  const [selectedMonth, setSelectedMonth] = useState(null); // null = Todos
-  const [monthModalVisible, setMonthModalVisible] = useState(false);
+  const [mesSelecionado, setMesSelecionado] = useState(null); // null = Todos
+  const [modalMesVisivel, setModalMesVisivel] = useState(false);
 
   // ─── ESTADO DO CUSTOM ALERT ───
-  const [alertConfig, setAlertConfig] = useState({
+  const [configAlerta, setConfigAlerta] = useState({
     visible: false,
     title: '',
     message: '',
@@ -60,8 +60,8 @@ export default function HistoryScreen({ navigation }) {
     buttons: [],
   });
 
-  function showAlert(title, message, isDestructive = false, buttons = null) {
-    setAlertConfig({
+  function mostrarAlerta(title, message, isDestructive = false, buttons = null) {
+    setConfigAlerta({
       visible: true,
       title,
       message,
@@ -70,40 +70,40 @@ export default function HistoryScreen({ navigation }) {
     });
   }
 
-  function closeAlert() {
-    setAlertConfig((prev) => ({ ...prev, visible: false }));
+  function fecharAlerta() {
+    setConfigAlerta((prev) => ({ ...prev, visible: false }));
   }
 
-  async function loadData() {
-    const list = await getTransactions();
-    setTransactions(list);
+  async function carregarDados() {
+    const lista = await obterTransacoes();
+    setTransacoes(lista);
   }
 
   useFocusEffect(
     useCallback(() => {
-      loadData();
+      carregarDados();
     }, [])
   );
 
-  async function onRefresh() {
-    setRefreshing(true);
-    await loadData();
-    setRefreshing(false);
+  async function aoAtualizar() {
+    setAtualizando(true);
+    await carregarDados();
+    setAtualizando(false);
   }
 
-  function handleFilterChange(newFilter) {
-    if (newFilter !== filter) {
+  function lidarComMudancaFiltro(novoFiltro) {
+    if (novoFiltro !== filtro) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      setFilter(newFilter);
+      setFiltro(novoFiltro);
     }
   }
 
-  function handlePress(transaction) {
-    navigation.navigate('AddTransaction', { edit: transaction });
+  function lidarComPressao(transacao) {
+    navigation.navigate('AddTransaction', { edit: transacao });
   }
 
-  function confirmDelete(id) {
-    showAlert(
+  function confirmarApagar(id) {
+    mostrarAlerta(
       'Apagar',
       'Tens a certeza que queres apagar?',
       true,
@@ -113,8 +113,8 @@ export default function HistoryScreen({ navigation }) {
           text: 'Apagar',
           style: 'destructive',
           onPress: async () => {
-            await deleteTransaction(id);
-            await loadData();
+            await apagarTransacao(id);
+            await carregarDados();
           },
         },
       ]
@@ -122,103 +122,103 @@ export default function HistoryScreen({ navigation }) {
   }
 
   // 1. Filtrar por tipo (Tudo / Recebi / Gastei)
-  const filteredByType =
-    filter === 'all'
-      ? transactions
-      : transactions.filter((tx) => tx.type === filter);
+  const filtradasPorTipo =
+    filtro === 'all'
+      ? transacoes
+      : transacoes.filter((tx) => tx.type === filtro);
 
   // 2. Filtrar por mês (se estiver selecionado)
-  const filtered = selectedMonth
-    ? filteredByType.filter((tx) => {
-        const date = new Date(tx.date || tx.createdAt);
+  const filtradas = mesSelecionado
+    ? filtradasPorTipo.filter((tx) => {
+        const data = new Date(tx.date || tx.createdAt);
         return (
-          date.getFullYear() === selectedMonth.year &&
-          date.getMonth() === selectedMonth.monthIndex
+          data.getFullYear() === mesSelecionado.year &&
+          data.getMonth() === mesSelecionado.monthIndex
         );
       })
-    : filteredByType;
+    : filtradasPorTipo;
 
   // 3. Agrupar por dia
-  const grouped = groupTransactionsByDay(filtered);
+  const agrupadas = agruparTransacoesPorDia(filtradas);
 
-  const sections = grouped.map((group) => {
-    const total = group.items.reduce((sum, tx) => {
-      const amount = Number(tx.amount) || 0;
-      return tx.type === 'in' ? sum + amount : sum - amount;
+  const secoes = agrupadas.map((grupo) => {
+    const total = grupo.items.reduce((soma, tx) => {
+      const valor = Number(tx.amount) || 0;
+      return tx.type === 'in' ? soma + valor : soma - valor;
     }, 0);
 
     return {
-      title: getDayLabel(group.date),
+      title: obterEtiquetaDia(grupo.date),
       total,
-      data: group.items,
+      data: grupo.items,
     };
   });
 
   // 4. Calcular meses disponíveis
-  const availableMonths = useMemo(() => getAvailableMonths(transactions), [transactions]);
+  const mesesDisponiveis = useMemo(() => obterMesesDisponiveis(transacoes), [transacoes]);
 
-  function openMonthModal() {
+  function abrirModalMes() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setMonthModalVisible(true);
+    setModalMesVisivel(true);
   }
 
-  function selectMonth(month) {
+  function selecionarMes(mes) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setSelectedMonth(month);
-    setMonthModalVisible(false);
+    setMesSelecionado(mes);
+    setModalMesVisivel(false);
   }
 
-  const monthLabel = selectedMonth
-    ? getMonthLabelShort(selectedMonth.year, selectedMonth.monthIndex)
+  const rotuloMes = mesSelecionado
+    ? obterEtiquetaMesCurta(mesSelecionado.year, mesSelecionado.monthIndex)
     : 'Este mês';
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
+    <SafeAreaView style={[styles.seguro, { backgroundColor: colors.fundo }]} edges={['top']}>
       {/* ─── CABEÇALHO ─── */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
+      <View style={styles.cabecalho}>
+        <View style={styles.cabecalhoEsquerda}>
           <Text style={typography.h2}>O que fiz</Text>
           
           {/* Botão do filtro de mês */}
           <TouchableOpacity
-            style={[styles.monthButton, { backgroundColor: colors.surface }]}
-            onPress={openMonthModal}
+            style={[styles.botaoMes, { backgroundColor: colors.superficie }]}
+            onPress={abrirModalMes}
             activeOpacity={0.7}
           >
-            <Text style={[styles.monthButtonText, { color: colors.textPrimary }]}>
-              {monthLabel}
+            <Text style={[styles.textoBotaoMes, { color: colors.textoPrimario }]}>
+              {rotuloMes}
             </Text>
-            <Ionicons name="chevron-down" size={14} color={colors.textSecondary} />
+            <Ionicons name="chevron-down" size={14} color={colors.textoSecundario} />
           </TouchableOpacity>
         </View>
 
         <TouchableOpacity
-          style={[styles.addButton, { backgroundColor: colors.primary }]}
+          style={[styles.botaoAdicionar, { backgroundColor: colors.primaria }]}
           onPress={() => navigation.navigate('AddTransaction', { type: 'out' })}
         >
-          <Ionicons name="add" size={24} color={colors.white} />
+          <Ionicons name="add" size={24} color={colors.branco} />
         </TouchableOpacity>
       </View>
 
       {/* ─── FILTROS (Tipo) ─── */}
-      <View style={styles.filters}>
-        {FILTERS.map((f) => {
-          const active = filter === f.id;
+      <View style={styles.filtros}>
+        {FILTROS.map((f) => {
+          const ativo = filtro === f.id;
           return (
             <TouchableOpacity
               key={f.id}
               style={[
-                styles.filter,
-                { backgroundColor: colors.surface },
-                active && { backgroundColor: colors.primary },
+                styles.filtro,
+                { backgroundColor: colors.superficie },
+                ativo && { backgroundColor: colors.primaria },
               ]}
-              onPress={() => handleFilterChange(f.id)}
+              onPress={() => lidarComMudancaFiltro(f.id)}
               activeOpacity={0.7}
             >
               <Text
                 style={[
-                  styles.filterText,
-                  { color: active ? colors.white : colors.textSecondary },
+                  styles.textoFiltro,
+                  { color: ativo ? colors.branco : colors.textoSecundario },
                 ]}
               >
                 {f.label}
@@ -229,58 +229,58 @@ export default function HistoryScreen({ navigation }) {
       </View>
 
       {/* ─── LISTA ─── */}
-      {sections.length === 0 ? (
+      {secoes.length === 0 ? (
         <EmptyState
           image={require('../../assets/illustrations/empty-history.png')}
           title="Ainda não fizeste nada"
           message={
-            filter === 'all'
+            filtro === 'all'
               ? 'Ainda não registaste nada. Bora começar.'
               : 'Não há nada deste tipo.'
           }
-          actionLabel={filter === 'all' ? 'Adicionar' : null}
+          actionLabel={filtro === 'all' ? 'Adicionar' : null}
           onAction={
-            filter === 'all'
+            filtro === 'all'
               ? () => navigation.navigate('AddTransaction', { type: 'out' })
               : null
           }
         />
       ) : (
         <SectionList
-          sections={sections}
+          sections={secoes}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={styles.conteudoLista}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={colors.primary}
+              refreshing={atualizando}
+              onRefresh={aoAtualizar}
+              tintColor={colors.primaria}
             />
           }
           renderSectionHeader={({ section }) => (
-            <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+            <View style={styles.cabecalhoSecao}>
+              <Text style={[styles.tituloSecao, { color: colors.textoSecundario }]}>
                 {section.title}
               </Text>
               <Text
                 style={[
-                  styles.sectionTotal,
+                  styles.totalSecao,
                   {
-                    color: section.total >= 0 ? colors.success : colors.danger,
+                    color: section.total >= 0 ? colors.sucesso : colors.perigo,
                   },
                 ]}
               >
                 {section.total >= 0 ? '+' : '-'}
-                {formatKz(Math.abs(section.total))}
+                {formatarKz(Math.abs(section.total))}
               </Text>
             </View>
           )}
           renderItem={({ item }) => (
             <TransactionItem
               transaction={item}
-              onPress={() => handlePress(item)}
-              onLongPress={() => confirmDelete(item.id)}
+              onPress={() => lidarComPressao(item)}
+              onLongPress={() => confirmarApagar(item.id)}
             />
           )}
         />
@@ -288,23 +288,23 @@ export default function HistoryScreen({ navigation }) {
 
       {/* ─── MODAL: FILTRO POR MÊS ─── */}
       <Modal
-        visible={monthModalVisible}
+        visible={modalMesVisivel}
         transparent
         animationType="slide"
-        onRequestClose={() => setMonthModalVisible(false)}
+        onRequestClose={() => setModalMesVisivel(false)}
       >
         <TouchableOpacity
-          style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}
-          onPress={() => setMonthModalVisible(false)}
+          style={[styles.sobreposicaoModal, { backgroundColor: colors.sobreposicao }]}
+          onPress={() => setModalMesVisivel(false)}
           activeOpacity={1}
         >
           <TouchableOpacity
-            style={[styles.modalSheet, { backgroundColor: colors.sheetBg }]}
+            style={[styles.folhaModal, { backgroundColor: colors.fundoModal }]}
             activeOpacity={1}
           >
-            <View style={[styles.modalHandle, { backgroundColor: colors.divider }]} />
+            <View style={[styles.pegaModal, { backgroundColor: colors.divisoria }]} />
 
-            <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
+            <Text style={[styles.tituloModal, { color: colors.textoPrimario }]}>
               Filtrar por mês
             </Text>
 
@@ -312,77 +312,77 @@ export default function HistoryScreen({ navigation }) {
               {/* Opção "Ver Todos" */}
               <TouchableOpacity
                 style={[
-                  styles.modalOption,
-                  !selectedMonth && { backgroundColor: colors.accentSoft },
+                  styles.opcaoModal,
+                  !mesSelecionado && { backgroundColor: colors.destaqueSuave },
                 ]}
-                onPress={() => selectMonth(null)}
+                onPress={() => selecionarMes(null)}
               >
-                <View style={styles.modalOptionLeft}>
+                <View style={styles.opcaoModalEsquerda}>
                   <Ionicons
                     name="calendar-outline"
                     size={20}
-                    color={!selectedMonth ? colors.primary : colors.textSecondary}
+                    color={!mesSelecionado ? colors.primaria : colors.textoSecundario}
                   />
                   <Text
                     style={[
-                      styles.modalOptionText,
+                      styles.textoOpcaoModal,
                       {
-                        color: !selectedMonth ? colors.primary : colors.textPrimary,
-                        fontFamily: !selectedMonth ? 'InterBold' : 'InterMedium',
+                        color: !mesSelecionado ? colors.primaria : colors.textoPrimario,
+                        fontFamily: !mesSelecionado ? 'InterBold' : 'InterMedium',
                       },
                     ]}
                   >
                     Ver Todos
                   </Text>
                 </View>
-                {!selectedMonth && (
-                  <Ionicons name="checkmark" size={20} color={colors.primary} />
+                {!mesSelecionado && (
+                  <Ionicons name="checkmark" size={20} color={colors.primaria} />
                 )}
               </TouchableOpacity>
 
               {/* Meses Disponíveis */}
-              {availableMonths.map((month) => {
-                const isActive =
-                  selectedMonth &&
-                  selectedMonth.year === month.year &&
-                  selectedMonth.monthIndex === month.monthIndex;
+              {mesesDisponiveis.map((mes) => {
+                const ativo =
+                  mesSelecionado &&
+                  mesSelecionado.year === mes.year &&
+                  mesSelecionado.monthIndex === mes.monthIndex;
 
                 return (
                   <TouchableOpacity
-                    key={`${month.year}-${month.monthIndex}`}
+                    key={`${mes.year}-${mes.monthIndex}`}
                     style={[
-                      styles.modalOption,
-                      isActive && { backgroundColor: colors.accentSoft },
+                      styles.opcaoModal,
+                      ativo && { backgroundColor: colors.destaqueSuave },
                     ]}
-                    onPress={() => selectMonth(month)}
+                    onPress={() => selecionarMes(mes)}
                   >
-                    <View style={styles.modalOptionLeft}>
+                    <View style={styles.opcaoModalEsquerda}>
                       <Ionicons
                         name="calendar-outline"
                         size={20}
-                        color={isActive ? colors.primary : colors.textSecondary}
+                        color={ativo ? colors.primaria : colors.textoSecundario}
                       />
                       <Text
                         style={[
-                          styles.modalOptionText,
+                          styles.textoOpcaoModal,
                           {
-                            color: isActive ? colors.primary : colors.textPrimary,
-                            fontFamily: isActive ? 'InterBold' : 'InterMedium',
+                            color: ativo ? colors.primaria : colors.textoPrimario,
+                            fontFamily: ativo ? 'InterBold' : 'InterMedium',
                           },
                         ]}
                       >
-                        {formatMonthYear(month.year, month.monthIndex)}
+                        {formatarMesAno(mes.year, mes.monthIndex)}
                       </Text>
                     </View>
-                    {isActive && (
-                      <Ionicons name="checkmark" size={20} color={colors.primary} />
+                    {ativo && (
+                      <Ionicons name="checkmark" size={20} color={colors.primaria} />
                     )}
                   </TouchableOpacity>
                 );
               })}
 
-              {availableMonths.length === 0 && (
-                <Text style={[styles.emptyMonthsText, { color: colors.textSecondary }]}>
+              {mesesDisponiveis.length === 0 && (
+                <Text style={[styles.textoMesesVazios, { color: colors.textoSecundario }]}>
                   Ainda não tens movimentos registados.
                 </Text>
               )}
@@ -393,18 +393,18 @@ export default function HistoryScreen({ navigation }) {
 
       {/* ─── CUSTOM ALERT ─── */}
       <CustomAlert
-        visible={alertConfig.visible}
-        title={alertConfig.title}
-        message={alertConfig.message}
-        isDestructive={alertConfig.isDestructive}
-        buttons={alertConfig.buttons.map((btn) => ({
+        visible={configAlerta.visible}
+        title={configAlerta.title}
+        message={configAlerta.message}
+        isDestructive={configAlerta.isDestructive}
+        buttons={configAlerta.buttons.map((btn) => ({
           ...btn,
           onPress: () => {
-            closeAlert();
+            fecharAlerta();
             if (btn.onPress) btn.onPress();
           },
         }))}
-        onRequestClose={closeAlert}
+        onRequestClose={fecharAlerta}
       />
 
     </SafeAreaView>
@@ -412,10 +412,10 @@ export default function HistoryScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safe: {
+  seguro: {
     flex: 1,
   },
-  header: {
+  cabecalho: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -423,12 +423,12 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 12,
   },
-  headerLeft: {
+  cabecalhoEsquerda: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
-  monthButton: {
+  botaoMes: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -436,76 +436,76 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 16,
   },
-  monthButtonText: {
+  textoBotaoMes: {
     fontFamily: 'InterBold',
     fontSize: 12,
   },
-  addButton: {
+  botaoAdicionar: {
     width: 42,
     height: 42,
     borderRadius: 21,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  filters: {
+  filtros: {
     flexDirection: 'row',
     gap: 8,
     paddingHorizontal: 20,
     marginBottom: 12,
   },
-  filter: {
+  filtro: {
     paddingVertical: 12,
     paddingHorizontal: 22,
     borderRadius: 24,
   },
-  filterText: {
+  textoFiltro: {
     fontFamily: 'InterBold',
     fontSize: 14,
   },
-  listContent: {
+  conteudoLista: {
     paddingHorizontal: 20,
     paddingBottom: 120,
   },
-  sectionHeader: {
+  cabecalhoSecao: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 16,
     marginBottom: 10,
   },
-  sectionTitle: {
+  tituloSecao: {
     fontFamily: 'InterBold',
     fontSize: 14,
   },
-  sectionTotal: {
+  totalSecao: {
     fontFamily: 'InterBold',
     fontSize: 13,
   },
-  modalOverlay: {
+  sobreposicaoModal: {
     flex: 1,
     justifyContent: 'flex-end',
   },
-  modalSheet: {
+  folhaModal: {
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingHorizontal: 24,
     paddingTop: 12,
     paddingBottom: 32,
   },
-  modalHandle: {
+  pegaModal: {
     width: 40,
     height: 4,
     borderRadius: 2,
     alignSelf: 'center',
     marginBottom: 20,
   },
-  modalTitle: {
+  tituloModal: {
     fontFamily: 'InterExtraBold',
     fontSize: 20,
     letterSpacing: -0.3,
     marginBottom: 16,
   },
-  modalOption: {
+  opcaoModal: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -514,15 +514,15 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 6,
   },
-  modalOptionLeft: {
+  opcaoModalEsquerda: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
   },
-  modalOptionText: {
+  textoOpcaoModal: {
     fontSize: 15,
   },
-  emptyMonthsText: {
+  textoMesesVazios: {
     fontFamily: 'InterRegular',
     fontSize: 14,
     textAlign: 'center',

@@ -3,11 +3,11 @@
 
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import * as FileSystem from 'expo-file-system/legacy'; // API Legacy 
-import { formatKz, formatDate, formatMonthYear } from './format';
+import * as FileSystem from 'expo-file-system/legacy';
+import { formatarKz, formatarData, formatarMesAno } from './format';
 import { CATEGORIES } from './categories';
 
-export async function generateMonthlyReport({
+export async function gerarRelatorioMensal({
   transactions,
   year,
   monthIndex,
@@ -17,44 +17,44 @@ export async function generateMonthlyReport({
   topCategories,
 }) {
   // Filtrar transações do mês
-  const monthTransactions = transactions.filter((tx) => {
-    const date = new Date(tx.date || tx.createdAt);
-    return date.getFullYear() === year && date.getMonth() === monthIndex;
+  const transacoesDoMes = transactions.filter((tx) => {
+    const data = new Date(tx.date || tx.createdAt);
+    return data.getFullYear() === year && data.getMonth() === monthIndex;
   });
 
-  monthTransactions.sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
+  transacoesDoMes.sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
 
   // HTML das categorias
-  const categoriesHtml = topCategories
+  const htmlCategorias = topCategories
     .map(
       (cat) => `
     <div class="category-row">
       <div class="category-dot" style="background-color: ${cat.color};"></div>
       <span class="category-name">${cat.label}</span>
-      <span class="category-value">${formatKz(cat.value)}</span>
+      <span class="category-value">${formatarKz(cat.value)}</span>
     </div>
   `
     )
     .join('');
 
   // HTML das transações
-  const transactionsHtml = monthTransactions
+  const htmlTransacoes = transacoesDoMes
     .map((tx) => {
-      const isIn = tx.type === 'in';
-      const catData = CATEGORIES.find((c) => c.id === tx.category);
-      const label = tx.note || (isIn ? 'Recebi' : catData ? catData.label : 'Gastei');
-      const dateStr = formatDate(tx.date || tx.createdAt);
-      const sign = isIn ? '+' : '-';
-      const color = isIn ? '#00D2A0' : '#FF8A8A';
+      const eEntrada = tx.type === 'in';
+      const dadosCat = CATEGORIES.find((c) => c.id === tx.category);
+      const rotulo = tx.note || (eEntrada ? 'Recebi' : dadosCat ? dadosCat.label : 'Gastei');
+      const dataStr = formatarData(tx.date || tx.createdAt);
+      const sinal = eEntrada ? '+' : '-';
+      const cor = eEntrada ? '#00D2A0' : '#FF8A8A';
 
       return `
       <div class="transaction-row">
         <div class="transaction-left">
-          <span class="transaction-label">${label}</span>
-          <span class="transaction-date">${dateStr}</span>
+          <span class="transaction-label">${rotulo}</span>
+          <span class="transaction-date">${dataStr}</span>
         </div>
-        <span class="transaction-value" style="color: ${color};">
-          ${sign} ${formatKz(tx.amount)}
+        <span class="transaction-value" style="color: ${cor};">
+          ${sinal} ${formatarKz(tx.amount)}
         </span>
       </div>
     `;
@@ -99,26 +99,26 @@ export async function generateMonthlyReport({
     <body>
       <div class="header">
         <h1>Kwanza App</h1>
-        <p>Relatório de ${formatMonthYear(year, monthIndex)}</p>
+        <p>Relatório de ${formatarMesAno(year, monthIndex)}</p>
         <div class="balance-label">SALDO FINAL</div>
-        <div class="balance">${formatKz(balance)}</div>
+        <div class="balance">${formatarKz(balance)}</div>
       </div>
       <div class="summary">
         <div class="summary-card">
           <div class="label">Recebi</div>
-          <div class="value in">${formatKz(totalIn)}</div>
+          <div class="value in">${formatarKz(totalIn)}</div>
         </div>
         <div class="summary-card">
           <div class="label">Gastei</div>
-          <div class="value out">${formatKz(totalOut)}</div>
+          <div class="value out">${formatarKz(totalOut)}</div>
         </div>
       </div>
       <h2 class="section-title">Top Categorias</h2>
-      ${categoriesHtml || '<p style="color: #A1A1A6;">Sem gastos por categoria.</p>'}
+      ${htmlCategorias || '<p style="color: #A1A1A6;">Sem gastos por categoria.</p>'}
       <h2 class="section-title">Todas as Transações</h2>
-      ${transactionsHtml || '<p style="color: #A1A1A6;">Sem transações neste mês.</p>'}
+      ${htmlTransacoes || '<p style="color: #A1A1A6;">Sem transações neste mês.</p>'}
       <div class="footer">
-        Gerado pelo Kwanza App • ${formatDate(new Date())}
+        Gerado pelo Kwanza App • ${formatarData(new Date())}
       </div>
     </body>
     </html>
@@ -135,24 +135,24 @@ export async function generateMonthlyReport({
     });
 
     // 2. Criar o nome bonito para o ficheiro
-    const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-    const monthStr = monthNames[monthIndex];
-    const fileName = `KwanzaApp_Relatorio_${monthStr}_${year}.pdf`;
+    const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const mesStr = nomesMeses[monthIndex];
+    const nomeFicheiro = `KwanzaApp_Relatorio_${mesStr}_${year}.pdf`;
     
     // 3. Copiar para o novo caminho com o nome bonito (API Legacy)
-    const newUri = `${FileSystem.cacheDirectory}${fileName}`;
-    await FileSystem.copyAsync({ from: uri, to: newUri });
+    const novoUri = `${FileSystem.cacheDirectory}${nomeFicheiro}`;
+    await FileSystem.copyAsync({ from: uri, to: novoUri });
 
     // 4. Abrir a folha de partilha
     if (await Sharing.isAvailableAsync()) {
-      await Sharing.shareAsync(newUri, {
+      await Sharing.shareAsync(novoUri, {
         mimeType: 'application/pdf',
         dialogTitle: 'Partilhar Relatório',
         UTI: 'com.adobe.pdf',
       });
     }
 
-    return newUri;
+    return novoUri;
   } catch (error) {
     console.error('Erro ao gerar PDF:', error);
     return null;

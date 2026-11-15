@@ -3,16 +3,16 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const KEY_PROFILE_CREATED = '@kzapp:profileCreated';
-const KEY_ONBOARDING_SEEN = '@kzapp:onboardingSeen';
+const CHAVE_PERFIL_CRIADO = '@kzapp:profileCreated';
+const CHAVE_ONBOARDING_VISTO = '@kzapp:onboardingSeen';
 
 // ─────────────────────────────
 // VERIFICAR SE O PERFIL JÁ FOI CRIADO
 // ─────────────────────────────
-export async function isProfileCreated() {
+export async function perfilFoiCriado() {
   try {
-    const value = await AsyncStorage.getItem(KEY_PROFILE_CREATED);
-    return value === 'true';
+    const valor = await AsyncStorage.getItem(CHAVE_PERFIL_CRIADO);
+    return valor === 'true';
   } catch (error) {
     console.log('Erro ao verificar perfil:', error);
     return false;
@@ -22,9 +22,9 @@ export async function isProfileCreated() {
 // ─────────────────────────────
 // MARCAR PERFIL COMO CRIADO
 // ─────────────────────────────
-export async function markProfileCreated() {
+export async function marcarPerfilCriado() {
   try {
-    await AsyncStorage.setItem(KEY_PROFILE_CREATED, 'true');
+    await AsyncStorage.setItem(CHAVE_PERFIL_CRIADO, 'true');
     return true;
   } catch (error) {
     console.log('Erro ao marcar perfil:', error);
@@ -35,10 +35,10 @@ export async function markProfileCreated() {
 // ─────────────────────────────
 // VERIFICAR SE O ONBOARDING JÁ FOI VISTO
 // ─────────────────────────────
-export async function hasSeenOnboarding() {
+export async function onboardingFoiVisto() {
   try {
-    const value = await AsyncStorage.getItem(KEY_ONBOARDING_SEEN);
-    return value === 'true';
+    const valor = await AsyncStorage.getItem(CHAVE_ONBOARDING_VISTO);
+    return valor === 'true';
   } catch (error) {
     console.log('Erro ao verificar onboarding:', error);
     return false;
@@ -48,9 +48,9 @@ export async function hasSeenOnboarding() {
 // ─────────────────────────────
 // MARCAR ONBOARDING COMO VISTO
 // ─────────────────────────────
-export async function markOnboardingSeen() {
+export async function marcarOnboardingVisto() {
   try {
-    await AsyncStorage.setItem(KEY_ONBOARDING_SEEN, 'true');
+    await AsyncStorage.setItem(CHAVE_ONBOARDING_VISTO, 'true');
     return true;
   } catch (error) {
     console.log('Erro ao marcar onboarding:', error);
@@ -61,13 +61,13 @@ export async function markOnboardingSeen() {
 // ─────────────────────────────
 // RESET (apagar tudo — usado no "Apagar dados")
 // ─────────────────────────────
-export async function resetAppState() {
+export async function redefinirEstadoApp() {
   try {
-    await AsyncStorage.removeItem(KEY_PROFILE_CREATED);
-    await AsyncStorage.removeItem(KEY_ONBOARDING_SEEN);
+    await AsyncStorage.removeItem(CHAVE_PERFIL_CRIADO);
+    await AsyncStorage.removeItem(CHAVE_ONBOARDING_VISTO);
     return true;
   } catch (error) {
-    console.log('Erro ao resetar appState:', error);
+    console.log('Erro ao redefinir estado do app:', error);
     return false;
   }
 }

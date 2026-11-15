@@ -19,29 +19,32 @@ import { useTheme } from '../context/ThemeContext';
 import CategoryPicker from '../components/CategoryPicker';
 import CustomAlert from '../components/CustomAlert';
 import {
-  addTransaction,
-  updateTransaction,
-  deleteTransaction,
+  adicionarTransacao,
+  atualizarTransacao,
+  apagarTransacao,
+  obterTransacoes,
 } from '../storage/transactions';
+import { calcularSaldo } from '../utils/calc';
+import { formatarKz } from '../utils/format';
 
 export default function AddTransactionScreen({ navigation, route }) {
   const { colors, typography } = useTheme();
-  const editTransaction = route?.params?.edit || null;
-  const initialType = editTransaction?.type || route?.params?.type || 'out';
-  const isEditing = !!editTransaction;
+  const transacaoEdicao = route?.params?.edit || null;
+  const tipoInicial = transacaoEdicao?.type || route?.params?.type || 'out';
+  const eEdicao = !!transacaoEdicao;
 
-  const [type, setType] = useState(initialType);
-  const [amount, setAmount] = useState(
-    editTransaction?.amount ? String(editTransaction.amount) : ''
+  const [tipo, setTipo] = useState(tipoInicial);
+  const [valor, setValor] = useState(
+    transacaoEdicao?.amount ? String(transacaoEdicao.amount) : ''
   );
-  const [category, setCategory] = useState(editTransaction?.category || null);
-  const [note, setNote] = useState(editTransaction?.note || '');
-  const [loading, setLoading] = useState(false);
+  const [categoria, setCategoria] = useState(transacaoEdicao?.category || null);
+  const [nota, setNota] = useState(transacaoEdicao?.note || '');
+  const [carregando, setCarregando] = useState(false);
 
   // Ref para bloquear gravação dupla
-  const savingRef = useRef(false);
+  const salvandoRef = useRef(false);
 
-  const [alertConfig, setAlertConfig] = useState({
+  const [configAlerta, setConfigAlerta] = useState({
     visible: false,
     title: '',
     message: '',
@@ -49,8 +52,8 @@ export default function AddTransactionScreen({ navigation, route }) {
     buttons: [],
   });
 
-  function showAlert(title, message, isDestructive = false, buttons = null) {
-    setAlertConfig({
+  function mostrarAlerta(title, message, isDestructive = false, buttons = null) {
+    setConfigAlerta({
       visible: true,
       title,
       message,
@@ -59,95 +62,107 @@ export default function AddTransactionScreen({ navigation, route }) {
     });
   }
 
-  function closeAlert() {
-    setAlertConfig((prev) => ({ ...prev, visible: false }));
+  function fecharAlerta() {
+    setConfigAlerta((prev) => ({ ...prev, visible: false }));
   }
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: isEditing ? 'Editar' : type === 'in' ? 'Recebi' : 'Gastei',
-      headerStyle: { backgroundColor: colors.background },
-      headerTintColor: colors.textPrimary,
+      title: eEdicao ? 'Editar' : tipo === 'in' ? 'Recebi' : 'Gastei',
+      headerStyle: { backgroundColor: colors.fundo },
+      headerTintColor: colors.textoPrimario,
       headerTitleStyle: { fontFamily: 'InterBold', fontWeight: 'normal' },
     });
-  }, [navigation, type, isEditing, colors]);
+  }, [navigation, tipo, eEdicao, colors]);
 
-  function handleTypeChange(newType) {
-    setType(newType);
-    if (newType === 'in') {
-      setCategory(null);
+  function lidarComMudancaTipo(novoTipo) {
+    setTipo(novoTipo);
+    if (novoTipo === 'in') {
+      setCategoria(null);
     }
   }
 
-  function formatAmountInput(text) {
-    const cleaned = text.replace(/[^0-9]/g, '');
-    setAmount(cleaned);
+  function formatarEntradaValor(texto) {
+    const limpo = texto.replace(/[^0-9]/g, '');
+    setValor(limpo);
   }
 
-  function displayAmount() {
-    if (!amount) return '';
-    return Number(amount)
+  function exibirValor() {
+    if (!valor) return '';
+    return Number(valor)
       .toFixed(0)
       .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   }
 
-  async function handleSave() {
-    // Bloqueia o duplo toque imediatamente
-    if (savingRef.current) return;
+  async function lidarComGuardar() {
+    if (salvandoRef.current) return;
 
-    const numeric = Number(amount);
+    const numerico = Number(valor);
 
-    if (!numeric || numeric <= 0) {
-      showAlert('Valor inválido', 'Escreve um valor maior que zero.');
+    if (!numerico || numerico <= 0) {
+      mostrarAlerta('Valor inválido', 'Escreve um valor maior que zero.');
       return;
     }
 
-    if (type === 'out' && !category) {
-      showAlert('Categoria obrigatória', 'Escolhe uma categoria.');
+    if (tipo === 'out' && !categoria) {
+      mostrarAlerta('Categoria obrigatória', 'Escolhe uma categoria.');
       return;
     }
 
-    // Ativa o bloqueio e o loading
-    savingRef.current = true;
-    setLoading(true);
+    // ─── VALIDAÇÃO DE SALDO INSUFICIENTE ───
+    if (tipo === 'out' && !eEdicao) {
+      const todasTransacoes = await obterTransacoes();
+      const saldoAtual = calcularSaldo(todasTransacoes);
 
-    if (isEditing) {
-      const result = await updateTransaction(editTransaction.id, {
-        type,
-        amount: numeric,
-        category: type === 'out' ? category : null,
-        note: note.trim(),
+      if (numerico > saldoAtual) {
+        mostrarAlerta(
+          'Saldo insuficiente',
+          `Não podes gastar mais do que tens. O teu saldo atual é de ${formatarKz(saldoAtual)}.`,
+          true
+        );
+        return;
+      }
+    }
+
+    salvandoRef.current = true;
+    setCarregando(true);
+
+    if (eEdicao) {
+      const resultado = await atualizarTransacao(transacaoEdicao.id, {
+        type: tipo,
+        amount: numerico,
+        category: tipo === 'out' ? categoria : null,
+        note: nota.trim(),
       });
 
-      if (!result) {
-        setLoading(false);
-        savingRef.current = false; // Liberta em caso de erro
-        showAlert('Erro', 'Não foi possível atualizar. Tenta novamente.', true);
+      if (!resultado) {
+        setCarregando(false);
+        salvandoRef.current = false;
+        mostrarAlerta('Erro', 'Não foi possível atualizar. Tenta novamente.', true);
         return;
       }
     } else {
-      const result = await addTransaction({
-        type,
-        amount: numeric,
-        category: type === 'out' ? category : null,
-        note: note.trim(),
+      const resultado = await adicionarTransacao({
+        type: tipo,
+        amount: numerico,
+        category: tipo === 'out' ? categoria : null,
+        note: nota.trim(),
         date: new Date().toISOString(),
       });
 
-      if (!result) {
-        setLoading(false);
-        savingRef.current = false; // Liberta em caso de erro
-        showAlert('Erro', 'Não foi possível guardar. Tenta novamente.', true);
+      if (!resultado) {
+        setCarregando(false);
+        salvandoRef.current = false;
+        mostrarAlerta('Erro', 'Não foi possível guardar. Tenta novamente.', true);
         return;
       }
     }
 
-    // Sucesso: volta atrás (o componente vai desmontar)
     navigation.goBack();
   }
 
-  function confirmDelete() {
-    showAlert(
+  function confirmarApagar() {
+    mostrarAlerta(
       'Apagar',
       'Tens a certeza que queres apagar?',
       true,
@@ -157,7 +172,7 @@ export default function AddTransactionScreen({ navigation, route }) {
           text: 'Apagar',
           style: 'destructive',
           onPress: async () => {
-            await deleteTransaction(editTransaction.id);
+            await apagarTransacao(transacaoEdicao.id);
             navigation.goBack();
           },
         },
@@ -166,7 +181,7 @@ export default function AddTransactionScreen({ navigation, route }) {
   }
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['bottom']}>
+    <SafeAreaView style={[styles.seguro, { backgroundColor: colors.fundo }]} edges={['bottom']}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -177,25 +192,25 @@ export default function AddTransactionScreen({ navigation, route }) {
           keyboardShouldPersistTaps="handled"
         >
           {/* ─── TIPO ─── */}
-          <View style={styles.typeRow}>
+          <View style={styles.linhaTipo}>
             <TouchableOpacity
               style={[
-                styles.typeButton,
-                { backgroundColor: colors.surface },
-                type === 'in' && { backgroundColor: colors.success },
+                styles.botaoTipo,
+                { backgroundColor: colors.superficie },
+                tipo === 'in' && { backgroundColor: colors.sucesso },
               ]}
-              onPress={() => handleTypeChange('in')}
+              onPress={() => lidarComMudancaTipo('in')}
               activeOpacity={0.85}
             >
               <Ionicons
                 name="arrow-down"
                 size={18}
-                color={type === 'in' ? colors.white : colors.success}
+                color={tipo === 'in' ? colors.branco : colors.sucesso}
               />
               <Text
                 style={[
-                  styles.typeText,
-                  { color: type === 'in' ? colors.white : colors.success },
+                  styles.textoTipo,
+                  { color: tipo === 'in' ? colors.branco : colors.sucesso },
                 ]}
               >
                 Recebi
@@ -204,22 +219,22 @@ export default function AddTransactionScreen({ navigation, route }) {
 
             <TouchableOpacity
               style={[
-                styles.typeButton,
-                { backgroundColor: colors.surface },
-                type === 'out' && { backgroundColor: colors.danger },
+                styles.botaoTipo,
+                { backgroundColor: colors.superficie },
+                tipo === 'out' && { backgroundColor: colors.perigo },
               ]}
-              onPress={() => handleTypeChange('out')}
+              onPress={() => lidarComMudancaTipo('out')}
               activeOpacity={0.85}
             >
               <Ionicons
                 name="arrow-up"
                 size={18}
-                color={type === 'out' ? colors.white : colors.danger}
+                color={tipo === 'out' ? colors.branco : colors.perigo}
               />
               <Text
                 style={[
-                  styles.typeText,
-                  { color: type === 'out' ? colors.white : colors.danger },
+                  styles.textoTipo,
+                  { color: tipo === 'out' ? colors.branco : colors.perigo },
                 ]}
               >
                 Gastei
@@ -228,66 +243,66 @@ export default function AddTransactionScreen({ navigation, route }) {
           </View>
 
           {/* ─── VALOR ─── */}
-          <View style={styles.amountWrapper}>
-            <Text style={typography.label}>Quanto?</Text>
-            <View style={styles.amountRow}>
-              <Text style={[styles.amountCurrency, { color: colors.textLight }]}>
+          <View style={styles.containerValor}>
+            <Text style={typography.rotulo}>Quanto?</Text>
+            <View style={styles.linhaValor}>
+              <Text style={[styles.moedaValor, { color: colors.textoClaro }]}>
                 Kz
               </Text>
               <TextInput
-                style={[styles.amountInput, { color: colors.textPrimary }]}
+                style={[styles.inputValor, { color: colors.textoPrimario }]}
                 placeholder="0"
-                placeholderTextColor={colors.textLight}
+                placeholderTextColor={colors.textoClaro}
                 keyboardType="number-pad"
-                value={displayAmount()}
-                onChangeText={formatAmountInput}
+                value={exibirValor()}
+                onChangeText={formatarEntradaValor}
                 maxLength={12}
               />
             </View>
           </View>
 
           {/* ─── CATEGORIA (só saída) ─── */}
-          {type === 'out' && (
-            <View style={styles.block}>
-              <Text style={[typography.subtitle, { marginBottom: 12, color: colors.textPrimary }]}>
+          {tipo === 'out' && (
+            <View style={styles.bloco}>
+              <Text style={[typography.subtitulo, { marginBottom: 12, color: colors.textoPrimario }]}>
                 Em quê?
               </Text>
-              <CategoryPicker selected={category} onSelect={setCategory} />
+              <CategoryPicker selected={categoria} onSelect={setCategoria} />
             </View>
           )}
 
           {/* ─── NOTA ─── */}
-          <View style={styles.block}>
-            <Text style={[typography.subtitle, { marginBottom: 12, color: colors.textPrimary }]}>
+          <View style={styles.bloco}>
+            <Text style={[typography.subtitulo, { marginBottom: 12, color: colors.textoPrimario }]}>
               Nota (se quiseres)
             </Text>
-            <View style={[styles.inputWrapper, { backgroundColor: colors.surface }]}>
+            <View style={[styles.containerInput, { backgroundColor: colors.superficie }]}>
               <Ionicons
                 name="create-outline"
                 size={20}
-                color={colors.textLight}
-                style={styles.inputIcon}
+                color={colors.textoClaro}
+                style={styles.iconeInput}
               />
               <TextInput
-                style={[styles.input, { color: colors.textPrimary }]}
-                placeholder="Ex: Lancha na escola"
-                placeholderTextColor={colors.textLight}
-                value={note}
-                onChangeText={setNote}
+                style={[styles.input, { color: colors.textoPrimario }]}
+                placeholder="Ex: Lanche na escola"
+                placeholderTextColor={colors.textoClaro}
+                value={nota}
+                onChangeText={setNota}
                 maxLength={60}
               />
             </View>
           </View>
 
           {/* ─── BOTÃO APAGAR (só em edição) ─── */}
-          {isEditing && (
+          {eEdicao && (
             <TouchableOpacity
-              style={[styles.deleteButton, { backgroundColor: colors.dangerSoft }]}
-              onPress={confirmDelete}
+              style={[styles.botaoApagar, { backgroundColor: colors.perigoSuave }]}
+              onPress={confirmarApagar}
               activeOpacity={0.85}
             >
-              <Ionicons name="trash-outline" size={18} color={colors.danger} />
-              <Text style={[styles.deleteText, { color: colors.danger }]}>
+              <Ionicons name="trash-outline" size={18} color={colors.perigo} />
+              <Text style={[styles.textoApagar, { color: colors.perigo }]}>
                 Apagar
               </Text>
             </TouchableOpacity>
@@ -295,41 +310,40 @@ export default function AddTransactionScreen({ navigation, route }) {
         </ScrollView>
 
         {/* ─── BOTÃO GUARDAR ─── */}
-        <View style={[styles.footer, { borderTopColor: colors.divider }]}>
+        <View style={[styles.rodape, { borderTopColor: colors.divisoria }]}>
           <TouchableOpacity
             style={[
-              styles.saveButton, 
-              loading && styles.saveButtonDisabled,
-              { backgroundColor: colors.primary, shadowColor: colors.primary }
+              styles.botaoGuardar,
+              carregando && styles.botaoDesativado,
+              { backgroundColor: colors.primaria, shadowColor: colors.primaria }
             ]}
-            onPress={handleSave}
+            onPress={lidarComGuardar}
             activeOpacity={0.85}
-            disabled={loading}
+            disabled={carregando}
           >
-            <Text style={[styles.saveText, { color: colors.white }]}>
-              {loading
+            <Text style={[styles.textoGuardar, { color: colors.branco }]}>
+              {carregando
                 ? 'A guardar...'
-                : isEditing
+                : eEdicao
                 ? 'Atualizar'
                 : 'Guardar'}
             </Text>
           </TouchableOpacity>
         </View>
 
-        {/* ─── CUSTOM ALERT ─── */}
         <CustomAlert
-          visible={alertConfig.visible}
-          title={alertConfig.title}
-          message={alertConfig.message}
-          isDestructive={alertConfig.isDestructive}
-          buttons={alertConfig.buttons.map((btn) => ({
+          visible={configAlerta.visible}
+          title={configAlerta.title}
+          message={configAlerta.message}
+          isDestructive={configAlerta.isDestructive}
+          buttons={configAlerta.buttons.map((btn) => ({
             ...btn,
             onPress: () => {
-              closeAlert();
+              fecharAlerta();
               if (btn.onPress) btn.onPress();
             },
           }))}
-          onRequestClose={closeAlert}
+          onRequestClose={fecharAlerta}
         />
 
       </KeyboardAvoidingView>
@@ -338,11 +352,11 @@ export default function AddTransactionScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1 },
+  seguro: { flex: 1 },
   flex: { flex: 1 },
   scroll: { padding: 20, paddingBottom: 32 },
-  typeRow: { flexDirection: 'row', gap: 12, marginBottom: 28 },
-  typeButton: {
+  linhaTipo: { flexDirection: 'row', gap: 12, marginBottom: 28 },
+  botaoTipo: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
@@ -351,40 +365,40 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 26,
   },
-  typeText: {
+  textoTipo: {
     fontFamily: 'InterBold',
     fontSize: 15,
     letterSpacing: 0.1,
   },
-  amountWrapper: { alignItems: 'center', marginBottom: 28 },
-  amountRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
-  amountCurrency: {
+  containerValor: { alignItems: 'center', marginBottom: 28 },
+  linhaValor: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
+  moedaValor: {
     fontFamily: 'InterBold',
     fontSize: 28,
     marginRight: 8,
   },
-  amountInput: {
+  inputValor: {
     fontFamily: 'InterExtraBold',
     fontSize: 40,
     minWidth: 100,
     textAlign: 'center',
     letterSpacing: -1,
   },
-  block: { marginBottom: 24 },
-  inputWrapper: {
+  bloco: { marginBottom: 24 },
+  containerInput: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 26,
     paddingHorizontal: 20,
     height: 52,
   },
-  inputIcon: { marginRight: 10 },
+  iconeInput: { marginRight: 10 },
   input: {
     flex: 1,
     fontFamily: 'InterRegular',
     fontSize: 15,
   },
-  deleteButton: {
+  botaoApagar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -393,15 +407,15 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     marginTop: 8,
   },
-  deleteText: {
+  textoApagar: {
     fontFamily: 'InterBold',
     fontSize: 15,
   },
-  footer: {
+  rodape: {
     padding: 20,
     borderTopWidth: 1,
   },
-  saveButton: {
+  botaoGuardar: {
     height: 56,
     borderRadius: 28,
     alignItems: 'center',
@@ -411,8 +425,8 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 4,
   },
-  saveButtonDisabled: { opacity: 0.6 },
-  saveText: {
+  botaoDesativado: { opacity: 0.6 },
+  textoGuardar: {
     fontFamily: 'InterBold',
     fontSize: 16,
     letterSpacing: 0.2,

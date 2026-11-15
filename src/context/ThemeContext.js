@@ -5,21 +5,21 @@ import React, { createContext, useContext } from 'react';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
 
-const ThemeContext = createContext();
+const ContextoTema = createContext();
 
 export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (!context) {
+  const contexto = useContext(ContextoTema);
+  if (!contexto) {
     throw new Error('useTheme deve ser usado dentro de um ThemeProvider');
   }
-  return context;
+  return contexto;
 }
 
 export function ThemeProvider({ children }) {
   // O tema agora é fixo (Dark). Não há estado, nem loading, nem toggle.
   return (
-    <ThemeContext.Provider value={{ colors, typography }}>
+    <ContextoTema.Provider value={{ colors, typography }}>
       {children}
-    </ThemeContext.Provider>
+    </ContextoTema.Provider>
   );
 }

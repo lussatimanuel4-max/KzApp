@@ -5,45 +5,45 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../context/ThemeContext';
-import { formatKz } from '../utils/format';
+import { formatarKz } from '../utils/format';
 
 export default function BalanceCard({ balance, userName = 'Estudante' }) {
   const { colors } = useTheme();
 
   return (
     <LinearGradient
-      colors={[colors.primary, colors.primaryDark]}
+      colors={[colors.primaria, colors.primariaEscura]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      style={styles.card}
+      style={styles.cartao}
     >
       {/* ─── NOME DO USER ─── */}
-      <Text style={styles.userName}>{userName}</Text>
+      <Text style={styles.nomeUtilizador}>{userName}</Text>
 
       {/* ─── CHIP + WIFI ─── */}
-      <View style={styles.chipRow}>
+      <View style={styles.linhaChip}>
         <View style={styles.chip}>
-          <View style={styles.chipLine} />
-          <View style={[styles.chipLine, { marginTop: 3 }]} />
-          <View style={[styles.chipLine, { marginTop: 3 }]} />
+          <View style={styles.linhaChipInterna} />
+          <View style={[styles.linhaChipInterna, { marginTop: 3 }]} />
+          <View style={[styles.linhaChipInterna, { marginTop: 3 }]} />
         </View>
 
-        <View style={styles.wifiIcon}>
-          <View style={[styles.wifiArc, styles.wifiArc1]} />
-          <View style={[styles.wifiArc, styles.wifiArc2]} />
-          <View style={[styles.wifiArc, styles.wifiArc3]} />
+        <View style={styles.iconeWifi}>
+          <View style={[styles.arcoWifi, styles.arcoWifi1]} />
+          <View style={[styles.arcoWifi, styles.arcoWifi2]} />
+          <View style={[styles.arcoWifi, styles.arcoWifi3]} />
         </View>
       </View>
 
       {/* ─── LABEL + VALOR ─── */}
-      <Text style={styles.label}>O QUE TENHO</Text>
-      <Text style={styles.balance}>{formatKz(balance)}</Text>
+      <Text style={styles.rotulo}>O QUE TENHO</Text>
+      <Text style={styles.saldo}>{formatarKz(balance)}</Text>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
+  cartao: {
     borderRadius: 22,
     paddingHorizontal: 22,
     paddingTop: 22,
@@ -51,22 +51,20 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 12,
     overflow: 'hidden',
-    // A sombra em dark mode não precisa de ser roxa brilhante, 
-    // mas o gradiente já se destaca sobre o preto.
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 14,
     elevation: 7,
   },
-  userName: {
+  nomeUtilizador: {
     fontFamily: 'InterBold',
     fontSize: 14,
-    color: '#FFFFFF', // Branco fixo (sobre gradiente)
+    color: '#FFFFFF',
     letterSpacing: 0.3,
     marginBottom: 16,
   },
-  chipRow: {
+  linhaChip: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
@@ -82,13 +80,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.1)',
   },
-  chipLine: {
+  linhaChipInterna: {
     height: 2,
     backgroundColor: 'rgba(0, 0, 0, 0.15)',
     borderRadius: 1,
     marginHorizontal: 3,
   },
-  wifiIcon: {
+  iconeWifi: {
     marginLeft: 10,
     width: 22,
     height: 22,
@@ -96,44 +94,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     transform: [{ rotate: '90deg' }],
   },
-  wifiArc: {
+  arcoWifi: {
     position: 'absolute',
-    borderColor: 'rgba(255, 255, 255, 0.9)', // Branco fixo
+    borderColor: 'rgba(255, 255, 255, 0.9)',
     borderStyle: 'solid',
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
     borderBottomColor: 'transparent',
     borderRadius: 100,
   },
-  wifiArc1: {
+  arcoWifi1: {
     width: 22,
     height: 22,
     borderWidth: 2,
     top: 0,
   },
-  wifiArc2: {
+  arcoWifi2: {
     width: 14,
     height: 14,
     borderWidth: 2,
     top: 4,
   },
-  wifiArc3: {
+  arcoWifi3: {
     width: 6,
     height: 6,
     borderWidth: 2,
     top: 8,
   },
-  label: {
+  rotulo: {
     fontFamily: 'InterBold',
     fontSize: 11,
-    color: 'rgba(255, 255, 255, 0.6)', // Branco translúcido fixo
+    color: 'rgba(255, 255, 255, 0.6)',
     letterSpacing: 1.5,
     marginBottom: 4,
   },
-  balance: {
+  saldo: {
     fontFamily: 'InterExtraBold',
     fontSize: 32,
-    color: '#FFFFFF', // Branco fixo
+    color: '#FFFFFF',
     letterSpacing: -1,
   },
 });

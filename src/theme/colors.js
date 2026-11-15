@@ -5,50 +5,50 @@ export const colors = {
   // ─────────────────────────────
   // FUNDOS
   // ─────────────────────────────
-  background: '#000000',      // preto puro (fundo do ecrã)
-  surface: '#1C1C1E',         // cinza escuro (inputs)
-  card: '#1C1C1E',            // cards
-  surfaceRaised: '#2C2C2E',   // botões claros em dark (ex: Editar Perfil)
-  sheetBg: '#1C1C1E',         // fundo de modais e tabBar
-  overlay: 'rgba(0, 0, 0, 0.7)', // overlay mais forte
+  fundo: '#000000',          // preto puro (fundo do ecrã)
+  superficie: '#1C1C1E',     // cinza escuro (inputs)
+  cartao: '#1C1C1E',         // cards
+  superficieElevada: '#2C2C2E', // botões claros em dark (ex: Editar Perfil)
+  fundoModal: '#1C1C1E',     // fundo de modais e tabBar
+  sobreposicao: 'rgba(0, 0, 0, 0.7)', // overlay mais forte
 
   // ─────────────────────────────
   // COR PRIMÁRIA
   // ─────────────────────────────
-  primary: '#7E57C2',         // roxo principal
-  primaryLight: '#B39DDB',
-  primaryDark: '#5E35B1',
+  primaria: '#7E57C2',       // roxo principal
+  primariaClara: '#B39DDB',
+  primariaEscura: '#5E35B1',
 
   // ─────────────────────────────
   // CORES DE ESTADO E SOFT (FUNDOS)
   // ─────────────────────────────
-  success: '#06d1a2',         // verde brilhante
-  successSoft: 'rgba(0, 184, 148, 0.15)', // fundo verde translúcido
-  danger: '#f74b4b',          // vermelho brilhante
-  dangerSoft: 'rgba(255, 118, 117, 0.15)', // fundo vermelho translúcido
-  warning: '#FDCB6E',
-  info: '#74B9FF',
-  accentSoft: 'rgba(126, 87, 194, 0.2)', // lilás translúcido
+  sucesso: '#06d1a2',        // verde brilhante
+  sucessoSuave: 'rgba(0, 184, 148, 0.15)', // fundo verde translúcido
+  perigo: '#f74b4b',         // vermelho brilhante
+  perigoSuave: 'rgba(255, 118, 117, 0.15)', // fundo vermelho translúcido
+  aviso: '#FDCB6E',
+  informacao: '#74B9FF',
+  destaqueSuave: 'rgba(126, 87, 194, 0.2)', // lilás translúcido
 
   // ─────────────────────────────
   // TEXTO
   // ─────────────────────────────
-  textPrimary: '#FFFFFF',     // branco (títulos)
-  textSecondary: '#ffffff',   // cinza claro (subtítulos)
-  textLight: '#fdfdfd',       // cinza médio (textos de apoio)
+  textoPrimario: '#FFFFFF',  // branco (títulos)
+  textoSecundario: '#ffffff', // branco (subtítulos)
+  textoClaro: '#fdfdfd',     // branco (textos de apoio)
 
   // ─────────────────────────────
   // BORDAS
   // ─────────────────────────────
-  border: '#2C2C2E',
-  divider: '#2C2C2E',
+  borda: '#2C2C2E',
+  divisoria: '#2C2C2E',
 
   // ─────────────────────────────
   // EXTRA
   // ─────────────────────────────
-  white: '#FFFFFF',
-  black: '#000000',
-  transparent: 'transparent',
+  branco: '#FFFFFF',
+  preto: '#000000',
+  transparente: 'transparent',
 };
 
 export default colors;

@@ -24,14 +24,14 @@ export const CATEGORIES = [
     image: require('../../assets/categories/fasciculos.png'),
   },
   {
+    id: 'livros',
+    label: 'Livros',
+    image: require('../../assets/categories/livros.png'),
+  },
+  {
     id: 'propinas',
     label: 'Propinas',
     image: require('../../assets/categories/propinas.png'),
-  },
-  {
-    id: 'internet unitel',
-    label: 'Internet Unitel',
-    image: require('../../assets/categories/internet.png'),
   },
 
   // ─── NOVAS ───
@@ -63,20 +63,43 @@ export const CATEGORIES = [
   {
     id: 'emprestimos',
     label: 'Empréstimos',
-    image: require('../../assets/categories/emprestimos.png'),
+    image: require('../../assets/categories/emprestimos.jpg'),
   },
-
-{
+  {
+    id: 'acessorios electronicos',
+    label: 'Acessórios Electrónicos',
+    image: require('../../assets/categories/acessorios.png'),
+  },
+  {
+    id: 'internet unitel',
+    label: 'Internet Unitel',
+    image: require('../../assets/categories/internet.png'),
+  },
+  {
     id: 'internet africell',
     label: 'Internet Africell',
     image: require('../../assets/categories/africell.png'),
   },
-
+  {
+    id: 'sinal dstv',
+    label: 'Sinal DSTV',
+    image: require('../../assets/categories/dstv.png'),
+  },
+  {
+    id: 'saldo zap',
+    label: 'Saldo Zap',
+    image: require('../../assets/categories/zap.jpg'),
+  },
+  {
+    id: 'luz ende',
+    label: 'Luz ENDE',
+    image: require('../../assets/categories/ende.png'),
+  },
 ];
 
 // ─────────────────────────────
 // OBTER CATEGORIA PELO ID
 // ─────────────────────────────
-export function getCategoryById(categoryId) {
-  return CATEGORIES.find((cat) => cat.id === categoryId) || null;
+export function obterCategoriaPorId(idCategoria) {
+  return CATEGORIES.find((cat) => cat.id === idCategoria) || null;
 }

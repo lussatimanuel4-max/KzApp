@@ -9,18 +9,18 @@ export default function ProgressBar({ percent = 0, color }) {
   const { colors } = useTheme();
   
   // Garantir que percent está entre 0 e 1
-  const safePercent = Math.max(0, Math.min(Number(percent) || 0, 1));
-  const widthPercent = `${safePercent * 100}%`;
+  const percentagemSegura = Math.max(0, Math.min(Number(percent) || 0, 1));
+  const larguraPercentagem = `${percentagemSegura * 100}%`;
   
   // Fallback para o primário se não for passada cor
-  const fillColor = color || colors.primary;
+  const corPreenchimento = color || colors.primaria;
 
   return (
-    <View style={[styles.track, { backgroundColor: colors.surface }]}>
+    <View style={[styles.trilho, { backgroundColor: colors.superficie }]}>
       <View
         style={[
-          styles.fill,
-          { width: widthPercent, backgroundColor: fillColor },
+          styles.preenchimento,
+          { width: larguraPercentagem, backgroundColor: corPreenchimento },
         ]}
       />
     </View>
@@ -28,13 +28,13 @@ export default function ProgressBar({ percent = 0, color }) {
 }
 
 const styles = StyleSheet.create({
-  track: {
+  trilho: {
     width: '100%',
     height: 8,
     borderRadius: 4,
     overflow: 'hidden',
   },
-  fill: {
+  preenchimento: {
     height: '100%',
     borderRadius: 4,
   },

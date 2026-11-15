@@ -22,33 +22,33 @@ export default function EmptyState({
       {image ? (
         <Image
           source={image}
-          style={[styles.illustration, { width: imageSize, height: imageSize }]}
+          style={[styles.ilustracao, { width: imageSize, height: imageSize }]}
           resizeMode="contain"
         />
       ) : (
-        <View style={[styles.iconBox, { backgroundColor: colors.accentSoft }]}>
-          <Ionicons name={icon} size={40} color={colors.primary} />
+        <View style={[styles.caixaIcone, { backgroundColor: colors.destaqueSuave }]}>
+          <Ionicons name={icon} size={40} color={colors.primaria} />
         </View>
       )}
 
-      <Text style={[styles.title, { color: colors.textPrimary }]}>
+      <Text style={[styles.titulo, { color: colors.textoPrimario }]}>
         {title}
       </Text>
 
       {message ? (
-        <Text style={[styles.message, { color: colors.textSecondary }]}>
+        <Text style={[styles.mensagem, { color: colors.textoSecundario }]}>
           {message}
         </Text>
       ) : null}
 
       {actionLabel && onAction ? (
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: colors.primary }]}
+          style={[styles.botao, { backgroundColor: colors.primaria }]}
           onPress={onAction}
           activeOpacity={0.8}
         >
-          <Ionicons name="add" size={18} color={colors.white} />
-          <Text style={[styles.buttonText, { color: colors.white }]}>
+          <Ionicons name="add" size={18} color={colors.branco} />
+          <Text style={[styles.textoBotao, { color: colors.branco }]}>
             {actionLabel}
           </Text>
         </TouchableOpacity>
@@ -64,10 +64,10 @@ const styles = StyleSheet.create({
     paddingVertical: 48,
     paddingHorizontal: 32,
   },
-  illustration: {
+  ilustracao: {
     marginBottom: 16,
   },
-  iconBox: {
+  caixaIcone: {
     width: 80,
     height: 80,
     borderRadius: 40,
@@ -75,21 +75,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 20,
   },
-  title: {
+  titulo: {
     fontFamily: 'InterExtraBold',
     fontSize: 18,
     textAlign: 'center',
     marginBottom: 8,
     letterSpacing: -0.3,
   },
-  message: {
+  mensagem: {
     fontFamily: 'InterRegular',
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: 24,
   },
-  button: {
+  botao: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 14,
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     gap: 6,
   },
-  buttonText: {
+  textoBotao: {
     fontFamily: 'InterBold',
     fontSize: 14,
     letterSpacing: 0.2,

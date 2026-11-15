@@ -30,8 +30,8 @@ import CreateProfileScreen from './src/screens/CreateProfileScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import AddTransactionScreen from './src/screens/AddTransactionScreen';
-import AnalyticsScreen from './src/screens/AnalyticsScreen'; // NOVO
-import GoalsScreen from './src/screens/GoalsScreen'; // Movido para o Stack
+import AnalyticsScreen from './src/screens/AnalyticsScreen';
+import GoalsScreen from './src/screens/GoalsScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import AboutScreen from './src/screens/AboutScreen';
 
@@ -40,9 +40,9 @@ import AddActionSheet from './src/components/AddActionSheet';
 
 // ─── Storage ───
 import {
-  isProfileCreated,
-  hasSeenOnboarding,
-  markOnboardingSeen,
+  perfilFoiCriado,
+  onboardingFoiVisto,
+  marcarOnboardingVisto,
 } from './src/storage/appState';
 
 const Tab = createBottomTabNavigator();
@@ -51,11 +51,11 @@ const Stack = createNativeStackNavigator();
 // ─────────────────────────────
 // FUNÇÕES DE VIBRAÇÃO
 // ─────────────────────────────
-function vibrateLight() {
+function vibrarLeve() {
   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 }
 
-function vibrateMedium() {
+function vibrarMedio() {
   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 }
 
@@ -64,26 +64,26 @@ function vibrateMedium() {
 // ─────────────────────────────
 function MainTabs({ onLogout, navigation }) {
   const insets = useSafeAreaInsets();
-  const bottomPosition = 0 + insets.bottom;
-  const [sheetVisible, setSheetVisible] = useState(false);
+  const posicaoInferior = 0 + insets.bottom;
+  const [folhaVisivel, setFolhaVisivel] = useState(false);
 
-  function handleSheetSelect(type) {
-    navigation.navigate('AddTransaction', { type });
+  function lidarComSelecaoFolha(tipo) {
+    navigation.navigate('AddTransaction', { type: tipo });
   }
 
-  function handleAddPress() {
-    vibrateMedium();
-    setSheetVisible(true);
+  function lidarComPressaoAdicionar() {
+    vibrarMedio();
+    setFolhaVisivel(true);
   }
 
-  const tabBarStyle = {
+  const estiloTabBar = {
     position: 'absolute',
-    bottom: bottomPosition,
+    bottom: posicaoInferior,
     left: 16,
     right: 16,
     height: 76,
     borderRadius: 28,
-    backgroundColor: colors.sheetBg,
+    backgroundColor: colors.fundoModal,
     borderTopWidth: 0,
     paddingBottom: 8,
     paddingTop: 8,
@@ -95,18 +95,18 @@ function MainTabs({ onLogout, navigation }) {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <View style={{ flex: 1, backgroundColor: colors.fundo }}>
       <Tab.Navigator
         screenListeners={{
           tabPress: () => {
-            vibrateLight();
+            vibrarLeve();
           },
         }}
         screenOptions={({ route }) => ({
           headerShown: false,
-          tabBarActiveTintColor: colors.primary,
-          tabBarInactiveTintColor: colors.textPrimary,
-          tabBarStyle: tabBarStyle,
+          tabBarActiveTintColor: colors.primaria,
+          tabBarInactiveTintColor: colors.textoPrimario,
+          tabBarStyle: estiloTabBar,
           tabBarItemStyle: {
             paddingVertical: 6,
           },
@@ -116,36 +116,36 @@ function MainTabs({ onLogout, navigation }) {
             marginTop: 2,
           },
           tabBarIcon: ({ focused, color }) => {
-            let iconName;
+            let nomeIcone;
 
             if (route.name === 'Home') {
-              iconName = 'home';
+              nomeIcone = 'home';
             } else if (route.name === 'Histórico') {
-              iconName = 'clock';
+              nomeIcone = 'clock';
             } else if (route.name === 'Análises') {
-              iconName = 'pie-chart'; // Ícone de gráfico
+              nomeIcone = 'pie-chart';
             } else if (route.name === 'Perfil') {
-              iconName = 'user';
+              nomeIcone = 'user';
             }
 
-            if (route.name === '_Add') {
-              return <View style={styles.ghostIcon} />;
+            if (route.name === '_Adicionar') {
+              return <View style={styles.iconeFantasma} />;
             }
 
             if (focused) {
               return (
                 <View
                   style={[
-                    styles.activeIconBox,
-                    { backgroundColor: colors.accentSoft },
+                    styles.caixaIconeAtivo,
+                    { backgroundColor: colors.destaqueSuave },
                   ]}
                 >
-                  <Feather name={iconName} size={18} color={colors.primary} />
+                  <Feather name={nomeIcone} size={18} color={colors.primaria} />
                 </View>
               );
             }
 
-            return <Feather name={iconName} size={20} color={color} />;
+            return <Feather name={nomeIcone} size={20} color={color} />;
           },
         })}
       >
@@ -153,10 +153,10 @@ function MainTabs({ onLogout, navigation }) {
         <Tab.Screen name="Histórico" component={HistoryScreen} />
 
         <Tab.Screen
-          name="_Add"
+          name="_Adicionar"
           component={View}
           options={{
-            tabBarButton: () => <View style={styles.ghostTab} />,
+            tabBarButton: () => <View style={styles.tabFantasma} />,
             tabBarLabel: () => null,
           }}
         />
@@ -172,23 +172,23 @@ function MainTabs({ onLogout, navigation }) {
 
       <TouchableOpacity
         style={[
-          styles.addButton,
+          styles.botaoAdicionar,
           {
-            bottom: bottomPosition + 12,
-            backgroundColor: colors.primary,
-            shadowColor: colors.primary,
+            bottom: posicaoInferior + 12,
+            backgroundColor: colors.primaria,
+            shadowColor: colors.primaria,
           },
         ]}
-        onPress={handleAddPress}
+        onPress={lidarComPressaoAdicionar}
         activeOpacity={0.85}
       >
-        <Ionicons name="add" size={30} color={colors.white} />
+        <Ionicons name="add" size={30} color={colors.branco} />
       </TouchableOpacity>
 
       <AddActionSheet
-        visible={sheetVisible}
-        onClose={() => setSheetVisible(false)}
-        onSelect={handleSheetSelect}
+        visible={folhaVisivel}
+        onClose={() => setFolhaVisivel(false)}
+        onSelect={lidarComSelecaoFolha}
       />
     </View>
   );
@@ -201,11 +201,11 @@ function MainStack({ onLogout }) {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: colors.background },
-        headerTintColor: colors.textPrimary,
+        headerStyle: { backgroundColor: colors.fundo },
+        headerTintColor: colors.textoPrimario,
         headerTitleStyle: { fontFamily: 'InterBold', fontWeight: 'normal' },
         headerShadowVisible: false,
-        contentStyle: { backgroundColor: colors.background },
+        contentStyle: { backgroundColor: colors.fundo },
       }}
     >
       <Stack.Screen name="Tabs" options={{ headerShown: false }}>
@@ -234,16 +234,16 @@ function MainStack({ onLogout }) {
 // CONTEÚDO INTERNO
 // ─────────────────────────────
 function AppContent() {
-  const [loading, setLoading] = useState(true);
-  const [fontsLoaded, setFontsLoaded] = useState(false);
-  const [onboardingSeen, setOnboardingSeen] = useState(false);
-  const [profileCreated, setProfileCreated] = useState(false);
+  const [carregando, setCarregando] = useState(true);
+  const [fontesCarregadas, setFontesCarregadas] = useState(false);
+  const [onboardingVisto, setOnboardingVisto] = useState(false);
+  const [perfilCriado, setPerfilCriado] = useState(false);
 
   useEffect(() => {
-    loadApp();
+    carregarApp();
   }, []);
 
-  async function loadApp() {
+  async function carregarApp() {
     try {
       await Font.loadAsync({
         InterRegular: require('./assets/fonts/Inter_18pt-Regular.ttf'),
@@ -251,68 +251,68 @@ function AppContent() {
         InterBold: require('./assets/fonts/Inter_18pt-Bold.ttf'),
         InterExtraBold: require('./assets/fonts/Inter_18pt-ExtraBold.ttf'),
       });
-      setFontsLoaded(true);
+      setFontesCarregadas(true);
     } catch (error) {
       console.log('Erro ao carregar fontes:', error);
-      setFontsLoaded(true);
+      setFontesCarregadas(true);
     }
 
-    const seen = await hasSeenOnboarding();
-    const created = await isProfileCreated();
-    setOnboardingSeen(seen);
-    setProfileCreated(created);
-    setLoading(false);
+    const visto = await onboardingFoiVisto();
+    const criado = await perfilFoiCriado();
+    setOnboardingVisto(visto);
+    setPerfilCriado(criado);
+    setCarregando(false);
   }
 
-  async function handleOnboardingComplete() {
-    await markOnboardingSeen();
-    setOnboardingSeen(true);
+  async function lidarComOnboardingConcluido() {
+    await marcarOnboardingVisto();
+    setOnboardingVisto(true);
   }
 
-  function handleProfileComplete() {
-    setProfileCreated(true);
+  function lidarComPerfilConcluido() {
+    setPerfilCriado(true);
   }
 
-  function handleLogout() {
-    setProfileCreated(false);
+  function lidarComLogout() {
+    setPerfilCriado(false);
   }
 
-  if (loading || !fontsLoaded) {
+  if (carregando || !fontesCarregadas) {
     return (
-      <View style={[styles.loading, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
+      <View style={[styles.carregando, { backgroundColor: colors.fundo }]}>
+        <ActivityIndicator size="large" color={colors.primaria} />
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <View style={{ flex: 1, backgroundColor: colors.fundo }}>
       <StatusBar style="light" />
       <NavigationContainer>
-        {!onboardingSeen ? (
+        {!onboardingVisto ? (
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Onboarding">
               {(props) => (
                 <OnboardingScreen
                   {...props}
-                  onComplete={handleOnboardingComplete}
+                  onComplete={lidarComOnboardingConcluido}
                 />
               )}
             </Stack.Screen>
           </Stack.Navigator>
-        ) : !profileCreated ? (
+        ) : !perfilCriado ? (
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="CreateProfile">
               {(props) => (
                 <CreateProfileScreen
                   {...props}
-                  onComplete={handleProfileComplete}
+                  onComplete={lidarComPerfilConcluido}
                 />
               )}
             </Stack.Screen>
           </Stack.Navigator>
         ) : (
-          <MainStack onLogout={handleLogout} />
+          <MainStack onLogout={lidarComLogout} />
         )}
       </NavigationContainer>
     </View>
@@ -333,12 +333,12 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  loading: {
+  carregando: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  activeIconBox: {
+  caixaIconeAtivo: {
     width: 54,
     height: 32,
     borderRadius: 16,
@@ -346,16 +346,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 2,
   },
-  ghostTab: {
+  tabFantasma: {
     flex: 1,
     backgroundColor: 'transparent',
   },
-  ghostIcon: {
+  iconeFantasma: {
     width: 20,
     height: 20,
     backgroundColor: 'transparent',
   },
-  addButton: {
+  botaoAdicionar: {
     position: 'absolute',
     alignSelf: 'center',
     width: 56,

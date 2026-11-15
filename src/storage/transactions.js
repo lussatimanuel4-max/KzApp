@@ -3,14 +3,14 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const KEY_TRANSACTIONS = '@kzapp:transactions';
+const CHAVE_TRANSACOES = '@kzapp:transactions';
 
 // ─────────────────────────────
 // LER TODAS AS TRANSAÇÕES
 // ─────────────────────────────
-export async function getTransactions() {
+export async function obterTransacoes() {
   try {
-    const json = await AsyncStorage.getItem(KEY_TRANSACTIONS);
+    const json = await AsyncStorage.getItem(CHAVE_TRANSACOES);
     if (!json) return [];
     return JSON.parse(json);
   } catch (error) {
@@ -22,10 +22,10 @@ export async function getTransactions() {
 // ─────────────────────────────
 // GUARDAR LISTA COMPLETA (uso interno)
 // ─────────────────────────────
-async function saveAll(transactions) {
+async function guardarTodas(transacoes) {
   try {
-    await AsyncStorage.setItem(KEY_TRANSACTIONS, JSON.stringify(transactions));
-    return transactions;
+    await AsyncStorage.setItem(CHAVE_TRANSACOES, JSON.stringify(transacoes));
+    return transacoes;
   } catch (error) {
     console.log('Erro ao guardar transações:', error);
     return null;
@@ -35,23 +35,23 @@ async function saveAll(transactions) {
 // ─────────────────────────────
 // ADICIONAR TRANSAÇÃO
 // ─────────────────────────────
-export async function addTransaction(transaction) {
+export async function adicionarTransacao(transacao) {
   try {
-    const list = await getTransactions();
+    const lista = await obterTransacoes();
 
-    const newTransaction = {
+    const novaTransacao = {
       id: Date.now().toString(),
-      type: transaction.type,
-      amount: Number(transaction.amount) || 0,
-      category: transaction.category || null,
-      note: transaction.note || '',
-      date: transaction.date || new Date().toISOString(),
+      type: transacao.type,
+      amount: Number(transacao.amount) || 0,
+      category: transacao.category || null,
+      note: transacao.note || '',
+      date: transacao.date || new Date().toISOString(),
       createdAt: Date.now(),
     };
 
-    const updated = [newTransaction, ...list];
-    await saveAll(updated);
-    return newTransaction;
+    const atualizada = [novaTransacao, ...lista];
+    await guardarTodas(atualizada);
+    return novaTransacao;
   } catch (error) {
     console.log('Erro ao adicionar transação:', error);
     return null;
@@ -61,31 +61,31 @@ export async function addTransaction(transaction) {
 // ─────────────────────────────
 // ATUALIZAR TRANSAÇÃO EXISTENTE
 // ─────────────────────────────
-export async function updateTransaction(id, updates) {
+export async function atualizarTransacao(id, atualizacoes) {
   try {
-    const list = await getTransactions();
+    const lista = await obterTransacoes();
 
-    const updated = list.map((tx) => {
+    const atualizada = lista.map((tx) => {
       if (tx.id === id) {
         return {
           ...tx,
-          type: updates.type !== undefined ? updates.type : tx.type,
+          type: atualizacoes.type !== undefined ? atualizacoes.type : tx.type,
           amount:
-            updates.amount !== undefined
-              ? Number(updates.amount) || 0
+            atualizacoes.amount !== undefined
+              ? Number(atualizacoes.amount) || 0
               : tx.amount,
           category:
-            updates.category !== undefined ? updates.category : tx.category,
-          note: updates.note !== undefined ? updates.note : tx.note,
-          date: updates.date !== undefined ? updates.date : tx.date,
+            atualizacoes.category !== undefined ? atualizacoes.category : tx.category,
+          note: atualizacoes.note !== undefined ? atualizacoes.note : tx.note,
+          date: atualizacoes.date !== undefined ? atualizacoes.date : tx.date,
           updatedAt: Date.now(),
         };
       }
       return tx;
     });
 
-    await saveAll(updated);
-    return updated;
+    await guardarTodas(atualizada);
+    return atualizada;
   } catch (error) {
     console.log('Erro ao atualizar transação:', error);
     return null;
@@ -95,10 +95,10 @@ export async function updateTransaction(id, updates) {
 // ─────────────────────────────
 // LER UMA TRANSAÇÃO PELO ID
 // ─────────────────────────────
-export async function getTransactionById(id) {
+export async function obterTransacaoPorId(id) {
   try {
-    const list = await getTransactions();
-    return list.find((tx) => tx.id === id) || null;
+    const lista = await obterTransacoes();
+    return lista.find((tx) => tx.id === id) || null;
   } catch (error) {
     console.log('Erro ao ler transação:', error);
     return null;
@@ -108,12 +108,12 @@ export async function getTransactionById(id) {
 // ─────────────────────────────
 // APAGAR TRANSAÇÃO
 // ─────────────────────────────
-export async function deleteTransaction(id) {
+export async function apagarTransacao(id) {
   try {
-    const list = await getTransactions();
-    const updated = list.filter((item) => item.id !== id);
-    await saveAll(updated);
-    return updated;
+    const lista = await obterTransacoes();
+    const atualizada = lista.filter((item) => item.id !== id);
+    await guardarTodas(atualizada);
+    return atualizada;
   } catch (error) {
     console.log('Erro ao apagar transação:', error);
     return null;
@@ -123,9 +123,9 @@ export async function deleteTransaction(id) {
 // ─────────────────────────────
 // APAGAR TODAS
 // ─────────────────────────────
-export async function clearTransactions() {
+export async function limparTransacoes() {
   try {
-    await AsyncStorage.removeItem(KEY_TRANSACTIONS);
+    await AsyncStorage.removeItem(CHAVE_TRANSACOES);
     return true;
   } catch (error) {
     console.log('Erro ao limpar transações:', error);
@@ -136,13 +136,13 @@ export async function clearTransactions() {
 // ─────────────────────────────
 // FILTRAR POR MÊS (YYYY-MM)
 // ─────────────────────────────
-export async function getTransactionsByMonth(yearMonth) {
+export async function obterTransacoesPorMes(anoMes) {
   try {
-    const list = await getTransactions();
-    return list.filter((item) => {
-      const date = new Date(item.date);
-      const itemYearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      return itemYearMonth === yearMonth;
+    const lista = await obterTransacoes();
+    return lista.filter((item) => {
+      const data = new Date(item.date);
+      const itemAnoMes = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`;
+      return itemAnoMes === anoMes;
     });
   } catch (error) {
     console.log('Erro ao filtrar por mês:', error);
@@ -153,10 +153,10 @@ export async function getTransactionsByMonth(yearMonth) {
 // ─────────────────────────────
 // FILTRAR POR TIPO
 // ─────────────────────────────
-export async function getTransactionsByType(type) {
+export async function obterTransacoesPorTipo(tipo) {
   try {
-    const list = await getTransactions();
-    return list.filter((item) => item.type === type);
+    const lista = await obterTransacoes();
+    return lista.filter((item) => item.type === tipo);
   } catch (error) {
     console.log('Erro ao filtrar por tipo:', error);
     return [];

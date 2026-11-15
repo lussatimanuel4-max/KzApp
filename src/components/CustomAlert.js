@@ -24,7 +24,7 @@ export default function CustomAlert({
   const { colors } = useTheme();
 
   // Se não houver botões, cria um botão "OK" por defeito
-  const alertButtons = buttons.length > 0
+  const botoesAlerta = buttons.length > 0
     ? buttons
     : [{ text: 'OK', style: 'default' }];
 
@@ -36,61 +36,61 @@ export default function CustomAlert({
       onRequestClose={onRequestClose}
     >
       <TouchableWithoutFeedback onPress={onRequestClose}>
-        <View style={[styles.overlay, { backgroundColor: colors.overlay }]}>
+        <View style={[styles.sobreposicao, { backgroundColor: colors.sobreposicao }]}>
           <TouchableWithoutFeedback>
-            <View style={[styles.card, { backgroundColor: colors.card }]}>
+            <View style={[styles.cartao, { backgroundColor: colors.cartao }]}>
               
               {/* ─── CABEÇALHO (Ícone + Título) ─── */}
-              <View style={styles.header}>
+              <View style={styles.cabecalho}>
                 {/* Se for destrutivo, mostra a imagem de erro sem fundo */}
                 {isDestructive && (
                   <Image
                     source={require('../../assets/error.png')}
-                    style={styles.errorIcon}
+                    style={styles.iconeErro}
                     resizeMode="contain"
                   />
                 )}
                 
-                <Text style={[styles.title, { color: colors.textPrimary }]}>
+                <Text style={[styles.titulo, { color: colors.textoPrimario }]}>
                   {title}
                 </Text>
               </View>
 
               {/* ─── MENSAGEM ─── */}
               {message ? (
-                <Text style={[styles.message, { color: colors.textSecondary }]}>
+                <Text style={[styles.mensagem, { color: colors.textoSecundario }]}>
                   {message}
                 </Text>
               ) : null}
 
               {/* ─── BOTÕES ─── */}
-              <View style={styles.buttonsContainer}>
-                {alertButtons.map((btn, index) => {
-                  const isPrimary = btn.style === 'destructive' || btn.style === 'default';
-                  const isCancel = btn.style === 'cancel';
+              <View style={styles.containerBotoes}>
+                {botoesAlerta.map((btn, index) => {
+                  const ePrimario = btn.style === 'destructive' || btn.style === 'default';
+                  const eCancelar = btn.style === 'cancel';
                   
                   // Cores dos botões
-                  let buttonBg = colors.surface;
-                  let textColor = colors.textPrimary;
+                  let fundoBotao = colors.superficie;
+                  let corTexto = colors.textoPrimario;
 
-                  if (isPrimary && btn.style === 'destructive') {
-                    buttonBg = colors.danger; // Botão vermelho para apagar
-                    textColor = colors.white;
-                  } else if (isPrimary) {
-                    buttonBg = colors.primary; // Botão roxo para ação principal
-                    textColor = colors.white;
-                  } else if (isCancel) {
-                    buttonBg = 'transparent'; // Botão de cancelar (texto)
-                    textColor = colors.textSecondary;
+                  if (ePrimario && btn.style === 'destructive') {
+                    fundoBotao = colors.perigo; // Botão vermelho para apagar
+                    corTexto = colors.branco;
+                  } else if (ePrimario) {
+                    fundoBotao = colors.primaria; // Botão roxo para ação principal
+                    corTexto = colors.branco;
+                  } else if (eCancelar) {
+                    fundoBotao = 'transparent'; // Botão de cancelar (texto)
+                    corTexto = colors.textoSecundario;
                   }
 
                   return (
                     <TouchableOpacity
                       key={index}
                       style={[
-                        styles.button,
-                        { backgroundColor: buttonBg },
-                        isCancel && styles.cancelButton,
+                        styles.botao,
+                        { backgroundColor: fundoBotao },
+                        eCancelar && styles.botaoCancelar,
                       ]}
                       onPress={() => {
                         if (btn.onPress) btn.onPress();
@@ -100,8 +100,8 @@ export default function CustomAlert({
                     >
                       <Text
                         style={[
-                          styles.buttonText,
-                          { color: textColor, fontFamily: 'InterBold' },
+                          styles.textoBotao,
+                          { color: corTexto, fontFamily: 'InterBold' },
                         ]}
                       >
                         {btn.text}
@@ -119,13 +119,13 @@ export default function CustomAlert({
 }
 
 const styles = StyleSheet.create({
-  overlay: {
+  sobreposicao: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
   },
-  card: {
+  cartao: {
     width: '100%',
     maxWidth: 400,
     borderRadius: 24,
@@ -136,34 +136,34 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 10,
   },
-  header: {
+  cabecalho: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16, // Aumentei um pouco o espaço para respirar
+    marginBottom: 16,
     gap: 12,
   },
-  errorIcon: {
-    width: 44, // Aumentei o tamanho do ícone
+  iconeErro: {
+    width: 44,
     height: 44,
   },
-  title: {
+  titulo: {
     fontFamily: 'InterExtraBold',
     fontSize: 20,
     letterSpacing: -0.3,
     flex: 1,
   },
-  message: {
+  mensagem: {
     fontFamily: 'InterRegular',
     fontSize: 15,
     lineHeight: 22,
     marginBottom: 24,
   },
-  buttonsContainer: {
+  containerBotoes: {
     flexDirection: 'row',
     gap: 10,
     justifyContent: 'flex-end',
   },
-  button: {
+  botao: {
     height: 48,
     borderRadius: 24,
     paddingHorizontal: 20,
@@ -171,10 +171,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flex: 1,
   },
-  cancelButton: {
+  botaoCancelar: {
     flex: 0.8,
   },
-  buttonText: {
+  textoBotao: {
     fontSize: 15,
     letterSpacing: 0.2,
   },

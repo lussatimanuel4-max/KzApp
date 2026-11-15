@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
-import { formatKzSigned, formatTime, getDayLabel } from '../utils/format';
+import { formatarKzComSinal, formatarHora, obterEtiquetaDia } from '../utils/format';
 import { CATEGORIES } from '../utils/categories';
 
 export default function TransactionItem({
@@ -21,30 +21,30 @@ export default function TransactionItem({
   onLongPress,
 }) {
   const { colors } = useTheme();
-  const isIn = transaction.type === 'in';
+  const eEntrada = transaction.type === 'in';
 
-  const category = !isIn
+  const categoria = !eEntrada
     ? CATEGORIES.find((c) => c.id === transaction.category)
     : null;
 
-  const getLabel = () => {
-    if (isIn) return transaction.note || 'Recebi';
+  const obterRotulo = () => {
+    if (eEntrada) return transaction.note || 'Recebi';
     if (transaction.note) return transaction.note;
-    return category?.label || 'Gastei';
+    return categoria?.label || 'Gastei';
   };
 
   // ─── ANIMAÇÃO ───
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(16)).current;
+  const animacaoFade = useRef(new Animated.Value(0)).current;
+  const animacaoSlide = useRef(new Animated.Value(16)).current;
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(fadeAnim, {
+      Animated.timing(animacaoFade, {
         toValue: 1,
         duration: 350,
         useNativeDriver: true,
       }),
-      Animated.timing(slideAnim, {
+      Animated.timing(animacaoSlide, {
         toValue: 0,
         duration: 350,
         useNativeDriver: true,
@@ -55,12 +55,12 @@ export default function TransactionItem({
   return (
     <Animated.View
       style={{
-        opacity: fadeAnim,
-        transform: [{ translateY: slideAnim }],
+        opacity: animacaoFade,
+        transform: [{ translateY: animacaoSlide }],
       }}
     >
       <TouchableOpacity
-        style={[styles.container, { backgroundColor: colors.card }]}
+        style={[styles.container, { backgroundColor: colors.cartao }]}
         onPress={onPress}
         onLongPress={onLongPress}
         activeOpacity={0.7}
@@ -69,50 +69,48 @@ export default function TransactionItem({
         {/* ─── CÍRCULO COM IMAGEM DA CATEGORIA ─── */}
         <View
           style={[
-            styles.iconCircle,
+            styles.circuloIcone,
             {
-              // O fundo é sempre branco para os ícones das categorias (igual à referência)
-              backgroundColor: category ? colors.white : colors.surface,
-              // A borda cinza que envolve o círculo
-              borderColor: colors.divider,
+              backgroundColor: categoria ? colors.branco : colors.superficie,
+              borderColor: colors.divisoria,
             },
           ]}
         >
-          {isIn ? (
-            <Ionicons name="arrow-down" size={22} color={colors.success} />
-          ) : category ? (
+          {eEntrada ? (
+            <Ionicons name="arrow-down" size={22} color={colors.sucesso} />
+          ) : categoria ? (
             <Image
-              source={category.image}
-              style={styles.categoryImage}
+              source={categoria.image}
+              style={styles.imagemCategoria}
               resizeMode="contain"
             />
           ) : (
-            <Ionicons name="arrow-up" size={22} color={colors.danger} />
+            <Ionicons name="arrow-up" size={22} color={colors.perigo} />
           )}
         </View>
 
         {/* ─── TÍTULO + SUBTÍTULO ─── */}
-        <View style={styles.middle}>
-          <Text style={[styles.title, { color: colors.textPrimary }]} numberOfLines={1}>
-            {getLabel()}
+        <View style={styles.meio}>
+          <Text style={[styles.titulo, { color: colors.textoPrimario }]} numberOfLines={1}>
+            {obterRotulo()}
           </Text>
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            {formatTime(transaction.date)}
+          <Text style={[styles.subtitulo, { color: colors.textoSecundario }]}>
+            {formatarHora(transaction.date)}
           </Text>
         </View>
 
         {/* ─── VALOR + DATA ─── */}
-        <View style={styles.right}>
+        <View style={styles.direita}>
           <Text
             style={[
-              styles.amount,
-              { color: isIn ? colors.success : colors.danger },
+              styles.valor,
+              { color: eEntrada ? colors.sucesso : colors.perigo },
             ]}
           >
-            {formatKzSigned(transaction.amount, transaction.type)}
+            {formatarKzComSinal(transaction.amount, transaction.type)}
           </Text>
-          <Text style={[styles.date, { color: colors.textSecondary }]}>
-            {getDayLabel(transaction.date)}
+          <Text style={[styles.data, { color: colors.textoSecundario }]}>
+            {obterEtiquetaDia(transaction.date)}
           </Text>
         </View>
       </TouchableOpacity>
@@ -134,44 +132,44 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 1,
   },
-  iconCircle: {
-    width: 48, // Tamanho exato do círculo exterior (incluindo a borda)
+  circuloIcone: {
+    width: 48,
     height: 48,
     borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 14,
-    borderWidth: 2, // A linha circular cinza que tu pediste
+    borderWidth: 2,
   },
-  categoryImage: {
-    width: 28, // Aumentei de 24 para 28, para preencher melhor o círculo branco
+  imagemCategoria: {
+    width: 28,
     height: 28,
   },
-  middle: {
+  meio: {
     flex: 1,
     justifyContent: 'center',
   },
-  title: {
+  titulo: {
     fontFamily: 'InterBold',
     fontSize: 15,
     marginBottom: 3,
     letterSpacing: -0.1,
   },
-  subtitle: {
+  subtitulo: {
     fontFamily: 'InterRegular',
     fontSize: 13,
   },
-  right: {
+  direita: {
     alignItems: 'flex-end',
     justifyContent: 'center',
   },
-  amount: {
+  valor: {
     fontFamily: 'InterBold',
     fontSize: 15,
     letterSpacing: -0.2,
     marginBottom: 3,
   },
-  date: {
+  data: {
     fontFamily: 'InterRegular',
     fontSize: 12,
   },

@@ -12,21 +12,21 @@ export const typography = StyleSheet.create({
   h1: {
     fontFamily: 'InterExtraBold',
     fontSize: 32,
-    color: colors.textPrimary,
+    color: colors.textoPrimario,
     letterSpacing: -0.8,
     lineHeight: 38,
   },
   h2: {
     fontFamily: 'InterExtraBold',
     fontSize: 26,
-    color: colors.textPrimary,
+    color: colors.textoPrimario,
     letterSpacing: -0.5,
     lineHeight: 32,
   },
   h3: {
     fontFamily: 'InterExtraBold',
     fontSize: 22,
-    color: colors.textPrimary,
+    color: colors.textoPrimario,
     letterSpacing: -0.3,
     lineHeight: 28,
   },
@@ -34,17 +34,17 @@ export const typography = StyleSheet.create({
   // ─────────────────────────────
   // TÍTULOS SECUNDÁRIOS (Inter Bold)
   // ─────────────────────────────
-  title: {
+  titulo: {
     fontFamily: 'InterBold',
     fontSize: 17,
-    color: colors.textPrimary,
+    color: colors.textoPrimario,
     letterSpacing: -0.2,
     lineHeight: 22,
   },
-  subtitle: {
+  subtitulo: {
     fontFamily: 'InterBold',
     fontSize: 15,
-    color: colors.textPrimary,
+    color: colors.textoPrimario,
     letterSpacing: -0.1,
     lineHeight: 20,
   },
@@ -52,67 +52,67 @@ export const typography = StyleSheet.create({
   // ─────────────────────────────
   // CORPO DE TEXTO (Inter Regular)
   // ─────────────────────────────
-  body: {
+  corpo: {
     fontFamily: 'InterRegular',
     fontSize: 15,
-    color: colors.textSecondary,
+    color: colors.textoSecundario,
     lineHeight: 22,
   },
-  bodySmall: {
+  corpoPequeno: {
     fontFamily: 'InterRegular',
     fontSize: 13,
-    color: colors.textSecondary,
+    color: colors.textoSecundario,
     lineHeight: 18,
   },
-  caption: {
+  legenda: {
     fontFamily: 'InterRegular',
     fontSize: 12,
-    color: colors.textLight,
+    color: colors.textoClaro,
     lineHeight: 16,
   },
 
   // ─────────────────────────────
-  // LABELS (Inter Medium)
+  // RÓTULOS (Inter Medium)
   // ─────────────────────────────
-  label: {
+  rotulo: {
     fontFamily: 'InterMedium',
     fontSize: 13,
-    color: colors.textSecondary,
+    color: colors.textoSecundario,
     letterSpacing: 0.1,
   },
-  labelSmall: {
+  rotuloPequeno: {
     fontFamily: 'InterMedium',
     fontSize: 11,
-    color: colors.textLight,
+    color: colors.textoClaro,
     letterSpacing: 0.2,
   },
 
   // ─────────────────────────────
   // BOTÕES (Inter Bold)
   // ─────────────────────────────
-  button: {
+  botao: {
     fontFamily: 'InterBold',
     fontSize: 16,
-    color: colors.white,
+    color: colors.branco,
     letterSpacing: 0.2,
   },
-  buttonSmall: {
+  botaoPequeno: {
     fontFamily: 'InterBold',
     fontSize: 14,
-    color: colors.white,
+    color: colors.branco,
     letterSpacing: 0.2,
   },
 
   // ─────────────────────────────
   // VALORES MONETÁRIOS (Inter ExtraBold)
   // ─────────────────────────────
-  balance: {
+  saldo: {
     fontFamily: 'InterExtraBold',
     fontSize: 32,
-    color: colors.white,
+    color: colors.branco,
     letterSpacing: -0.8,
   },
-  amount: {
+  valor: {
     fontFamily: 'InterBold',
     fontSize: 16,
     letterSpacing: -0.2,

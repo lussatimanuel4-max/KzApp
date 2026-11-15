@@ -20,17 +20,17 @@ import BalanceCard from '../components/BalanceCard';
 import TransactionItem from '../components/TransactionItem';
 import EmptyState from '../components/EmptyState';
 
-import { getProfile } from '../storage/profile';
-import { getTransactions } from '../storage/transactions';
+import { obterPerfil } from '../storage/profile';
+import { obterTransacoes } from '../storage/transactions';
 import {
-  calculateBalance,
-  calculateTotalIn,
-  calculateTotalOut,
+  calcularSaldo,
+  calcularTotalEntradas,
+  calcularTotalSaidas,
 } from '../utils/calc';
-import { formatKz, getGreeting } from '../utils/format';
+import { formatarKz, obterSaudacao } from '../utils/format';
 
 // ─── AVATARES ───
-const AVATAR_MAP = {
+const MAPA_AVATARES = {
   'avatar-1': require('../../assets/avatars/avatar-1.jpg'),
   'avatar-2': require('../../assets/avatars/avatar-2.jpg'),
   'avatar-3': require('../../assets/avatars/avatar-3.jpg'),
@@ -40,7 +40,7 @@ const AVATAR_MAP = {
 };
 
 // ─── DIAS DA SEMANA ───
-const WEEKDAYS = [
+const DIAS_SEMANA = [
   'Domingo',
   'Segunda',
   'Terça',
@@ -51,156 +51,155 @@ const WEEKDAYS = [
 ];
 
 // ─── MESES ───
-const MONTHS = [
+const MESES = [
   'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
   'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
 ];
 
-function getTodayLabel() {
-  const now = new Date();
-  const weekday = WEEKDAYS[now.getDay()];
-  const day = now.getDate();
-  const month = MONTHS[now.getMonth()];
-  return `${weekday}, ${day} ${month}`;
+function obterEtiquetaHoje() {
+  const agora = new Date();
+  const diaSemana = DIAS_SEMANA[agora.getDay()];
+  const dia = agora.getDate();
+  const mes = MESES[agora.getMonth()];
+  return `${diaSemana}, ${dia} ${mes}`;
 }
 
 export default function HomeScreen({ navigation }) {
   const { colors, typography } = useTheme();
-  const [profile, setProfile] = useState(null);
-  const [transactions, setTransactions] = useState([]);
-  const [refreshing, setRefreshing] = useState(false);
+  const [perfil, setPerfil] = useState(null);
+  const [transacoes, setTransacoes] = useState([]);
+  const [atualizando, setAtualizando] = useState(false);
 
-  async function loadData() {
-    const p = await getProfile();
-    const t = await getTransactions();
-    setProfile(p);
-    setTransactions(t);
+  async function carregarDados() {
+    const p = await obterPerfil();
+    const t = await obterTransacoes();
+    setPerfil(p);
+    setTransacoes(t);
   }
 
   useFocusEffect(
     useCallback(() => {
-      loadData();
+      carregarDados();
     }, [])
   );
 
-  async function onRefresh() {
-    setRefreshing(true);
-    await loadData();
-    setRefreshing(false);
+  async function aoAtualizar() {
+    setAtualizando(true);
+    await carregarDados();
+    setAtualizando(false);
   }
 
-  const balance = calculateBalance(transactions);
-  const totalIn = calculateTotalIn(transactions);
-  const totalOut = calculateTotalOut(transactions);
-  const recent = transactions.slice(0, 5);
-  const greeting = getGreeting();
-  const firstName = profile?.name ? profile.name.split(' ')[0] : '';
-  const avatarSource =
-    AVATAR_MAP[profile?.avatar] || AVATAR_MAP['avatar-1'];
+  const saldo = calcularSaldo(transacoes);
+  const totalEntradas = calcularTotalEntradas(transacoes);
+  const totalSaidas = calcularTotalSaidas(transacoes);
+  const recentes = transacoes.slice(0, 5);
+  const saudacao = obterSaudacao();
+  const primeiroNome = perfil?.name ? perfil.name.split(' ')[0] : '';
+  const fonteAvatar = MAPA_AVATARES[perfil?.avatar] || MAPA_AVATARES['avatar-1'];
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
+    <SafeAreaView style={[styles.seguro, { backgroundColor: colors.fundo }]} edges={['top']}>
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
+            refreshing={atualizando}
+            onRefresh={aoAtualizar}
+            tintColor={colors.primaria}
           />
         }
       >
         {/* ─── CABEÇALHO ─── */}
-        <View style={styles.header}>
+        <View style={styles.cabecalho}>
           <TouchableOpacity
             onPress={() => navigation.navigate('Perfil')}
             activeOpacity={0.85}
           >
             <Image
-              source={avatarSource}
-              style={[styles.headerAvatar, { borderColor: colors.card }]}
+              source={fonteAvatar}
+              style={[styles.avatarCabecalho, { borderColor: colors.cartao }]}
             />
           </TouchableOpacity>
 
-          <View style={styles.headerText}>
-            <Text style={[styles.greeting, { color: colors.textPrimary }]}>
-              {greeting}, {firstName || 'Estudante'}
+          <View style={styles.textoCabecalho}>
+            <Text style={[styles.saudacao, { color: colors.textoPrimario }]}>
+              {saudacao}, {primeiroNome || 'Estudante'}
             </Text>
-            <Text style={[styles.date, { color: colors.textSecondary }]}>
-              {getTodayLabel()}
+            <Text style={[styles.data, { color: colors.textoSecundario }]}>
+              {obterEtiquetaHoje()}
             </Text>
           </View>
         </View>
 
         {/* ─── CARD DO SALDO ─── */}
         <BalanceCard
-          balance={balance}
-          userName={firstName || 'Estudante'}
+          balance={saldo}
+          userName={primeiroNome || 'Estudante'}
         />
 
         {/* ─── AÇÕES RÁPIDAS ─── */}
-        <View style={styles.actions}>
+        <View style={styles.acoes}>
           <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: colors.success }]}
+            style={[styles.botaoAcao, { backgroundColor: colors.sucesso }]}
             activeOpacity={0.85}
             onPress={() => navigation.navigate('AddTransaction', { type: 'in' })}
           >
-            <Ionicons name="arrow-down" size={20} color={colors.white} />
-            <Text style={typography.button}>Recebi</Text>
+            <Ionicons name="arrow-down" size={20} color={colors.branco} />
+            <Text style={typography.botao}>Recebi</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: colors.danger }]}
+            style={[styles.botaoAcao, { backgroundColor: colors.perigo }]}
             activeOpacity={0.85}
             onPress={() => navigation.navigate('AddTransaction', { type: 'out' })}
           >
-            <Ionicons name="arrow-up" size={20} color={colors.white} />
-            <Text style={typography.button}>Gastei</Text>
+            <Ionicons name="arrow-up" size={20} color={colors.branco} />
+            <Text style={typography.botao}>Gastei</Text>
           </TouchableOpacity>
         </View>
 
         {/* ─── RESUMO ─── */}
-        <View style={styles.summaryRow}>
-          <View style={[styles.summaryCard, { backgroundColor: colors.card }]}>
-            <View style={[styles.summaryIcon, { backgroundColor: colors.successSoft }]}>
-              <Ionicons name="trending-up" size={18} color={colors.success} />
+        <View style={styles.linhaResumo}>
+          <View style={[styles.cartaoResumo, { backgroundColor: colors.cartao }]}>
+            <View style={[styles.iconeResumo, { backgroundColor: colors.sucessoSuave }]}>
+              <Ionicons name="trending-up" size={18} color={colors.sucesso} />
             </View>
-            <Text style={typography.label}>Recebi</Text>
+            <Text style={typography.rotulo}>Recebi</Text>
             <Text
               style={[
-                typography.subtitle,
-                { color: colors.success, marginTop: 4 },
+                typography.subtitulo,
+                { color: colors.sucesso, marginTop: 4 },
               ]}
             >
-              {formatKz(totalIn)}
+              {formatarKz(totalEntradas)}
             </Text>
           </View>
 
-          <View style={[styles.summaryCard, { backgroundColor: colors.card }]}>
-            <View style={[styles.summaryIcon, { backgroundColor: colors.dangerSoft }]}>
-              <Ionicons name="trending-down" size={18} color={colors.danger} />
+          <View style={[styles.cartaoResumo, { backgroundColor: colors.cartao }]}>
+            <View style={[styles.iconeResumo, { backgroundColor: colors.perigoSuave }]}>
+              <Ionicons name="trending-down" size={18} color={colors.perigo} />
             </View>
-            <Text style={typography.label}>Gastei</Text>
+            <Text style={typography.rotulo}>Gastei</Text>
             <Text
               style={[
-                typography.subtitle,
-                { color: colors.danger, marginTop: 4 },
+                typography.subtitulo,
+                { color: colors.perigo, marginTop: 4 },
               ]}
             >
-              {formatKz(totalOut)}
+              {formatarKz(totalSaidas)}
             </Text>
           </View>
         </View>
 
         {/* ─── TRANSAÇÕES RECENTES ─── */}
-        <View style={styles.sectionHeader}>
-          <Text style={typography.title}>O que fiz</Text>
+        <View style={styles.cabecalhoSecao}>
+          <Text style={typography.titulo}>O que fiz</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Histórico')}>
             <Text
               style={[
-                typography.label,
-                { color: colors.primary, fontFamily: 'InterBold' },
+                typography.rotulo,
+                { color: colors.primaria, fontFamily: 'InterBold' },
               ]}
             >
               Ver mais
@@ -208,7 +207,7 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {recent.length === 0 ? (
+        {recentes.length === 0 ? (
           <EmptyState
             image={require('../../assets/illustrations/empty-home.png')}
             title="Ainda não fizeste nada"
@@ -219,8 +218,8 @@ export default function HomeScreen({ navigation }) {
             }
           />
         ) : (
-          <View style={styles.list}>
-            {recent.map((tx) => (
+          <View style={styles.lista}>
+            {recentes.map((tx) => (
               <TransactionItem
                 key={tx.id}
                 transaction={tx}
@@ -239,13 +238,13 @@ export default function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safe: {
+  seguro: {
     flex: 1,
   },
   scroll: {
     paddingBottom: 32,
   },
-  header: {
+  cabecalho: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
@@ -253,33 +252,33 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     gap: 12,
   },
-  headerAvatar: {
+  avatarCabecalho: {
     width: 48,
     height: 48,
     borderRadius: 24,
     borderWidth: 2,
   },
-  headerText: {
+  textoCabecalho: {
     flex: 1,
   },
-  greeting: {
+  saudacao: {
     fontFamily: 'InterExtraBold',
     fontSize: 17,
     letterSpacing: -0.3,
     marginBottom: 2,
   },
-  date: {
+  data: {
     fontFamily: 'InterMedium',
     fontSize: 12,
     letterSpacing: 0.1,
   },
-  actions: {
+  acoes: {
     flexDirection: 'row',
     gap: 12,
     paddingHorizontal: 20,
     marginTop: 20,
   },
-  actionButton: {
+  botaoAcao: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
@@ -288,13 +287,13 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 26,
   },
-  summaryRow: {
+  linhaResumo: {
     flexDirection: 'row',
     gap: 12,
     paddingHorizontal: 20,
     marginTop: 20,
   },
-  summaryCard: {
+  cartaoResumo: {
     flex: 1,
     borderRadius: 16,
     padding: 16,
@@ -304,7 +303,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 1,
   },
-  summaryIcon: {
+  iconeResumo: {
     width: 34,
     height: 34,
     borderRadius: 10,
@@ -312,7 +311,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 10,
   },
-  sectionHeader: {
+  cabecalhoSecao: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -320,7 +319,7 @@ const styles = StyleSheet.create({
     marginTop: 28,
     marginBottom: 12,
   },
-  list: {
+  lista: {
     paddingHorizontal: 20,
   },
 });

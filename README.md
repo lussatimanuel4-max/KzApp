@@ -3,7 +3,7 @@
 
 O KzApp é uma aplicação mobile de finanças pessoais, desenhada especialmente para estudantes angolanos. O foco é ser 100% **Offline-first**, rápido, seguro e visualmente apelativo.
 
-Este projeto está a ser desenvolvido como parte do meu portfólio pessoal e também como projeto académico (Front-end em React Native + Back-end em Java/Spring Boot).
+Este projeto está a ser desenvolvido como parte do meu portfólio pessoal e também como projeto académico...
 
 ## 🚀 Funcionalidades
 

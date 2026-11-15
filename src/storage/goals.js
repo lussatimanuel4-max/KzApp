@@ -3,14 +3,14 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const KEY_GOALS = '@kzapp:goals';
+const CHAVE_METAS = '@kzapp:goals';
 
 // ─────────────────────────────
 // LER TODAS AS METAS
 // ─────────────────────────────
-export async function getGoals() {
+export async function obterMetas() {
   try {
-    const json = await AsyncStorage.getItem(KEY_GOALS);
+    const json = await AsyncStorage.getItem(CHAVE_METAS);
     if (!json) return [];
     return JSON.parse(json);
   } catch (error) {
@@ -22,10 +22,10 @@ export async function getGoals() {
 // ─────────────────────────────
 // GUARDAR LISTA COMPLETA
 // ─────────────────────────────
-async function saveAll(goals) {
+async function guardarTodas(metas) {
   try {
-    await AsyncStorage.setItem(KEY_GOALS, JSON.stringify(goals));
-    return goals;
+    await AsyncStorage.setItem(CHAVE_METAS, JSON.stringify(metas));
+    return metas;
   } catch (error) {
     console.log('Erro ao guardar metas:', error);
     return null;
@@ -35,22 +35,22 @@ async function saveAll(goals) {
 // ─────────────────────────────
 // CRIAR NOVA META
 // ─────────────────────────────
-export async function addGoal(goal) {
+export async function adicionarMeta(meta) {
   try {
-    const list = await getGoals();
+    const lista = await obterMetas();
 
-    const newGoal = {
+    const novaMeta = {
       id: Date.now().toString(),
-      title: goal.title || 'Nova meta',
-      target: Number(goal.target) || 0,
-      saved: Number(goal.saved) || 0,
-      deadline: goal.deadline || null,
+      title: meta.title || 'Nova meta',
+      target: Number(meta.target) || 0,
+      saved: Number(meta.saved) || 0,
+      deadline: meta.deadline || null,
       createdAt: Date.now(),
     };
 
-    const updated = [newGoal, ...list];
-    await saveAll(updated);
-    return newGoal;
+    const atualizada = [novaMeta, ...lista];
+    await guardarTodas(atualizada);
+    return novaMeta;
   } catch (error) {
     console.log('Erro ao criar meta:', error);
     return null;
@@ -60,24 +60,24 @@ export async function addGoal(goal) {
 // ─────────────────────────────
 // ADICIONAR DINHEIRO A UMA META
 // ─────────────────────────────
-export async function addToGoal(goalId, amount) {
+export async function adicionarValorMeta(idMeta, valor) {
   try {
-    const numericAmount = Number(amount);
+    const valorNumerico = Number(valor);
 
     // Bloqueia valores negativos ou zero
-    if (!numericAmount || numericAmount <= 0) {
+    if (!valorNumerico || valorNumerico <= 0) {
       return null;
     }
 
-    const list = await getGoals();
-    const updated = list.map((goal) => {
-      if (goal.id === goalId) {
-        return { ...goal, saved: (goal.saved || 0) + numericAmount };
+    const lista = await obterMetas();
+    const atualizada = lista.map((meta) => {
+      if (meta.id === idMeta) {
+        return { ...meta, saved: (meta.saved || 0) + valorNumerico };
       }
-      return goal;
+      return meta;
     });
-    await saveAll(updated);
-    return updated;
+    await guardarTodas(atualizada);
+    return atualizada;
   } catch (error) {
     console.log('Erro ao adicionar à meta:', error);
     return null;
@@ -87,10 +87,10 @@ export async function addToGoal(goalId, amount) {
 // ─────────────────────────────
 // LER UMA META PELO ID
 // ─────────────────────────────
-export async function getGoalById(goalId) {
+export async function obterMetaPorId(idMeta) {
   try {
-    const list = await getGoals();
-    return list.find((goal) => goal.id === goalId) || null;
+    const lista = await obterMetas();
+    return lista.find((meta) => meta.id === idMeta) || null;
   } catch (error) {
     console.log('Erro ao ler meta:', error);
     return null;
@@ -100,12 +100,12 @@ export async function getGoalById(goalId) {
 // ─────────────────────────────
 // APAGAR META
 // ─────────────────────────────
-export async function deleteGoal(goalId) {
+export async function apagarMeta(idMeta) {
   try {
-    const list = await getGoals();
-    const updated = list.filter((goal) => goal.id !== goalId);
-    await saveAll(updated);
-    return updated;
+    const lista = await obterMetas();
+    const atualizada = lista.filter((meta) => meta.id !== idMeta);
+    await guardarTodas(atualizada);
+    return atualizada;
   } catch (error) {
     console.log('Erro ao apagar meta:', error);
     return null;
@@ -115,9 +115,9 @@ export async function deleteGoal(goalId) {
 // ─────────────────────────────
 // APAGAR TODAS AS METAS
 // ─────────────────────────────
-export async function clearGoals() {
+export async function limparMetas() {
   try {
-    await AsyncStorage.removeItem(KEY_GOALS);
+    await AsyncStorage.removeItem(CHAVE_METAS);
     return true;
   } catch (error) {
     console.log('Erro ao limpar metas:', error);

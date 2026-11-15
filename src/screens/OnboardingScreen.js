@@ -43,44 +43,44 @@ const SLIDES = [
 
 export default function OnboardingScreen({ onComplete }) {
   const { colors } = useTheme();
-  const scrollRef = useRef(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const refScroll = useRef(null);
+  const [indiceAtual, setIndiceAtual] = useState(0);
 
-  function handleScroll(event) {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    const index = Math.round(offsetX / width);
-    setCurrentIndex(index);
+  function lidarComScroll(evento) {
+    const deslocamentoX = evento.nativeEvent.contentOffset.x;
+    const indice = Math.round(deslocamentoX / width);
+    setIndiceAtual(indice);
   }
 
-  function handleNext() {
-    if (currentIndex < SLIDES.length - 1) {
-      const nextIndex = currentIndex + 1;
-      scrollRef.current?.scrollTo({
-        x: nextIndex * width,
+  function lidarComProximo() {
+    if (indiceAtual < SLIDES.length - 1) {
+      const proximoIndice = indiceAtual + 1;
+      refScroll.current?.scrollTo({
+        x: proximoIndice * width,
         animated: true,
       });
-      setCurrentIndex(nextIndex);
+      setIndiceAtual(proximoIndice);
     } else {
       if (onComplete) onComplete();
     }
   }
 
-  function handleSkip() {
+  function lidarComPular() {
     if (onComplete) onComplete();
   }
 
-  const isLast = currentIndex === SLIDES.length - 1;
+  const eUltimo = indiceAtual === SLIDES.length - 1;
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
+    <SafeAreaView style={[styles.seguro, { backgroundColor: colors.fundo }]}>
       {/* ─── PULAR ─── */}
-      <View style={styles.topBar}>
+      <View style={styles.barraSuperior}>
         <TouchableOpacity
-          style={[styles.skipButton, { backgroundColor: colors.surface }]}
-          onPress={handleSkip}
+          style={[styles.botaoPular, { backgroundColor: colors.superficie }]}
+          onPress={lidarComPular}
           activeOpacity={0.7}
         >
-          <Text style={[styles.skipText, { color: colors.textPrimary }]}>
+          <Text style={[styles.textoPular, { color: colors.textoPrimario }]}>
             Pular
           </Text>
         </TouchableOpacity>
@@ -88,28 +88,28 @@ export default function OnboardingScreen({ onComplete }) {
 
       {/* ─── SLIDES ─── */}
       <ScrollView
-        ref={scrollRef}
+        ref={refScroll}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onScroll={handleScroll}
+        onScroll={lidarComScroll}
         scrollEventThrottle={16}
         style={styles.scroll}
       >
         {SLIDES.map((slide) => (
           <View key={slide.id} style={styles.slide}>
-            <View style={styles.illustrationWrapper}>
+            <View style={styles.containerIlustracao}>
               <Image
                 source={slide.image}
-                style={styles.illustration}
+                style={styles.ilustracao}
                 resizeMode="contain"
               />
             </View>
 
-            <Text style={[styles.title, { color: colors.textPrimary }]}>
+            <Text style={[styles.titulo, { color: colors.textoPrimario }]}>
               {slide.title}
             </Text>
-            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+            <Text style={[styles.subtitulo, { color: colors.textoSecundario }]}>
               {slide.subtitle}
             </Text>
           </View>
@@ -117,16 +117,16 @@ export default function OnboardingScreen({ onComplete }) {
       </ScrollView>
 
       {/* ─── DOTS ─── */}
-      <View style={styles.dotsRow}>
-        {SLIDES.map((slide, index) => (
+      <View style={styles.linhaPontos}>
+        {SLIDES.map((slide, indice) => (
           <View
             key={slide.id}
             style={[
-              styles.dot,
-              { backgroundColor: colors.divider },
-              index === currentIndex && {
+              styles.ponto,
+              { backgroundColor: colors.divisoria },
+              indice === indiceAtual && {
                 width: 24,
-                backgroundColor: colors.primary,
+                backgroundColor: colors.primaria,
               },
             ]}
           />
@@ -134,22 +134,22 @@ export default function OnboardingScreen({ onComplete }) {
       </View>
 
       {/* ─── BOTÃO ─── */}
-      <View style={styles.footer}>
+      <View style={styles.rodape}>
         <TouchableOpacity
           style={[
-            styles.button,
+            styles.botao,
             {
-              backgroundColor: colors.primary,
-              shadowColor: colors.primary,
+              backgroundColor: colors.primaria,
+              shadowColor: colors.primaria,
             },
           ]}
-          onPress={handleNext}
+          onPress={lidarComProximo}
           activeOpacity={0.85}
         >
-          <Text style={[styles.buttonText, { color: colors.white }]}>
-            {isLast ? 'Começar' : 'Próximo'}
+          <Text style={[styles.textoBotao, { color: colors.branco }]}>
+            {eUltimo ? 'Começar' : 'Próximo'}
           </Text>
-          <Ionicons name="arrow-forward" size={20} color={colors.white} />
+          <Ionicons name="arrow-forward" size={20} color={colors.branco} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -157,21 +157,21 @@ export default function OnboardingScreen({ onComplete }) {
 }
 
 const styles = StyleSheet.create({
-  safe: {
+  seguro: {
     flex: 1,
   },
-  topBar: {
+  barraSuperior: {
     alignItems: 'flex-end',
     paddingHorizontal: 24,
     paddingTop: 8,
     paddingBottom: 8,
   },
-  skipButton: {
+  botaoPular: {
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
   },
-  skipText: {
+  textoPular: {
     fontFamily: 'InterBold',
     fontSize: 13,
   },
@@ -184,48 +184,48 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 32,
   },
-  illustrationWrapper: {
+  containerIlustracao: {
     width: 280,
     height: 280,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 40,
   },
-  illustration: {
+  ilustracao: {
     width: '100%',
     height: '100%',
   },
-  title: {
+  titulo: {
     fontFamily: 'InterExtraBold',
     fontSize: 26,
     textAlign: 'center',
     letterSpacing: -0.5,
     marginBottom: 12,
   },
-  subtitle: {
+  subtitulo: {
     fontFamily: 'InterRegular',
     fontSize: 15,
     textAlign: 'center',
     lineHeight: 22,
     paddingHorizontal: 8,
   },
-  dotsRow: {
+  linhaPontos: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 8,
     paddingVertical: 24,
   },
-  dot: {
+  ponto: {
     width: 8,
     height: 8,
     borderRadius: 4,
   },
-  footer: {
+  rodape: {
     paddingHorizontal: 32,
     paddingBottom: 32,
   },
-  button: {
+  botao: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 4,
   },
-  buttonText: {
+  textoBotao: {
     fontFamily: 'InterBold',
     fontSize: 16,
     letterSpacing: 0.2,

@@ -3,16 +3,16 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // Importamos a lista oficial de categorias (fonte única de verdade)
-import { CATEGORIES, getCategoryById } from '../utils/categories';
+import { CATEGORIES, obterCategoriaPorId } from '../utils/categories';
 
-const KEY_BUDGETS = '@kzapp:budgets';
+const CHAVE_ORCAMENTOS = '@kzapp:budgets';
 
 // ─────────────────────────────
 // LER TODOS OS ORÇAMENTOS
 // ─────────────────────────────
-export async function getBudgets() {
+export async function obterOrcamentos() {
   try {
-    const json = await AsyncStorage.getItem(KEY_BUDGETS);
+    const json = await AsyncStorage.getItem(CHAVE_ORCAMENTOS);
     if (!json) return {};
     return JSON.parse(json);
   } catch (error) {
@@ -24,10 +24,10 @@ export async function getBudgets() {
 // ─────────────────────────────
 // GUARDAR LISTA COMPLETA
 // ─────────────────────────────
-async function saveAll(budgets) {
+async function guardarTodos(orcamentos) {
   try {
-    await AsyncStorage.setItem(KEY_BUDGETS, JSON.stringify(budgets));
-    return budgets;
+    await AsyncStorage.setItem(CHAVE_ORCAMENTOS, JSON.stringify(orcamentos));
+    return orcamentos;
   } catch (error) {
     console.log('Erro ao guardar orçamentos:', error);
     return null;
@@ -37,17 +37,17 @@ async function saveAll(budgets) {
 // ─────────────────────────────
 // DEFINIR ORÇAMENTO PARA UMA CATEGORIA
 // ─────────────────────────────
-export async function setBudget(categoryId, amount) {
+export async function definirOrcamento(idCategoria, valor) {
   try {
-    const budgets = await getBudgets();
+    const orcamentos = await obterOrcamentos();
 
-    budgets[categoryId] = {
-      amount: Number(amount) || 0,
+    orcamentos[idCategoria] = {
+      amount: Number(valor) || 0,
       updatedAt: Date.now(),
     };
 
-    await saveAll(budgets);
-    return budgets[categoryId];
+    await guardarTodos(orcamentos);
+    return orcamentos[idCategoria];
   } catch (error) {
     console.log('Erro ao definir orçamento:', error);
     return null;
@@ -57,10 +57,10 @@ export async function setBudget(categoryId, amount) {
 // ─────────────────────────────
 // LER ORÇAMENTO DE UMA CATEGORIA
 // ─────────────────────────────
-export async function getBudget(categoryId) {
+export async function obterOrcamento(idCategoria) {
   try {
-    const budgets = await getBudgets();
-    return budgets[categoryId] || null;
+    const orcamentos = await obterOrcamentos();
+    return orcamentos[idCategoria] || null;
   } catch (error) {
     console.log('Erro ao ler orçamento:', error);
     return null;
@@ -70,12 +70,12 @@ export async function getBudget(categoryId) {
 // ─────────────────────────────
 // APAGAR ORÇAMENTO DE UMA CATEGORIA
 // ─────────────────────────────
-export async function deleteBudget(categoryId) {
+export async function apagarOrcamento(idCategoria) {
   try {
-    const budgets = await getBudgets();
-    delete budgets[categoryId];
-    await saveAll(budgets);
-    return budgets;
+    const orcamentos = await obterOrcamentos();
+    delete orcamentos[idCategoria];
+    await guardarTodos(orcamentos);
+    return orcamentos;
   } catch (error) {
     console.log('Erro ao apagar orçamento:', error);
     return null;
@@ -83,11 +83,11 @@ export async function deleteBudget(categoryId) {
 }
 
 // ─────────────────────────────
-// APAGAR TODOS OS ORÇAMENTOS (NOVO - usado no "Apagar tudo")
+// APAGAR TODOS OS ORÇAMENTOS
 // ─────────────────────────────
-export async function clearBudgets() {
+export async function limparOrcamentos() {
   try {
-    await AsyncStorage.removeItem(KEY_BUDGETS);
+    await AsyncStorage.removeItem(CHAVE_ORCAMENTOS);
     return true;
   } catch (error) {
     console.log('Erro ao limpar orçamentos:', error);
@@ -98,4 +98,4 @@ export async function clearBudgets() {
 // ─────────────────────────────
 // RE-EXPORTAR CATEGORIAS (para não quebrar o BudgetScreen antigo)
 // ─────────────────────────────
-export { CATEGORIES, getCategoryById };
+export { CATEGORIES, obterCategoriaPorId };

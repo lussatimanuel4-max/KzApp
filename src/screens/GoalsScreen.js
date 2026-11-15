@@ -24,32 +24,32 @@ import EmptyState from '../components/EmptyState';
 import CustomAlert from '../components/CustomAlert';
 
 import {
-  getGoals,
-  addGoal,
-  addToGoal,
-  deleteGoal,
+  obterMetas,
+  adicionarMeta,
+  adicionarValorMeta,
+  apagarMeta,
 } from '../storage/goals';
 import {
-  calculateTotalSaved,
-  calculateGoalProgress,
+  calcularTotalGuardado,
+  calcularProgressoMeta,
 } from '../utils/calc';
-import { formatKz } from '../utils/format';
+import { formatarKz } from '../utils/format';
 
 export default function GoalsScreen({ navigation }) {
   const { colors, typography } = useTheme();
-  const [goals, setGoals] = useState([]);
-  const [refreshing, setRefreshing] = useState(false);
+  const [metas, setMetas] = useState([]);
+  const [atualizando, setAtualizando] = useState(false);
 
-  const [addModal, setAddModal] = useState(false);
-  const [moneyModal, setMoneyModal] = useState(false);
-  const [activeGoal, setActiveGoal] = useState(null);
+  const [modalAdicionar, setModalAdicionar] = useState(false);
+  const [modalDinheiro, setModalDinheiro] = useState(false);
+  const [metaAtiva, setMetaAtiva] = useState(null);
 
-  const [newTitle, setNewTitle] = useState('');
-  const [newTarget, setNewTarget] = useState('');
-  const [moneyInput, setMoneyInput] = useState('');
+  const [novoTitulo, setNovoTitulo] = useState('');
+  const [novoAlvo, setNovoAlvo] = useState('');
+  const [entradaDinheiro, setEntradaDinheiro] = useState('');
 
   // ─── ESTADO DO CUSTOM ALERT ───
-  const [alertConfig, setAlertConfig] = useState({
+  const [configAlerta, setConfigAlerta] = useState({
     visible: false,
     title: '',
     message: '',
@@ -57,8 +57,8 @@ export default function GoalsScreen({ navigation }) {
     buttons: [],
   });
 
-  function showAlert(title, message, isDestructive = false, buttons = null) {
-    setAlertConfig({
+  function mostrarAlerta(title, message, isDestructive = false, buttons = null) {
+    setConfigAlerta({
       visible: true,
       title,
       message,
@@ -67,72 +67,72 @@ export default function GoalsScreen({ navigation }) {
     });
   }
 
-  function closeAlert() {
-    setAlertConfig((prev) => ({ ...prev, visible: false }));
+  function fecharAlerta() {
+    setConfigAlerta((prev) => ({ ...prev, visible: false }));
   }
 
-  async function loadData() {
-    const list = await getGoals();
-    setGoals(list);
+  async function carregarDados() {
+    const lista = await obterMetas();
+    setMetas(lista);
   }
 
   useFocusEffect(
     useCallback(() => {
-      loadData();
+      carregarDados();
     }, [])
   );
 
-  async function onRefresh() {
-    setRefreshing(true);
-    await loadData();
-    setRefreshing(false);
+  async function aoAtualizar() {
+    setAtualizando(true);
+    await carregarDados();
+    setAtualizando(false);
   }
 
-  async function handleAddGoal() {
-    const target = Number(newTarget);
+  async function lidarComAdicionarMeta() {
+    const alvo = Number(novoAlvo);
 
-    if (newTitle.trim().length < 2) {
-      showAlert('Nome inválido', 'Escreve um nome para o objetivo.');
+    if (novoTitulo.trim().length < 2) {
+      mostrarAlerta('Nome inválido', 'Escreve um nome para o objetivo.');
       return;
     }
 
-    if (!target || target <= 0) {
-      showAlert('Valor inválido', 'Define um valor maior que zero.');
+    if (!alvo || alvo <= 0) {
+      mostrarAlerta('Valor inválido', 'Define um valor maior que zero.');
       return;
     }
 
-    await addGoal({
-      title: newTitle.trim(),
-      target,
+    await adicionarMeta({
+      title: novoTitulo.trim(),
+      target: alvo,
       saved: 0,
       deadline: null,
     });
 
-    setNewTitle('');
-    setNewTarget('');
-    setAddModal(false);
-    await loadData();
+    setNovoTitulo('');
+    setNovoAlvo('');
+    setModalAdicionar(false);
+    await carregarDados();
   }
 
-  async function handleAddMoney() {
-    const amount = Number(moneyInput);
+  async function lidarComAdicionarDinheiro() {
+    const valor = Number(entradaDinheiro);
 
-    if (!amount || amount <= 0) {
-      showAlert('Valor inválido', 'Escreve um valor maior que zero.');
+    if (!valor || valor <= 0) {
+      mostrarAlerta('Valor inválido', 'Escreve um valor maior que zero.');
       return;
     }
 
-    await addToGoal(activeGoal.id, amount);
-    setMoneyInput('');
-    setMoneyModal(false);
-    setActiveGoal(null);
-    await loadData();
+    await adicionarValorMeta(metaAtiva.id, valor);
+    setEntradaDinheiro('');
+    setModalDinheiro(false);
+    setMetaAtiva(null);
+    await carregarDados();
   }
 
-  function confirmDelete(goal) {
-    showAlert(
+  function confirmarApagar(meta) {
+    mostrarAlerta(
       'Apagar objetivo',
-      `Queres apagar "${goal.title}"?`,
+      `Queres apagar "${meta.title}"?`,
       true,
       [
         { text: 'Cancelar', style: 'cancel' },
@@ -140,151 +140,151 @@ export default function GoalsScreen({ navigation }) {
           text: 'Apagar',
           style: 'destructive',
           onPress: async () => {
-            await deleteGoal(goal.id);
-            await loadData();
+            await apagarMeta(meta.id);
+            await carregarDados();
           },
         },
       ]
     );
   }
 
-  function displayMoney() {
-    if (!moneyInput) return '';
-    return Number(moneyInput)
+  function exibirDinheiro() {
+    if (!entradaDinheiro) return '';
+    return Number(entradaDinheiro)
       .toFixed(0)
       .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   }
 
-  function displayTarget() {
-    if (!newTarget) return '';
-    return Number(newTarget)
+  function exibirAlvo() {
+    if (!novoAlvo) return '';
+    return Number(novoAlvo)
       .toFixed(0)
       .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   }
 
-  const totalSaved = calculateTotalSaved(goals);
+  const totalGuardado = calcularTotalGuardado(metas);
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
+    <SafeAreaView style={[styles.seguro, { backgroundColor: colors.fundo }]} edges={['top']}>
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
+            refreshing={atualizando}
+            onRefresh={aoAtualizar}
+            tintColor={colors.primaria}
           />
         }
       >
         {/* ─── CABEÇALHO ─── */}
-        <View style={styles.header}>
+        <View style={styles.cabecalho}>
           <Text style={typography.h2}>O que quero</Text>
           <TouchableOpacity
-            style={[styles.addButton, { backgroundColor: colors.primary }]}
-            onPress={() => setAddModal(true)}
+            style={[styles.botaoAdicionar, { backgroundColor: colors.primaria }]}
+            onPress={() => setModalAdicionar(true)}
             activeOpacity={0.85}
           >
-            <Ionicons name="add" size={24} color={colors.white} />
+            <Ionicons name="add" size={24} color={colors.branco} />
           </TouchableOpacity>
         </View>
 
         {/* ─── CARD TOTAL ─── */}
-        <View style={[styles.totalCard, { backgroundColor: colors.surface }]}>
-          <Text style={typography.label}>Já juntei</Text>
+        <View style={[styles.cartaoTotal, { backgroundColor: colors.superficie }]}>
+          <Text style={typography.rotulo}>Já juntei</Text>
           <Text
             style={[
               typography.h2,
-              { color: colors.primary, marginTop: 6 },
+              { color: colors.primaria, marginTop: 6 },
             ]}
           >
-            {formatKz(totalSaved)}
+            {formatarKz(totalGuardado)}
           </Text>
         </View>
 
         {/* ─── LISTA ─── */}
-        {goals.length === 0 ? (
+        {metas.length === 0 ? (
           <EmptyState
             image={require('../../assets/illustrations/empty-goals.png')}
             title="Ainda não tens objetivos"
             message="Cria o teu primeiro objetivo e começa a juntar."
             actionLabel="Novo objetivo"
-            onAction={() => setAddModal(true)}
+            onAction={() => setModalAdicionar(true)}
           />
         ) : (
-          <View style={styles.list}>
-            {goals.map((goal) => {
-              const percent = calculateGoalProgress(goal);
-              const done = percent >= 1;
+          <View style={styles.lista}>
+            {metas.map((meta) => {
+              const percentagem = calcularProgressoMeta(meta);
+              const concluida = percentagem >= 1;
 
               return (
                 <TouchableOpacity
-                  key={goal.id}
-                  style={[styles.goalCard, { backgroundColor: colors.card }]}
+                  key={meta.id}
+                  style={[styles.cartaoMeta, { backgroundColor: colors.cartao }]}
                   activeOpacity={0.85}
                   onPress={() => {
-                    setActiveGoal(goal);
-                    setMoneyInput('');
-                    setMoneyModal(true);
+                    setMetaAtiva(meta);
+                    setEntradaDinheiro('');
+                    setModalDinheiro(true);
                   }}
-                  onLongPress={() => confirmDelete(goal)}
+                  onLongPress={() => confirmarApagar(meta)}
                 >
-                  <View style={styles.goalTop}>
-                    <View style={styles.goalLeft}>
+                  <View style={styles.topoMeta}>
+                    <View style={styles.esquerdaMeta}>
                       <View
                         style={[
-                          styles.goalIcon,
+                          styles.iconeMeta,
                           {
-                            backgroundColor: done
-                              ? colors.successSoft
-                              : colors.accentSoft,
+                            backgroundColor: concluida
+                              ? colors.sucessoSuave
+                              : colors.destaqueSuave,
                           },
                         ]}
                       >
                         <Ionicons
-                          name={done ? 'checkmark' : 'flag-outline'}
+                          name={concluida ? 'checkmark' : 'flag-outline'}
                           size={20}
-                          color={done ? colors.success : colors.primary}
+                          color={concluida ? colors.sucesso : colors.primaria}
                         />
                       </View>
                       <Text
-                        style={[typography.subtitle, { flex: 1, color: colors.textPrimary }]}
+                        style={[typography.subtitulo, { flex: 1, color: colors.textoPrimario }]}
                         numberOfLines={1}
                       >
-                        {goal.title}
+                        {meta.title}
                       </Text>
                     </View>
 
-                    {done && (
-                      <View style={[styles.doneBadge, { backgroundColor: colors.successSoft }]}>
-                        <Text style={[styles.doneText, { color: colors.success }]}>
+                    {concluida && (
+                      <View style={[styles.seloConcluido, { backgroundColor: colors.sucessoSuave }]}>
+                        <Text style={[styles.textoSelo, { color: colors.sucesso }]}>
                           Consegui!
                         </Text>
                       </View>
                     )}
                   </View>
 
-                  <View style={styles.goalValues}>
-                    <Text style={[typography.subtitle, { fontSize: 16, color: colors.textPrimary }]}>
-                      {formatKz(goal.saved)}
+                  <View style={styles.valoresMeta}>
+                    <Text style={[typography.subtitulo, { fontSize: 16, color: colors.textoPrimario }]}>
+                      {formatarKz(meta.saved)}
                     </Text>
-                    <Text style={[typography.label, { marginLeft: 6 }]}>
-                      / {formatKz(goal.target)}
+                    <Text style={[typography.rotulo, { marginLeft: 6 }]}>
+                      / {formatarKz(meta.target)}
                     </Text>
                   </View>
 
                   <ProgressBar
-                    percent={percent}
-                    color={done ? colors.success : colors.primary}
+                    percent={percentagem}
+                    color={concluida ? colors.sucesso : colors.primaria}
                   />
 
                   <Text
                     style={[
-                      typography.caption,
-                      { marginTop: 8, color: colors.textLight },
+                      typography.legenda,
+                      { marginTop: 8, color: colors.textoClaro },
                     ]}
                   >
-                    {Math.round(percent * 100)}% • toca para juntar
+                    {Math.round(percentagem * 100)}% • toca para juntar
                   </Text>
                 </TouchableOpacity>
               );
@@ -297,74 +297,74 @@ export default function GoalsScreen({ navigation }) {
 
       {/* ─── MODAL: NOVO OBJETIVO ─── */}
       <Modal
-        visible={addModal}
+        visible={modalAdicionar}
         transparent
         animationType="slide"
-        onRequestClose={() => setAddModal(false)}
+        onRequestClose={() => setModalAdicionar(false)}
       >
         <KeyboardAvoidingView
-          style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}
+          style={[styles.sobreposicaoModal, { backgroundColor: colors.sobreposicao }]}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <View style={[styles.modalContent, { backgroundColor: colors.sheetBg }]}>
-            <View style={[styles.modalHandle, { backgroundColor: colors.divider }]} />
+          <View style={[styles.conteudoModal, { backgroundColor: colors.fundoModal }]}>
+            <View style={[styles.pegaModal, { backgroundColor: colors.divisoria }]} />
 
-            <Text style={[typography.h3, { marginBottom: 4, color: colors.textPrimary }]}>
+            <Text style={[typography.h3, { marginBottom: 4, color: colors.textoPrimario }]}>
               Novo objetivo
             </Text>
-            <Text style={[typography.body, { marginBottom: 20, color: colors.textSecondary }]}>
+            <Text style={[typography.corpo, { marginBottom: 20, color: colors.textoSecundario }]}>
               O que queres conquistar?
             </Text>
 
-            <View style={[styles.inputWrapper, { backgroundColor: colors.surface }]}>
+            <View style={[styles.containerInput, { backgroundColor: colors.superficie }]}>
               <Ionicons
                 name="flag-outline"
                 size={20}
-                color={colors.textLight}
-                style={styles.inputIcon}
+                color={colors.textoClaro}
+                style={styles.iconeInput}
               />
               <TextInput
-                style={[styles.input, { color: colors.textPrimary }]}
+                style={[styles.input, { color: colors.textoPrimario }]}
                 placeholder="Ex: Comprar PC"
-                placeholderTextColor={colors.textLight}
-                value={newTitle}
-                onChangeText={setNewTitle}
+                placeholderTextColor={colors.textoClaro}
+                value={novoTitulo}
+                onChangeText={setNovoTitulo}
                 maxLength={40}
               />
             </View>
 
-            <View style={[styles.inputWrapper, { backgroundColor: colors.surface }]}>
-              <Text style={[styles.currency, { color: colors.textLight }]}>Kz</Text>
+            <View style={[styles.containerInput, { backgroundColor: colors.superficie }]}>
+              <Text style={[styles.moeda, { color: colors.textoClaro }]}>Kz</Text>
               <TextInput
-                style={[styles.input, { color: colors.textPrimary }]}
+                style={[styles.input, { color: colors.textoPrimario }]}
                 placeholder="Quanto precisas?"
-                placeholderTextColor={colors.textLight}
+                placeholderTextColor={colors.textoClaro}
                 keyboardType="number-pad"
-                value={displayTarget()}
+                value={exibirAlvo()}
                 onChangeText={(t) =>
-                  setNewTarget(t.replace(/[^0-9]/g, ''))
+                  setNovoAlvo(t.replace(/[^0-9]/g, ''))
                 }
                 maxLength={12}
               />
             </View>
 
-            <View style={styles.modalButtons}>
+            <View style={styles.botoesModal}>
               <TouchableOpacity
-                style={[styles.modalCancel, { backgroundColor: colors.surface }]}
-                onPress={() => setAddModal(false)}
+                style={[styles.botaoCancelar, { backgroundColor: colors.superficie }]}
+                onPress={() => setModalAdicionar(false)}
                 activeOpacity={0.8}
               >
-                <Text style={[styles.modalCancelText, { color: colors.textSecondary }]}>
+                <Text style={[styles.textoCancelar, { color: colors.textoSecundario }]}>
                   Cancelar
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.modalSave, { backgroundColor: colors.primary }]}
-                onPress={handleAddGoal}
+                style={[styles.botaoSalvar, { backgroundColor: colors.primaria }]}
+                onPress={lidarComAdicionarMeta}
                 activeOpacity={0.85}
               >
-                <Text style={[styles.modalSaveText, { color: colors.white }]}>
+                <Text style={[styles.textoSalvar, { color: colors.branco }]}>
                   Criar
                 </Text>
               </TouchableOpacity>
@@ -375,61 +375,61 @@ export default function GoalsScreen({ navigation }) {
 
       {/* ─── MODAL: JUNTAR DINHEIRO ─── */}
       <Modal
-        visible={moneyModal}
+        visible={modalDinheiro}
         transparent
         animationType="slide"
-        onRequestClose={() => setMoneyModal(false)}
+        onRequestClose={() => setModalDinheiro(false)}
       >
         <KeyboardAvoidingView
-          style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}
+          style={[styles.sobreposicaoModal, { backgroundColor: colors.sobreposicao }]}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <View style={[styles.modalContent, { backgroundColor: colors.sheetBg }]}>
-            <View style={[styles.modalHandle, { backgroundColor: colors.divider }]} />
+          <View style={[styles.conteudoModal, { backgroundColor: colors.fundoModal }]}>
+            <View style={[styles.pegaModal, { backgroundColor: colors.divisoria }]} />
 
-            <Text style={[typography.h3, { marginBottom: 4, color: colors.textPrimary }]}>
-              {activeGoal?.title || 'Objetivo'}
+            <Text style={[typography.h3, { marginBottom: 4, color: colors.textoPrimario }]}>
+              {metaAtiva?.title || 'Objetivo'}
             </Text>
-            <Text style={[typography.body, { marginBottom: 20, color: colors.textSecondary }]}>
+            <Text style={[typography.corpo, { marginBottom: 20, color: colors.textoSecundario }]}>
               Quanto queres juntar agora?
             </Text>
 
-            <View style={[styles.inputWrapper, { backgroundColor: colors.surface }]}>
-              <Text style={[styles.currency, { color: colors.textLight }]}>Kz</Text>
+            <View style={[styles.containerInput, { backgroundColor: colors.superficie }]}>
+              <Text style={[styles.moeda, { color: colors.textoClaro }]}>Kz</Text>
               <TextInput
-                style={[styles.input, { color: colors.textPrimary }]}
+                style={[styles.input, { color: colors.textoPrimario }]}
                 placeholder="0"
-                placeholderTextColor={colors.textLight}
+                placeholderTextColor={colors.textoClaro}
                 keyboardType="number-pad"
-                value={displayMoney()}
+                value={exibirDinheiro()}
                 onChangeText={(t) =>
-                  setMoneyInput(t.replace(/[^0-9]/g, ''))
+                  setEntradaDinheiro(t.replace(/[^0-9]/g, ''))
                 }
                 maxLength={12}
                 autoFocus
               />
             </View>
 
-            <View style={styles.modalButtons}>
+            <View style={styles.botoesModal}>
               <TouchableOpacity
-                style={[styles.modalCancel, { backgroundColor: colors.surface }]}
+                style={[styles.botaoCancelar, { backgroundColor: colors.superficie }]}
                 onPress={() => {
-                  setMoneyModal(false);
-                  setActiveGoal(null);
+                  setModalDinheiro(false);
+                  setMetaAtiva(null);
                 }}
                 activeOpacity={0.8}
               >
-                <Text style={[styles.modalCancelText, { color: colors.textSecondary }]}>
+                <Text style={[styles.textoCancelar, { color: colors.textoSecundario }]}>
                   Cancelar
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.modalSave, { backgroundColor: colors.primary }]}
-                onPress={handleAddMoney}
+                style={[styles.botaoSalvar, { backgroundColor: colors.primaria }]}
+                onPress={lidarComAdicionarDinheiro}
                 activeOpacity={0.85}
               >
-                <Text style={[styles.modalSaveText, { color: colors.white }]}>
+                <Text style={[styles.textoSalvar, { color: colors.branco }]}>
                   Juntar
                 </Text>
               </TouchableOpacity>
@@ -440,18 +440,18 @@ export default function GoalsScreen({ navigation }) {
 
       {/* ─── CUSTOM ALERT ─── */}
       <CustomAlert
-        visible={alertConfig.visible}
-        title={alertConfig.title}
-        message={alertConfig.message}
-        isDestructive={alertConfig.isDestructive}
-        buttons={alertConfig.buttons.map((btn) => ({
+        visible={configAlerta.visible}
+        title={configAlerta.title}
+        message={configAlerta.message}
+        isDestructive={configAlerta.isDestructive}
+        buttons={configAlerta.buttons.map((btn) => ({
           ...btn,
           onPress: () => {
-            closeAlert();
+            fecharAlerta();
             if (btn.onPress) btn.onPress();
           },
         }))}
-        onRequestClose={closeAlert}
+        onRequestClose={fecharAlerta}
       />
 
     </SafeAreaView>
@@ -459,13 +459,13 @@ export default function GoalsScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safe: {
+  seguro: {
     flex: 1,
   },
   scroll: {
     paddingBottom: 32,
   },
-  header: {
+  cabecalho: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -473,23 +473,23 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 12,
   },
-  addButton: {
+  botaoAdicionar: {
     width: 42,
     height: 42,
     borderRadius: 21,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  totalCard: {
+  cartaoTotal: {
     marginHorizontal: 20,
     padding: 20,
     borderRadius: 18,
     marginBottom: 20,
   },
-  list: {
+  lista: {
     paddingHorizontal: 20,
   },
-  goalCard: {
+  cartaoMeta: {
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -499,57 +499,57 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 1,
   },
-  goalTop: {
+  topoMeta: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
   },
-  goalLeft: {
+  esquerdaMeta: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
     flex: 1,
   },
-  goalIcon: {
+  iconeMeta: {
     width: 36,
     height: 36,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  doneBadge: {
+  seloConcluido: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
   },
-  doneText: {
+  textoSelo: {
     fontFamily: 'InterBold',
     fontSize: 11,
   },
-  goalValues: {
+  valoresMeta: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     marginBottom: 10,
   },
-  modalOverlay: {
+  sobreposicaoModal: {
     flex: 1,
     justifyContent: 'flex-end',
   },
-  modalContent: {
+  conteudoModal: {
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     padding: 24,
     paddingBottom: 40,
   },
-  modalHandle: {
+  pegaModal: {
     width: 40,
     height: 4,
     borderRadius: 2,
     alignSelf: 'center',
     marginBottom: 20,
   },
-  inputWrapper: {
+  containerInput: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 26,
@@ -557,10 +557,10 @@ const styles = StyleSheet.create({
     height: 52,
     marginBottom: 14,
   },
-  inputIcon: {
+  iconeInput: {
     marginRight: 10,
   },
-  currency: {
+  moeda: {
     fontFamily: 'InterBold',
     fontSize: 18,
     marginRight: 10,
@@ -570,30 +570,30 @@ const styles = StyleSheet.create({
     fontFamily: 'InterRegular',
     fontSize: 16,
   },
-  modalButtons: {
+  botoesModal: {
     flexDirection: 'row',
     gap: 12,
     marginTop: 10,
   },
-  modalCancel: {
+  botaoCancelar: {
     flex: 1,
     height: 52,
     borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  modalCancelText: {
+  textoCancelar: {
     fontFamily: 'InterBold',
     fontSize: 15,
   },
-  modalSave: {
+  botaoSalvar: {
     flex: 1,
     height: 52,
     borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  modalSaveText: {
+  textoSalvar: {
     fontFamily: 'InterBold',
     fontSize: 15,
   },

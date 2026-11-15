@@ -1,3 +1,4 @@
+
 // src/utils/calc.js
 // Funções de cálculo para o KzApp
 
@@ -5,22 +6,22 @@
 // SALDO TOTAL
 // Entradas - Saídas
 // ─────────────────────────────
-export function calculateBalance(transactions) {
-  if (!Array.isArray(transactions)) return 0;
+export function calcularSaldo(transacoes) {
+  if (!Array.isArray(transacoes)) return 0;
 
-  return transactions.reduce((total, tx) => {
-    const amount = Number(tx.amount) || 0;
-    return tx.type === 'in' ? total + amount : total - amount;
+  return transacoes.reduce((total, tx) => {
+    const valor = Number(tx.amount) || 0;
+    return tx.type === 'in' ? total + valor : total - valor;
   }, 0);
 }
 
 // ─────────────────────────────
 // TOTAL DE ENTRADAS
 // ─────────────────────────────
-export function calculateTotalIn(transactions) {
-  if (!Array.isArray(transactions)) return 0;
+export function calcularTotalEntradas(transacoes) {
+  if (!Array.isArray(transacoes)) return 0;
 
-  return transactions
+  return transacoes
     .filter((tx) => tx.type === 'in')
     .reduce((total, tx) => total + (Number(tx.amount) || 0), 0);
 }
@@ -28,10 +29,10 @@ export function calculateTotalIn(transactions) {
 // ─────────────────────────────
 // TOTAL DE SAÍDAS
 // ─────────────────────────────
-export function calculateTotalOut(transactions) {
-  if (!Array.isArray(transactions)) return 0;
+export function calcularTotalSaidas(transacoes) {
+  if (!Array.isArray(transacoes)) return 0;
 
-  return transactions
+  return transacoes
     .filter((tx) => tx.type === 'out')
     .reduce((total, tx) => total + (Number(tx.amount) || 0), 0);
 }
@@ -40,36 +41,36 @@ export function calculateTotalOut(transactions) {
 // VARIAÇÃO DE HOJE
 // Entradas de hoje - Saídas de hoje
 // ─────────────────────────────
-export function calculateTodayChange(transactions) {
-  if (!Array.isArray(transactions)) return 0;
+export function calcularVariacaoHoje(transacoes) {
+  if (!Array.isArray(transacoes)) return 0;
 
-  const today = new Date();
+  const hoje = new Date();
 
-  const isToday = (dateInput) => {
-    const d = new Date(dateInput);
+  const eHoje = (dataEntrada) => {
+    const d = new Date(dataEntrada);
     return (
-      d.getDate() === today.getDate() &&
-      d.getMonth() === today.getMonth() &&
-      d.getFullYear() === today.getFullYear()
+      d.getDate() === hoje.getDate() &&
+      d.getMonth() === hoje.getMonth() &&
+      d.getFullYear() === hoje.getFullYear()
     );
   };
 
-  return transactions
-    .filter((tx) => isToday(tx.date || tx.createdAt))
+  return transacoes
+    .filter((tx) => eHoje(tx.date || tx.createdAt))
     .reduce((total, tx) => {
-      const amount = Number(tx.amount) || 0;
-      return tx.type === 'in' ? total + amount : total - amount;
+      const valor = Number(tx.amount) || 0;
+      return tx.type === 'in' ? total + valor : total - valor;
     }, 0);
 }
 
 // ─────────────────────────────
 // TOTAL GASTO NUMA CATEGORIA
 // ─────────────────────────────
-export function calculateCategorySpent(transactions, categoryId) {
-  if (!Array.isArray(transactions)) return 0;
+export function calcularGastoPorCategoria(transacoes, idCategoria) {
+  if (!Array.isArray(transacoes)) return 0;
 
-  return transactions
-    .filter((tx) => tx.type === 'out' && tx.category === categoryId)
+  return transacoes
+    .filter((tx) => tx.type === 'out' && tx.category === idCategoria)
     .reduce((total, tx) => total + (Number(tx.amount) || 0), 0);
 }
 
@@ -77,88 +78,88 @@ export function calculateCategorySpent(transactions, categoryId) {
 // AGRUPAR TRANSAÇÕES POR DIA
 // Devolve: [{ dateKey, date, items }, ...]
 // ─────────────────────────────
-export function groupTransactionsByDay(transactions) {
-  if (!Array.isArray(transactions) || transactions.length === 0) return [];
+export function agruparTransacoesPorDia(transacoes) {
+  if (!Array.isArray(transacoes) || transacoes.length === 0) return [];
 
-  const groups = {};
+  const grupos = {};
 
-  transactions.forEach((tx) => {
-    const date = new Date(tx.date || tx.createdAt);
-    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  transacoes.forEach((tx) => {
+    const data = new Date(tx.date || tx.createdAt);
+    const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`;
 
-    if (!groups[key]) {
-      groups[key] = {
-        dateKey: key,
-        date: date,
+    if (!grupos[chave]) {
+      grupos[chave] = {
+        dateKey: chave,
+        date: data,
         items: [],
       };
     }
 
-    groups[key].items.push(tx);
+    grupos[chave].items.push(tx);
   });
 
-  return Object.values(groups).sort((a, b) => b.date - a.date);
+  return Object.values(grupos).sort((a, b) => b.date - a.date);
 }
 
 // ─────────────────────────────
 // TOTAL GUARDADO EM TODAS AS METAS
 // ─────────────────────────────
-export function calculateTotalSaved(goals) {
-  if (!Array.isArray(goals)) return 0;
+export function calcularTotalGuardado(metas) {
+  if (!Array.isArray(metas)) return 0;
 
-  return goals.reduce((total, goal) => total + (Number(goal.saved) || 0), 0);
+  return metas.reduce((total, meta) => total + (Number(meta.saved) || 0), 0);
 }
 
 // ─────────────────────────────
 // PROGRESSO DE UMA META (0 a 1)
 // ─────────────────────────────
-export function calculateGoalProgress(goal) {
-  if (!goal) return 0;
+export function calcularProgressoMeta(meta) {
+  if (!meta) return 0;
 
-  const saved = Number(goal.saved) || 0;
-  const target = Number(goal.target) || 0;
+  const guardado = Number(meta.saved) || 0;
+  const alvo = Number(meta.target) || 0;
 
-  if (target === 0) return 0;
-  const percent = saved / target;
-  return percent > 1 ? 1 : percent;
+  if (alvo === 0) return 0;
+  const percentagem = guardado / alvo;
+  return percentagem > 1 ? 1 : percentagem;
 }
 
 // ─────────────────────────────
 // DIAS ATÉ UMA DATA
 // ─────────────────────────────
-export function daysUntil(dateInput) {
-  if (!dateInput) return null;
+export function diasAte(dataEntrada) {
+  if (!dataEntrada) return null;
 
-  const target = new Date(dateInput);
-  const today = new Date();
-  const diff = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+  const alvo = new Date(dataEntrada);
+  const hoje = new Date();
+  const diferenca = Math.ceil((alvo - hoje) / (1000 * 60 * 60 * 24));
 
-  return diff;
+  return diferenca;
 }
 
 // ─────────────────────────────
-// RESUMO DO ORÇAMENTO POR CATEGORIA (NOVO)
+// RESUMO DO ORÇAMENTO POR CATEGORIA
 // Usado no BudgetScreen para cruzar gastos e orçamentos
 // ─────────────────────────────
-export function calculateCategorySummary(transactions, budgets, categories) {
-  if (!Array.isArray(transactions)) return [];
+export function calcularResumoCategorias(transacoes, orcamentos, categorias) {
+  if (!Array.isArray(transacoes)) return [];
 
-  return categories.map((cat) => {
-    const spent = transactions
+  return categorias.map((cat) => {
+    const gasto = transacoes
       .filter((tx) => tx.type === 'out' && tx.category === cat.id)
-      .reduce((sum, tx) => sum + (Number(tx.amount) || 0), 0);
+      .reduce((soma, tx) => soma + (Number(tx.amount) || 0), 0);
 
-    const budgetData = budgets[cat.id];
-    const budgetAmount = budgetData ? Number(budgetData.amount) || 0 : 0;
+    const dadosOrcamento = orcamentos[cat.id];
+    const valorOrcamento = dadosOrcamento ? Number(dadosOrcamento.amount) || 0 : 0;
     
-    const percent = budgetAmount > 0 ? spent / budgetAmount : 0;
+    const percentagem = valorOrcamento > 0 ? gasto / valorOrcamento : 0;
 
     return {
       id: cat.id,
       label: cat.label,
-      spent,
-      budget: budgetAmount,
-      percent: percent > 1 ? 1 : percent, // Limita a 100%
+      spent: gasto,
+      budget: valorOrcamento,
+      percent: percentagem > 1 ? 1 : percentagem,
     };
   });
 }

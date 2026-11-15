@@ -17,12 +17,12 @@ import { useTheme } from '../context/ThemeContext';
 export default function AddActionSheet({ visible, onClose, onSelect }) {
   const { colors, typography } = useTheme();
 
-  function handleSelect(type) {
+  function lidarComSelecao(tipo) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onClose();
     // Pequeno delay para o modal fechar antes de navegar
     setTimeout(() => {
-      onSelect(type);
+      onSelect(tipo);
     }, 150);
   }
 
@@ -34,11 +34,11 @@ export default function AddActionSheet({ visible, onClose, onSelect }) {
       onRequestClose={onClose}
     >
       <TouchableWithoutFeedback onPress={onClose}>
-        <View style={[styles.overlay, { backgroundColor: colors.overlay }]}>
+        <View style={[styles.sobreposicao, { backgroundColor: colors.sobreposicao }]}>
           <TouchableWithoutFeedback>
-            <View style={[styles.sheet, { backgroundColor: colors.sheetBg }]}>
+            <View style={[styles.folha, { backgroundColor: colors.fundoModal }]}>
               {/* ─── HANDLE ─── */}
-              <View style={[styles.handle, { backgroundColor: colors.divider }]} />
+              <View style={[styles.pega, { backgroundColor: colors.divisoria }]} />
 
               {/* ─── TÍTULO ─── */}
               <Text style={[typography.h3, { marginBottom: 20 }]}>
@@ -46,45 +46,45 @@ export default function AddActionSheet({ visible, onClose, onSelect }) {
               </Text>
 
               {/* ─── CARDS ─── */}
-              <View style={styles.optionsRow}>
+              <View style={styles.linhaOpcoes}>
                 {/* Recebi */}
                 <TouchableOpacity
-                  style={[styles.optionCard, { backgroundColor: colors.successSoft }]}
-                  onPress={() => handleSelect('in')}
+                  style={[styles.cartaoOpcao, { backgroundColor: colors.sucessoSuave }]}
+                  onPress={() => lidarComSelecao('in')}
                   activeOpacity={0.85}
                 >
-                  <View style={[styles.optionIcon, { backgroundColor: colors.success }]}>
+                  <View style={[styles.iconeOpcao, { backgroundColor: colors.sucesso }]}>
                     <Ionicons
                       name="arrow-down"
                       size={28}
-                      color={colors.white}
+                      color={colors.branco}
                     />
                   </View>
-                  <Text style={[styles.optionLabel, { color: colors.textPrimary }]}>
+                  <Text style={[styles.rotuloOpcao, { color: colors.textoPrimario }]}>
                     Recebi
                   </Text>
-                  <Text style={[styles.optionHint, { color: colors.textSecondary }]}>
+                  <Text style={[styles.dicaOpcao, { color: colors.textoSecundario }]}>
                     Dinheiro que entrou
                   </Text>
                 </TouchableOpacity>
 
                 {/* Gastei */}
                 <TouchableOpacity
-                  style={[styles.optionCard, { backgroundColor: colors.dangerSoft }]}
-                  onPress={() => handleSelect('out')}
+                  style={[styles.cartaoOpcao, { backgroundColor: colors.perigoSuave }]}
+                  onPress={() => lidarComSelecao('out')}
                   activeOpacity={0.85}
                 >
-                  <View style={[styles.optionIcon, { backgroundColor: colors.danger }]}>
+                  <View style={[styles.iconeOpcao, { backgroundColor: colors.perigo }]}>
                     <Ionicons
                       name="arrow-up"
                       size={28}
-                      color={colors.white}
+                      color={colors.branco}
                     />
                   </View>
-                  <Text style={[styles.optionLabel, { color: colors.textPrimary }]}>
+                  <Text style={[styles.rotuloOpcao, { color: colors.textoPrimario }]}>
                     Gastei
                   </Text>
-                  <Text style={[styles.optionHint, { color: colors.textSecondary }]}>
+                  <Text style={[styles.dicaOpcao, { color: colors.textoSecundario }]}>
                     Dinheiro que saiu
                   </Text>
                 </TouchableOpacity>
@@ -92,11 +92,11 @@ export default function AddActionSheet({ visible, onClose, onSelect }) {
 
               {/* ─── CANCELAR ─── */}
               <TouchableOpacity
-                style={[styles.cancelButton, { backgroundColor: colors.primary }]}
+                style={[styles.botaoCancelar, { backgroundColor: colors.primaria }]}
                 onPress={onClose}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.cancelText, { color: colors.white }]}>
+                <Text style={[styles.textoCancelar, { color: colors.branco }]}>
                   Cancelar
                 </Text>
               </TouchableOpacity>
@@ -109,36 +109,36 @@ export default function AddActionSheet({ visible, onClose, onSelect }) {
 }
 
 const styles = StyleSheet.create({
-  overlay: {
+  sobreposicao: {
     flex: 1,
     justifyContent: 'flex-end',
   },
-  sheet: {
+  folha: {
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingHorizontal: 24,
     paddingTop: 12,
     paddingBottom: 32,
   },
-  handle: {
+  pega: {
     width: 40,
     height: 4,
     borderRadius: 2,
     alignSelf: 'center',
     marginBottom: 20,
   },
-  optionsRow: {
+  linhaOpcoes: {
     flexDirection: 'row',
     gap: 12,
     marginBottom: 16,
   },
-  optionCard: {
+  cartaoOpcao: {
     flex: 1,
     borderRadius: 18,
     padding: 18,
     alignItems: 'flex-start',
   },
-  optionIcon: {
+  iconeOpcao: {
     width: 48,
     height: 48,
     borderRadius: 14,
@@ -146,23 +146,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 14,
   },
-  optionLabel: {
+  rotuloOpcao: {
     fontFamily: 'InterExtraBold',
     fontSize: 17,
     marginBottom: 4,
     letterSpacing: -0.2,
   },
-  optionHint: {
+  dicaOpcao: {
     fontFamily: 'InterMedium',
     fontSize: 12,
   },
-  cancelButton: {
+  botaoCancelar: {
     height: 52,
     borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cancelText: {
+  textoCancelar: {
     fontFamily: 'InterBold',
     fontSize: 15,
   },

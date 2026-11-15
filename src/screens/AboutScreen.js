@@ -16,112 +16,112 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { useTheme } from '../context/ThemeContext';
 
-const WHATSAPP_NUMBER = '244933593515';
+const NUMERO_WHATSAPP = '244933593515';
 
 export default function AboutScreen() {
   const { colors } = useTheme();
 
-  async function openWhatsApp() {
-    const appUrl = `whatsapp://send?phone=${WHATSAPP_NUMBER}`;
-    const webUrl = `https://wa.me/${WHATSAPP_NUMBER}`;
+  async function abrirWhatsApp() {
+    const urlApp = `whatsapp://send?phone=${NUMERO_WHATSAPP}`;
+    const urlWeb = `https://wa.me/${NUMERO_WHATSAPP}`;
 
     try {
-      const supported = await Linking.canOpenURL(appUrl);
-      if (supported) {
-        await Linking.openURL(appUrl);
+      const suportado = await Linking.canOpenURL(urlApp);
+      if (suportado) {
+        await Linking.openURL(urlApp);
       } else {
-        await Linking.openURL(webUrl);
+        await Linking.openURL(urlWeb);
       }
     } catch (error) {
-      await Linking.openURL(webUrl);
+      await Linking.openURL(urlWeb);
     }
   }
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['bottom']}>
+    <SafeAreaView style={[styles.seguro, { backgroundColor: colors.fundo }]} edges={['bottom']}>
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
         {/* ─── DEV CARD (1º) ─── */}
-        <View style={[styles.devCard, { backgroundColor: colors.card }]}>
+        <View style={[styles.cartaoDev, { backgroundColor: colors.cartao }]}>
           <Image
             source={require('../../assets/dev.jpg')}
-            style={styles.devAvatar}
+            style={styles.avatarDev}
           />
 
-          <View style={styles.devInfo}>
-            <Text style={[styles.devLabel, { color: colors.textSecondary }]}>
+          <View style={styles.infoDev}>
+            <Text style={[styles.rotuloDev, { color: colors.textoSecundario }]}>
               Desenvolvedor Do App
             </Text>
-            <Text style={[styles.devName, { color: colors.textPrimary }]}>
+            <Text style={[styles.nomeDev, { color: colors.textoPrimario }]}>
               Manuel Lussaty
             </Text>
           </View>
         </View>
 
         <TouchableOpacity
-          style={styles.contactButton}
-          onPress={openWhatsApp}
+          style={styles.botaoContacto}
+          onPress={abrirWhatsApp}
           activeOpacity={0.85}
         >
-          <Ionicons name="logo-whatsapp" size={20} color={colors.white} />
-          <Text style={[styles.contactButtonText, { color: colors.white }]}>
+          <Ionicons name="logo-whatsapp" size={20} color={colors.branco} />
+          <Text style={[styles.textoBotaoContacto, { color: colors.branco }]}>
             Falar comigo
           </Text>
         </TouchableOpacity>
 
         {/* ─── 3 MINI-CARDS (2º) ─── */}
-        <View style={styles.miniCardsRow}>
-          <View style={[styles.miniCard, { backgroundColor: colors.card }]}>
-            <View style={[styles.miniIconBox, { backgroundColor: colors.accentSoft }]}>
+        <View style={styles.linhaMiniCartoes}>
+          <View style={[styles.miniCartao, { backgroundColor: colors.cartao }]}>
+            <View style={[styles.caixaIconeMini, { backgroundColor: colors.destaqueSuave }]}>
               <Ionicons
                 name="cloud-offline-outline"
                 size={22}
-                color={colors.primary}
+                color={colors.primaria}
               />
             </View>
-            <Text style={[styles.miniLabel, { color: colors.textPrimary }]}>
+            <Text style={[styles.rotuloMini, { color: colors.textoPrimario }]}>
               Offline
             </Text>
           </View>
 
-          <View style={[styles.miniCard, { backgroundColor: colors.card }]}>
-            <View style={[styles.miniIconBox, { backgroundColor: colors.accentSoft }]}>
+          <View style={[styles.miniCartao, { backgroundColor: colors.cartao }]}>
+            <View style={[styles.caixaIconeMini, { backgroundColor: colors.destaqueSuave }]}>
               <Ionicons
                 name="shield-checkmark-outline"
                 size={22}
-                color={colors.primary}
+                color={colors.primaria}
               />
             </View>
-            <Text style={[styles.miniLabel, { color: colors.textPrimary }]}>
+            <Text style={[styles.rotuloMini, { color: colors.textoPrimario }]}>
               Privado
             </Text>
           </View>
 
-          <View style={[styles.miniCard, { backgroundColor: colors.card }]}>
-            <View style={[styles.miniIconBox, { backgroundColor: colors.accentSoft }]}>
-              <Text style={styles.flagEmoji}>🇦🇴</Text>
+          <View style={[styles.miniCartao, { backgroundColor: colors.cartao }]}>
+            <View style={[styles.caixaIconeMini, { backgroundColor: colors.destaqueSuave }]}>
+              <Text style={styles.emojiBandeira}>🇦🇴</Text>
             </View>
-            <Text style={[styles.miniLabel, { color: colors.textPrimary }]}>
+            <Text style={[styles.rotuloMini, { color: colors.textoPrimario }]}>
               Angola
             </Text>
           </View>
         </View>
 
         {/* ─── SOBRE O KWANZA (3º) ─── */}
-        <View style={[styles.card, { backgroundColor: colors.card }]}>
-          <View style={styles.cardHeader}>
+        <View style={[styles.cartao, { backgroundColor: colors.cartao }]}>
+          <View style={styles.cabecalhoCartao}>
             <Image
               source={require('../../assets/moeda.png')}
-              style={styles.cardImageIcon}
+              style={styles.iconeImagemCartao}
               resizeMode="contain"
             />
-            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
+            <Text style={[styles.tituloCartao, { color: colors.textoPrimario }]}>
               Sobre o Kwanza App
             </Text>
           </View>
-          <Text style={[styles.cardTextDark, { color: colors.textPrimary }]}>
+          <Text style={[styles.textoCartao, { color: colors.textoPrimario }]}>
             O Kwanza App, é um aplicativo Android que funciona de maneira 
             Offline, O foco do App é registar e controlar os teus ganhos
             e gastos, para teres domínio de onde vão as tuas Finanças. O APP
@@ -130,54 +130,54 @@ export default function AboutScreen() {
         </View>
 
         {/* ─── SOBRE O KZAPP (4º) ─── */}
-        <View style={[styles.card, { backgroundColor: colors.card }]}>
-          <View style={styles.cardHeader}>
-            <View style={[styles.cardIcon, { backgroundColor: colors.accentSoft }]}>
+        <View style={[styles.cartao, { backgroundColor: colors.cartao }]}>
+          <View style={styles.cabecalhoCartao}>
+            <View style={[styles.iconeCartao, { backgroundColor: colors.destaqueSuave }]}>
               <Ionicons
                 name="information-circle-outline"
                 size={18}
-                color={colors.primary}
+                color={colors.primaria}
               />
             </View>
-            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
+            <Text style={[styles.tituloCartao, { color: colors.textoPrimario }]}>
               Sobre o KzApp
             </Text>
           </View>
 
-          <View style={[styles.infoRow, { borderBottomColor: colors.divider }]}>
-            <Text style={[styles.infoLabelDark, { color: colors.textPrimary }]}>
+          <View style={[styles.linhaInfo, { borderBottomColor: colors.divisoria }]}>
+            <Text style={[styles.rotuloInfo, { color: colors.textoPrimario }]}>
               Versão
             </Text>
-            <Text style={[styles.infoValueDark, { color: colors.textPrimary }]}>
+            <Text style={[styles.valorInfo, { color: colors.textoPrimario }]}>
               5.1.3
             </Text>
           </View>
 
-          <View style={[styles.infoRow, { borderBottomColor: colors.divider }]}>
-            <Text style={[styles.infoLabelDark, { color: colors.textPrimary }]}>
+          <View style={[styles.linhaInfo, { borderBottomColor: colors.divisoria }]}>
+            <Text style={[styles.rotuloInfo, { color: colors.textoPrimario }]}>
               Plataforma
             </Text>
-            <Text style={[styles.infoValueDark, { color: colors.textPrimary }]}>
+            <Text style={[styles.valorInfo, { color: colors.textoPrimario }]}>
               Android
             </Text>
           </View>
 
-          <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
-            <Text style={[styles.infoLabelDark, { color: colors.textPrimary }]}>
+          <View style={[styles.linhaInfo, { borderBottomWidth: 0 }]}>
+            <Text style={[styles.rotuloInfo, { color: colors.textoPrimario }]}>
               Preço
             </Text>
-            <Text style={[styles.infoValueDark, { color: colors.textPrimary }]}>
+            <Text style={[styles.valorInfo, { color: colors.textoPrimario }]}>
               Grátis
             </Text>
           </View>
         </View>
 
         {/* ─── RODAPÉ ─── */}
-        <View style={styles.footer}>
-          <Text style={[styles.footerText, { color: colors.textSecondary }]}>
+        <View style={styles.rodape}>
+          <Text style={[styles.textoRodape, { color: colors.textoSecundario }]}>
             © 2026 KzApp
           </Text>
-          <Text style={[styles.footerSub, { color: colors.textLight }]}>
+          <Text style={[styles.subRodape, { color: colors.textoClaro }]}>
             App De Finanças
           </Text>
         </View>
@@ -189,7 +189,7 @@ export default function AboutScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: {
+  seguro: {
     flex: 1,
   },
   scroll: {
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   },
 
   // ─── DEV CARD ───
-  devCard: {
+  cartaoDev: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 18,
@@ -207,27 +207,27 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     gap: 14,
   },
-  devAvatar: {
+  avatarDev: {
     width: 60,
     height: 60,
     borderRadius: 30,
   },
-  devInfo: {
+  infoDev: {
     flex: 1,
   },
-  devLabel: {
+  rotuloDev: {
     fontFamily: 'InterMedium',
     fontSize: 12,
     marginBottom: 2,
   },
-  devName: {
+  nomeDev: {
     fontFamily: 'InterExtraBold',
     fontSize: 20,
     letterSpacing: -0.3,
   },
 
   // ─── CONTACT BUTTON ───
-  contactButton: {
+  botaoContacto: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -242,19 +242,19 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 4,
   },
-  contactButtonText: {
+  textoBotaoContacto: {
     fontFamily: 'InterBold',
     fontSize: 15,
     letterSpacing: 0.2,
   },
 
   // ─── MINI-CARDS ───
-  miniCardsRow: {
+  linhaMiniCartoes: {
     flexDirection: 'row',
     gap: 12,
     marginBottom: 24,
   },
-  miniCard: {
+  miniCartao: {
     flex: 1,
     borderRadius: 16,
     paddingVertical: 18,
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 1,
   },
-  miniIconBox: {
+  caixaIconeMini: {
     width: 44,
     height: 44,
     borderRadius: 12,
@@ -273,17 +273,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 10,
   },
-  flagEmoji: {
+  emojiBandeira: {
     fontSize: 22,
   },
-  miniLabel: {
+  rotuloMini: {
     fontFamily: 'InterBold',
     fontSize: 13,
     letterSpacing: -0.1,
   },
 
   // ─── CARDS ───
-  card: {
+  cartao: {
     borderRadius: 18,
     padding: 18,
     marginBottom: 14,
@@ -293,63 +293,63 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 1,
   },
-  cardHeader: {
+  cabecalhoCartao: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
     marginBottom: 12,
     minHeight: 32,
   },
-  cardIcon: {
+  iconeCartao: {
     width: 32,
     height: 32,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cardImageIcon: {
+  iconeImagemCartao: {
     width: 32,
     height: 32,
   },
-  cardTitle: {
+  tituloCartao: {
     fontFamily: 'InterBold',
     fontSize: 15,
     letterSpacing: -0.1,
   },
-  cardTextDark: {
+  textoCartao: {
     fontFamily: 'InterRegular',
     fontSize: 14,
     lineHeight: 21,
   },
 
   // ─── INFO ROWS ───
-  infoRow: {
+  linhaInfo: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 8,
     borderBottomWidth: 1,
   },
-  infoLabelDark: {
+  rotuloInfo: {
     fontFamily: 'InterMedium',
     fontSize: 14,
   },
-  infoValueDark: {
+  valorInfo: {
     fontFamily: 'InterBold',
     fontSize: 14,
   },
 
   // ─── RODAPÉ ───
-  footer: {
+  rodape: {
     alignItems: 'center',
     marginTop: 16,
   },
-  footerText: {
+  textoRodape: {
     fontFamily: 'InterBold',
     fontSize: 12,
     marginBottom: 4,
   },
-  footerSub: {
+  subRodape: {
     fontFamily: 'InterRegular',
     fontSize: 12,
   },

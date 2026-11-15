@@ -5,12 +5,12 @@
 // FORMATAR VALOR EM KWANZA
 // Ex: 15000 → "15.000 Kz"
 // ─────────────────────────────
-export function formatKz(value) {
-  const num = Number(value) || 0;
-  const formatted = num
+export function formatarKz(valor) {
+  const num = Number(valor) || 0;
+  const formatado = num
     .toFixed(0)
     .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  return `${formatted} Kz`;
+  return `${formatado} Kz`;
 }
 
 // ─────────────────────────────
@@ -18,76 +18,76 @@ export function formatKz(value) {
 // Ex: 15000, 'in' → "+15.000 Kz"
 // Ex: 15000, 'out' → "-15.000 Kz"
 // ─────────────────────────────
-export function formatKzSigned(value, type) {
-  const num = Number(value) || 0;
-  const formatted = num
+export function formatarKzComSinal(valor, tipo) {
+  const num = Number(valor) || 0;
+  const formatado = num
     .toFixed(0)
     .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  const sign = type === 'in' ? '+' : '-';
-  return `${sign}${formatted} Kz`;
+  const sinal = tipo === 'in' ? '+' : '-';
+  return `${sinal}${formatado} Kz`;
 }
 
 // ─────────────────────────────
 // FORMATAR DATA (curta)
 // Ex: "14 Set 2026"
 // ─────────────────────────────
-const MONTHS_SHORT = [
+const MESES_CURTOS = [
   'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
   'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
 ];
 
-const MONTHS_LONG = [
+const MESES_LONGOS = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ];
 
-export function formatDate(dateInput) {
-  if (!dateInput) return '';
-  const date = new Date(dateInput);
-  const day = date.getDate();
-  const month = MONTHS_SHORT[date.getMonth()];
-  const year = date.getFullYear();
-  return `${day} ${month} ${year}`;
+export function formatarData(dataEntrada) {
+  if (!dataEntrada) return '';
+  const data = new Date(dataEntrada);
+  const dia = data.getDate();
+  const mes = MESES_CURTOS[data.getMonth()];
+  const ano = data.getFullYear();
+  return `${dia} ${mes} ${ano}`;
 }
 
 // ─────────────────────────────
 // FORMATAR DATA (hora)
 // Ex: "10:30"
 // ─────────────────────────────
-export function formatTime(dateInput) {
-  if (!dateInput) return '';
-  const date = new Date(dateInput);
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  return `${hours}:${minutes}`;
+export function formatarHora(dataEntrada) {
+  if (!dataEntrada) return '';
+  const data = new Date(dataEntrada);
+  const horas = String(data.getHours()).padStart(2, '0');
+  const minutos = String(data.getMinutes()).padStart(2, '0');
+  return `${horas}:${minutos}`;
 }
 
 // ─────────────────────────────
 // ETIQUETA DO DIA (Hoje / Ontem / Data)
 // ─────────────────────────────
-export function getDayLabel(dateInput) {
-  if (!dateInput) return '';
-  const date = new Date(dateInput);
-  const today = new Date();
-  const yesterday = new Date();
-  yesterday.setDate(today.getDate() - 1);
+export function obterEtiquetaDia(dataEntrada) {
+  if (!dataEntrada) return '';
+  const data = new Date(dataEntrada);
+  const hoje = new Date();
+  const ontem = new Date();
+  ontem.setDate(hoje.getDate() - 1);
 
-  const sameDay = (a, b) =>
+  const eMesmoDia = (a, b) =>
     a.getDate() === b.getDate() &&
     a.getMonth() === b.getMonth() &&
     a.getFullYear() === b.getFullYear();
 
-  if (sameDay(date, today)) return 'Hoje';
-  if (sameDay(date, yesterday)) return 'Ontem';
-  return formatDate(dateInput);
+  if (eMesmoDia(data, hoje)) return 'Hoje';
+  if (eMesmoDia(data, ontem)) return 'Ontem';
+  return formatarData(dataEntrada);
 }
 
 // ─────────────────────────────
 // FORMATAR PERCENTAGEM
 // Ex: 0.4567 → "46%"
 // ─────────────────────────────
-export function formatPercent(value) {
-  const num = Number(value) || 0;
+export function formatarPercentagem(valor) {
+  const num = Number(valor) || 0;
   return `${Math.round(num * 100)}%`;
 }
 
@@ -95,52 +95,52 @@ export function formatPercent(value) {
 // CALCULAR PERCENTAGEM (0 a 1)
 // Ex: 5000 / 10000 → 0.5
 // ─────────────────────────────
-export function calculatePercent(current, total) {
-  const c = Number(current) || 0;
+export function calcularPercentagem(atual, total) {
+  const a = Number(atual) || 0;
   const t = Number(total) || 0;
   if (t === 0) return 0;
-  const percent = c / t;
-  return percent > 1 ? 1 : percent;
+  const percentagem = a / t;
+  return percentagem > 1 ? 1 : percentagem;
 }
 
 // ─────────────────────────────
 // PRIMEIRA LETRA MAIÚSCULA
 // Ex: "joão" → "João"
 // ─────────────────────────────
-export function capitalize(text) {
-  if (!text) return '';
-  return text.charAt(0).toUpperCase() + text.slice(1);
+export function capitalizar(texto) {
+  if (!texto) return '';
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
 
 // ─────────────────────────────
 // SAUDAÇÃO POR HORA
 // Ex: "Bom dia", "Boa tarde", "Boa noite"
 // ─────────────────────────────
-export function getGreeting() {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Bom dia';
-  if (hour < 18) return 'Boa tarde';
+export function obterSaudacao() {
+  const hora = new Date().getHours();
+  if (hora < 12) return 'Bom dia';
+  if (hora < 18) return 'Boa tarde';
   return 'Boa noite';
 }
 
 // ═══════════════════════════════════════════════════════════
-// NOVAS FUNÇÕES PARA O FILTRO POR MÊS
+// FUNÇÕES PARA O FILTRO POR MÊS
 // ═══════════════════════════════════════════════════════════
 
 // ─────────────────────────────
 // FORMATAR MÊS POR EXTENSO
 // Ex: (2026, 10) → "Novembro 2026"
 // ─────────────────────────────
-export function formatMonthYear(year, monthIndex) {
-  return `${MONTHS_LONG[monthIndex]} ${year}`;
+export function formatarMesAno(ano, indiceMes) {
+  return `${MESES_LONGOS[indiceMes]} ${ano}`;
 }
 
 // ─────────────────────────────
 // FORMATAR MÊS CURTO (para o botão no topo)
 // Ex: (2026, 10) → "Nov 2026"
 // ─────────────────────────────
-export function getMonthLabelShort(year, monthIndex) {
-  return `${MONTHS_SHORT[monthIndex]} ${year}`;
+export function obterEtiquetaMesCurta(ano, indiceMes) {
+  return `${MESES_CURTOS[indiceMes]} ${ano}`;
 }
 
 // ─────────────────────────────
@@ -148,26 +148,26 @@ export function getMonthLabelShort(year, monthIndex) {
 // A partir da lista de transações, devolve um array de objetos:
 // [{ label, year, monthIndex }, ...] ordenado do mais recente para o mais antigo.
 // ─────────────────────────────
-export function getAvailableMonths(transactions) {
-  if (!Array.isArray(transactions) || transactions.length === 0) return [];
+export function obterMesesDisponiveis(transacoes) {
+  if (!Array.isArray(transacoes) || transacoes.length === 0) return [];
 
-  const monthsMap = {};
+  const mapaMeses = {};
 
-  transactions.forEach((tx) => {
-    const date = new Date(tx.date || tx.createdAt);
-    const key = `${date.getFullYear()}-${date.getMonth()}`;
+  transacoes.forEach((tx) => {
+    const data = new Date(tx.date || tx.createdAt);
+    const chave = `${data.getFullYear()}-${data.getMonth()}`;
     
-    if (!monthsMap[key]) {
-      monthsMap[key] = {
-        year: date.getFullYear(),
-        monthIndex: date.getMonth(),
-        label: formatMonthYear(date.getFullYear(), date.getMonth()),
+    if (!mapaMeses[chave]) {
+      mapaMeses[chave] = {
+        year: data.getFullYear(),
+        monthIndex: data.getMonth(),
+        label: formatarMesAno(data.getFullYear(), data.getMonth()),
       };
     }
   });
 
   // Converter para array e ordenar decrescente (mais recente primeiro)
-  return Object.values(monthsMap).sort((a, b) => {
+  return Object.values(mapaMeses).sort((a, b) => {
     if (a.year !== b.year) return b.year - a.year;
     return b.monthIndex - a.monthIndex;
   });

@@ -1,4 +1,6 @@
 // src/screens/AnalyticsScreen.js
+// Ecrã de Análises (Gráficos)
+
 import React, { useState, useCallback } from 'react';
 import {
   View,
@@ -7,7 +9,6 @@ import {
   ScrollView,
   Dimensions,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,65 +16,65 @@ import { useFocusEffect } from '@react-navigation/native';
 import { PieChart } from 'react-native-gifted-charts';
 
 import { useTheme } from '../context/ThemeContext';
-import { getTransactions } from '../storage/transactions';
+import { obterTransacoes } from '../storage/transactions';
 import { CATEGORIES } from '../utils/categories';
-import { formatKz, getMonthLabelShort } from '../utils/format';
-import { generateMonthlyReport } from '../utils/pdfGenerator';
+import { formatarKz, obterEtiquetaMesCurta } from '../utils/format';
+import { gerarRelatorioMensal } from '../utils/pdfGenerator';
 
 const { width } = Dimensions.get('window');
 
 export default function AnalyticsScreen() {
   const { colors, typography } = useTheme();
-  const [transactions, setTransactions] = useState([]);
-  const [generating, setGenerating] = useState(false);
+  const [transacoes, setTransacoes] = useState([]);
+  const [gerando, setGerando] = useState(false);
 
-  async function loadData() {
-    const list = await getTransactions();
-    setTransactions(list);
+  async function carregarDados() {
+    const lista = await obterTransacoes();
+    setTransacoes(lista);
   }
 
   useFocusEffect(
     useCallback(() => {
-      loadData();
+      carregarDados();
     }, [])
   );
 
-  const now = new Date();
-  const targetYear = now.getFullYear();
-  const targetMonthIndex = now.getMonth();
+  const agora = new Date();
+  const anoAlvo = agora.getFullYear();
+  const indiceMesAlvo = agora.getMonth();
 
-  const monthTransactions = transactions.filter((tx) => {
-    const date = new Date(tx.date || tx.createdAt);
-    return date.getFullYear() === targetYear && date.getMonth() === targetMonthIndex;
+  const transacoesDoMes = transacoes.filter((tx) => {
+    const data = new Date(tx.date || tx.createdAt);
+    return data.getFullYear() === anoAlvo && data.getMonth() === indiceMesAlvo;
   });
 
   // Cálculos para o Relatório
-  const totalIn = monthTransactions
+  const totalEntradas = transacoesDoMes
     .filter((tx) => tx.type === 'in')
-    .reduce((sum, tx) => sum + tx.amount, 0);
-  const totalOut = monthTransactions
+    .reduce((soma, tx) => soma + tx.amount, 0);
+  const totalSaidas = transacoesDoMes
     .filter((tx) => tx.type === 'out')
-    .reduce((sum, tx) => sum + tx.amount, 0);
-  const balance = totalIn - totalOut;
+    .reduce((soma, tx) => soma + tx.amount, 0);
+  const saldo = totalEntradas - totalSaidas;
 
-  // Ranking diário (para o gráfico de cima)
-  const dailyTotals = {};
-  monthTransactions
+  // 1. Ranking Diário (Top 5)
+  const totaisDiarios = {};
+  transacoesDoMes
     .filter((tx) => tx.type === 'out')
     .forEach((tx) => {
-      const day = new Date(tx.date || tx.createdAt).getDate();
-      dailyTotals[day] = (dailyTotals[day] || 0) + tx.amount;
+      const dia = new Date(tx.date || tx.createdAt).getDate();
+      totaisDiarios[dia] = (totaisDiarios[dia] || 0) + tx.amount;
     });
 
-  const dailyRanking = Object.keys(dailyTotals)
-    .map(day => ({ day: Number(day), amount: dailyTotals[day] }))
+  const rankingDiario = Object.keys(totaisDiarios)
+    .map(dia => ({ day: Number(dia), amount: totaisDiarios[dia] }))
     .sort((a, b) => b.amount - a.amount)
     .slice(0, 5);
 
-  const maxDailyAmount = dailyRanking.length > 0 ? dailyRanking[0].amount : 1;
+  const maiorValorDiario = rankingDiario.length > 0 ? rankingDiario[0].amount : 1;
 
-  // Pizza (Top Categorias)
-  const categoryTotals = monthTransactions
+  // 2. Gastos por Categoria
+  const totaisCategoria = transacoesDoMes
     .filter((tx) => tx.type === 'out')
     .reduce((acc, tx) => {
       const cat = tx.category || 'outros';
@@ -81,114 +82,126 @@ export default function AnalyticsScreen() {
       return acc;
     }, {});
 
-  const colorMap = {
-    lanche: '#FFB74D', transporte: '#64B5F6', material: '#BA68C8',
-    fasciculos: '#4DB6AC', propinas: '#9575CD', 'internet unitel': '#FF8A65',
-    almoco: '#E57373', roupa: '#4FC3F7', higiene: '#81C784',
-    saude: '#FFD54F', diversao: '#F06292', emprestimos: '#A1887F',
+  // MAPA DE CORES
+  const mapaCores = {
+    lanche: '#FFB74D',
+    transporte: '#64B5F6',
+    material: '#d72cf5',
+    fasciculos: '#c6f5f0',
+    propinas: '#9575CD',
+    'internet unitel': '#f77149',
+    'internet africell': '#fc3a7b',
+    almoco: '#E57373',
+    roupa: '#4FC3F7',
+    higiene: '#81C784',
+    saude: '#FFD54F',
+    diversao: '#A1887F',
+    emprestimos: '#90A4AE',
+    livros: '#7986CB',
+    'acessorios electronicos': '#A1887F',
+    'sinal dstv': '#0ec1f8',
+    'saldo zap': '#BA68C8',
+    'luz ende': '#FFB300',
   };
 
-  const topCategoriesData = Object.keys(categoryTotals).map((catId) => {
-    const catData = CATEGORIES.find((c) => c.id === catId);
+  const dadosTopCategorias = Object.keys(totaisCategoria).map((idCat) => {
+    const dadosCat = CATEGORIES.find((c) => c.id === idCat);
     return {
-      id: catId,
-      value: categoryTotals[catId],
-      color: colorMap[catId] || '#A1A1A6',
-      label: catData ? catData.label : 'Outros',
+      id: idCat,
+      value: totaisCategoria[idCat],
+      color: mapaCores[idCat] || '#A1A1A6',
+      label: dadosCat ? dadosCat.label : 'Outros',
     };
   }).sort((a, b) => b.value - a.value);
 
-  const pieData = topCategoriesData.map((item) => ({
+  const dadosPizza = dadosTopCategorias.map((item) => ({
     value: item.value,
     color: item.color,
     text: item.label,
     fullLabel: item.label,
   }));
 
-  const totalGasto = pieData.reduce((sum, item) => sum + item.value, 0);
+  const totalGasto = dadosPizza.reduce((soma, item) => soma + item.value, 0);
 
-  // ─── GERAR PDF ───
-  async function handleShareReport() {
-    if (monthTransactions.length === 0) {
-      Alert.alert('Sem dados', 'Ainda não tens transações este mês.');
+  async function lidarComPartilharRelatorio() {
+    if (transacoesDoMes.length === 0) {
+      alert('Sem dados para este mês.');
       return;
     }
 
     try {
-      setGenerating(true);
-      await generateMonthlyReport({
-        transactions,
-        year: targetYear,
-        monthIndex: targetMonthIndex,
-        totalIn,
-        totalOut,
-        balance,
-        topCategories: topCategoriesData,
+      setGerando(true);
+      await gerarRelatorioMensal({
+        transactions: transacoes,
+        year: anoAlvo,
+        monthIndex: indiceMesAlvo,
+        totalIn: totalEntradas,
+        totalOut: totalSaidas,
+        balance: saldo,
+        topCategories: dadosTopCategorias,
       });
     } catch (error) {
       console.error(error);
-      Alert.alert('Erro', 'Não foi possível gerar o relatório.');
+      alert('Erro ao gerar relatório.');
     } finally {
-      setGenerating(false);
+      setGerando(false);
     }
   }
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
+    <SafeAreaView style={[styles.seguro, { backgroundColor: colors.fundo }]} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         
-        {/* ─── CABEÇALHO ─── */}
-        <View style={styles.header}>
+        <View style={styles.cabecalho}>
           <View>
             <Text style={typography.h2}>Análises</Text>
-            <Text style={[typography.label, { color: colors.textSecondary, marginTop: 4 }]}>
-              {getMonthLabelShort(targetYear, targetMonthIndex)}
+            <Text style={[typography.rotulo, { color: colors.textoSecundario, marginTop: 4 }]}>
+              {obterEtiquetaMesCurta(anoAlvo, indiceMesAlvo)}
             </Text>
           </View>
 
-          {/* Botão de Partilhar */}
           <TouchableOpacity
-            style={[styles.shareBtn, { backgroundColor: colors.card }]}
-            onPress={handleShareReport}
+            style={[styles.botaoPartilhar, { backgroundColor: colors.cartao }]}
+            onPress={lidarComPartilharRelatorio}
             activeOpacity={0.7}
-            disabled={generating}
+            disabled={gerando}
           >
-            <Ionicons name="share-outline" size={20} color={colors.primary} />
-            <Text style={[styles.shareBtnText, { color: colors.primary }]}>
-              {generating ? 'A gerar...' : 'Relatório'}
+            <Ionicons name="share-outline" size={20} color={colors.primaria} />
+            <Text style={[styles.textoBotaoPartilhar, { color: colors.primaria }]}>
+              {gerando ? 'A gerar...' : 'Relatório'}
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* ─── CARD: RANKING DIÁRIO ─── */}
-        <View style={[styles.chartCard, { backgroundColor: colors.card }]}>
-          <Text style={[typography.subtitle, { color: colors.textPrimary, marginBottom: 24 }]}>
-            Dias com mais gastos
+        <View style={[styles.cartaoGrafico, { backgroundColor: colors.cartao }]}>
+          <Text style={[typography.subtitulo, { color: colors.textoPrimario, marginBottom: 24 }]}>
+            Top 5 dias com mais gastos
           </Text>
           
-          {dailyRanking.length === 0 ? (
-            <Text style={[typography.body, { textAlign: 'center', paddingVertical: 20, color: colors.textSecondary }]}>
+          {rankingDiario.length === 0 ? (
+            <Text style={[typography.corpo, { textAlign: 'center', paddingVertical: 20, color: colors.textoSecundario }]}>
               Sem gastos registados este mês.
             </Text>
           ) : (
-            <View style={styles.rankingContainer}>
-              {dailyRanking.map((item, index) => {
-                const percent = (item.amount / maxDailyAmount);
+            <View style={styles.containerRanking}>
+              {rankingDiario.map((item, index) => {
+                const percentagem = (item.amount / maiorValorDiario);
                 return (
-                  <View key={index} style={styles.rankingRow}>
-                    <Text style={[styles.rankingDay, { color: colors.textSecondary }]}>
+                  <View key={index} style={styles.linhaRanking}>
+                    <Text style={[styles.diaRanking, { color: colors.textoSecundario }]}>
                       Dia {item.day}
                     </Text>
-                    <View style={[styles.rankingBarTrack, { backgroundColor: colors.surface }]}>
+                    <View style={[styles.trilhoBarra, { backgroundColor: colors.superficie }]}>
                       <View 
                         style={[
-                          styles.rankingBarFill, 
-                          { width: `${percent * 100}%`, backgroundColor: colors.danger }
+                          styles.preenchimentoBarra, 
+                          { width: `${percentagem * 100}%`, backgroundColor: colors.perigo }
                         ]} 
                       />
                     </View>
-                    <Text style={[styles.rankingAmount, { color: colors.textPrimary }]}>
-                      {formatKz(item.amount)}
+                    <Text style={[styles.valorRanking, { color: colors.textoPrimario }]}>
+                      {formatarKz(item.amount)}
                     </Text>
                   </View>
                 );
@@ -198,46 +211,46 @@ export default function AnalyticsScreen() {
         </View>
 
         {/* ─── CARD: GRÁFICO DE PIZZA ─── */}
-        <View style={[styles.chartCard, { backgroundColor: colors.card }]}>
-          <Text style={[typography.subtitle, { color: colors.textPrimary, marginBottom: 20 }]}>
+        <View style={[styles.cartaoGrafico, { backgroundColor: colors.cartao }]}>
+          <Text style={[typography.subtitulo, { color: colors.textoPrimario, marginBottom: 20 }]}>
             Gastos por Categoria
           </Text>
 
-          {pieData.length > 0 ? (
-            <View style={styles.pieContainer}>
-              <View style={styles.pieChartWrapper}>
+          {dadosPizza.length > 0 ? (
+            <View style={styles.containerPizza}>
+              <View style={styles.containerGraficoPizza}>
                 <PieChart
-                  data={pieData}
+                  data={dadosPizza}
                   donut
                   radius={80}
                   innerRadius={60}
-                  innerCircleColor={colors.card}
+                  innerCircleColor={colors.cartao}
                   centerLabelComponent={() => (
                     <View style={{justifyContent: 'center', alignItems: 'center'}}>
-                      <Text style={[typography.label, {color: colors.textSecondary}]}>Total</Text>
-                      <Text style={[typography.subtitle, {color: colors.textPrimary}]}>
-                        {formatKz(totalGasto)}
+                      <Text style={[typography.rotulo, {color: colors.textoSecundario}]}>Total</Text>
+                      <Text style={[typography.subtitulo, {color: colors.textoPrimario}]}>
+                        {formatarKz(totalGasto)}
                       </Text>
                     </View>
                   )}
                 />
               </View>
-              <View style={styles.pieLegend}>
-                {pieData.map((item, index) => (
-                  <View key={index} style={styles.pieLegendItem}>
-                    <View style={[styles.legendDot, { backgroundColor: item.color }]} />
-                    <Text style={[styles.legendText, { color: colors.textSecondary, flex: 1 }]} numberOfLines={1}>
+              <View style={styles.legendaPizza}>
+                {dadosPizza.map((item, index) => (
+                  <View key={index} style={styles.itemLegendaPizza}>
+                    <View style={[styles.pontoLegenda, { backgroundColor: item.color }]} />
+                    <Text style={[styles.textoLegenda, { color: colors.textoSecundario, flex: 1 }]} numberOfLines={1}>
                       {item.fullLabel}
                     </Text>
-                    <Text style={[styles.legendValue, { color: colors.textPrimary }]}>
-                      {formatKz(item.value)}
+                    <Text style={[styles.valorLegenda, { color: colors.textoPrimario }]}>
+                      {formatarKz(item.value)}
                     </Text>
                   </View>
                 ))}
               </View>
             </View>
           ) : (
-            <Text style={[typography.body, { textAlign: 'center', paddingVertical: 40, color: colors.textSecondary }]}>
+            <Text style={[typography.corpo, { textAlign: 'center', paddingVertical: 40, color: colors.textoSecundario }]}>
               Sem gastos registados este mês.
             </Text>
           )}
@@ -250,9 +263,9 @@ export default function AnalyticsScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1 },
+  seguro: { flex: 1 },
   scroll: { paddingBottom: 32 },
-  header: {
+  cabecalho: {
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 20,
@@ -260,7 +273,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  shareBtn: {
+  botaoPartilhar: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
@@ -268,27 +281,27 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 20,
   },
-  shareBtnText: {
+  textoBotaoPartilhar: {
     fontFamily: 'InterBold',
     fontSize: 13,
   },
-  chartCard: {
+  cartaoGrafico: {
     marginHorizontal: 20,
     padding: 20,
     borderRadius: 20,
     marginBottom: 16,
   },
-  rankingContainer: { gap: 16 },
-  rankingRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  rankingDay: { fontFamily: 'InterMedium', fontSize: 13, width: 50 },
-  rankingBarTrack: { flex: 1, height: 8, borderRadius: 4, overflow: 'hidden' },
-  rankingBarFill: { height: '100%', borderRadius: 4 },
-  rankingAmount: { fontFamily: 'InterBold', fontSize: 13, width: 80, textAlign: 'right' },
-  pieContainer: { flexDirection: 'column', alignItems: 'center' },
-  pieChartWrapper: { marginBottom: 24 },
-  pieLegend: { width: '100%', gap: 12 },
-  pieLegendItem: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  legendDot: { width: 8, height: 8, borderRadius: 4 },
-  legendText: { fontFamily: 'InterMedium', fontSize: 13 },
-  legendValue: { fontFamily: 'InterBold', fontSize: 13 },
+  containerRanking: { gap: 16 },
+  linhaRanking: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  diaRanking: { fontFamily: 'InterMedium', fontSize: 13, width: 50 },
+  trilhoBarra: { flex: 1, height: 8, borderRadius: 4, overflow: 'hidden' },
+  preenchimentoBarra: { height: '100%', borderRadius: 4 },
+  valorRanking: { fontFamily: 'InterBold', fontSize: 13, width: 80, textAlign: 'right' },
+  containerPizza: { flexDirection: 'column', alignItems: 'center' },
+  containerGraficoPizza: { marginBottom: 24 },
+  legendaPizza: { width: '100%', gap: 12 },
+  itemLegendaPizza: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  pontoLegenda: { width: 8, height: 8, borderRadius: 4 },
+  textoLegenda: { fontFamily: 'InterMedium', fontSize: 13 },
+  valorLegenda: { fontFamily: 'InterBold', fontSize: 13 },
 });

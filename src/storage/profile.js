@@ -3,25 +3,25 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const KEY_PROFILE = '@kzapp:profile';
+const CHAVE_PERFIL = '@kzapp:profile';
 
 // ─────────────────────────────
 // GUARDAR PERFIL
 // ─────────────────────────────
-export async function saveProfile(profile) {
+export async function guardarPerfil(perfil) {
   try {
-    const data = {
-      name: profile.name || '',
-      age: profile.age || '',
-      school: profile.school || '',
-      schoolLevel: profile.schoolLevel || '',
-      province: profile.province || '',
-      gender: profile.gender || '',
-      avatar: profile.avatar || 'avatar-1',
+    const dados = {
+      name: perfil.name || '',
+      age: perfil.age || '',
+      school: perfil.school || '',
+      schoolLevel: perfil.schoolLevel || '',
+      province: perfil.province || '',
+      gender: perfil.gender || '',
+      avatar: perfil.avatar || 'avatar-1',
       createdAt: Date.now(),
     };
-    await AsyncStorage.setItem(KEY_PROFILE, JSON.stringify(data));
-    return data;
+    await AsyncStorage.setItem(CHAVE_PERFIL, JSON.stringify(dados));
+    return dados;
   } catch (error) {
     console.log('Erro ao guardar perfil:', error);
     return null;
@@ -31,9 +31,9 @@ export async function saveProfile(profile) {
 // ─────────────────────────────
 // LER PERFIL
 // ─────────────────────────────
-export async function getProfile() {
+export async function obterPerfil() {
   try {
-    const json = await AsyncStorage.getItem(KEY_PROFILE);
+    const json = await AsyncStorage.getItem(CHAVE_PERFIL);
     if (!json) return null;
     return JSON.parse(json);
   } catch (error) {
@@ -45,14 +45,14 @@ export async function getProfile() {
 // ─────────────────────────────
 // ATUALIZAR NOME
 // ─────────────────────────────
-export async function updateProfileName(newName) {
+export async function atualizarNomePerfil(novoNome) {
   try {
-    const current = await getProfile();
-    if (!current) return null;
+    const atual = await obterPerfil();
+    if (!atual) return null;
 
-    const updated = { ...current, name: newName };
-    await AsyncStorage.setItem(KEY_PROFILE, JSON.stringify(updated));
-    return updated;
+    const atualizado = { ...atual, name: novoNome };
+    await AsyncStorage.setItem(CHAVE_PERFIL, JSON.stringify(atualizado));
+    return atualizado;
   } catch (error) {
     console.log('Erro ao atualizar nome:', error);
     return null;
@@ -62,14 +62,14 @@ export async function updateProfileName(newName) {
 // ─────────────────────────────
 // ATUALIZAR CAMPO GENÉRICO
 // ─────────────────────────────
-export async function updateProfileField(field, value) {
+export async function atualizarCampoPerfil(campo, valor) {
   try {
-    const current = await getProfile();
-    if (!current) return null;
+    const atual = await obterPerfil();
+    if (!atual) return null;
 
-    const updated = { ...current, [field]: value };
-    await AsyncStorage.setItem(KEY_PROFILE, JSON.stringify(updated));
-    return updated;
+    const atualizado = { ...atual, [campo]: valor };
+    await AsyncStorage.setItem(CHAVE_PERFIL, JSON.stringify(atualizado));
+    return atualizado;
   } catch (error) {
     console.log('Erro ao atualizar campo:', error);
     return null;
@@ -79,9 +79,9 @@ export async function updateProfileField(field, value) {
 // ─────────────────────────────
 // APAGAR PERFIL
 // ─────────────────────────────
-export async function deleteProfile() {
+export async function apagarPerfil() {
   try {
-    await AsyncStorage.removeItem(KEY_PROFILE);
+    await AsyncStorage.removeItem(CHAVE_PERFIL);
     return true;
   } catch (error) {
     console.log('Erro ao apagar perfil:', error);
